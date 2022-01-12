@@ -1,0 +1,25 @@
+# https://packaging.python.org/tutorials/packaging-projects/#creating-pyproject-toml
+# https://www.python.org/dev/peps/pep-0621/
+
+[bdist_wheel]
+universal = 1
+
+# Example configuration for Black.
+
+# NOTE: you have to use single-quoted strings in TOML for regular expressions.
+# It's the equivalent of r-strings in Python.  Multiline strings are treated as
+# verbose regular expressions by Black.  Use [ ] to denote a significant space
+# character.
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
