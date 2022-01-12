@@ -48,7 +48,7 @@ GET     /api/term-hist                  controllers.FrequencyController.termHist
 POST    /api/rule-hist                  controllers.FrequencyController.ruleHist()
 
 # index
-#POST    /api/index/document
+POST    /api/index/document             controllers.OdinsonController.indexDocument()
 #DELETE  /api/index/document
 
 

@@ -38,6 +38,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
   val indexDir = new File(tmpFolder, "index")
   val docsDir = new File(tmpFolder, "docs").getAbsolutePath
 
+  // FIXME: where is this used?
   val testConfig: Config = {
     defaultConfig
       .withValue("odinson.dataDir", ConfigValueFactory.fromAnyRef(dataDir))

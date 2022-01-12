@@ -51,6 +51,17 @@ class OdinsonController @Inject() (
   // FIXME: add this
   // https://github.com/lum-ai/odinson/blob/ac73464f27ad087f4ab1c9d0a96be20effb6f5d1/core/src/test/scala/ai/lum/odinson/lucene/index/TestIncrementalIndex.scala#L96
   // def indexDoc(doc: OdinsonDocument): Boolean = ???
+    // val index = OdinsonIndex.fromConfig(testConfig)
+
+    // val aliens = getDocument("alien-species")
+    // index.indexOdinsonDoc(aliens)
+  def indexDocument(): Action[AnyContent] = Action { request =>
+    try {
+      val jsonStr = request.body.asText.get
+      val doc = OdinsonDocument.fromJson(jsonStr)
+      // FIXME: return {docId: }
+    } catch handleNonFatal
+  }
 
   def buildInfo(pretty: Option[Boolean]) = Action {
     Ok(BuildInfo.toJson.format(pretty)).as(ContentTypes.JSON)
