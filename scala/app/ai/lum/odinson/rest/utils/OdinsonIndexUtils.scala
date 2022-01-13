@@ -16,18 +16,19 @@ object OdinsonIndexUtils {
   def addFileNameMetadata(config: Config, doc: OdinsonDocument): OdinsonDocument = {
     // use config for name field
     val fieldName = config.apply[String]("odinson.index.parentDocFieldFileName")
-    val docsDir = config.apply[File]("odinson.docsDir")
+    // For greater portability, don't include the docs dir as part of the file name.
     // FIXME: any better ways to name?
-    val file = new File(docsDir, s"${doc.toJson.hashCode()}.json")
-    val filenameField = StringField(name = fieldName, string = file.getAbsolutePath())
+    val file = new File(s"${doc.toJson.hashCode()}.json")
+    val filenameField = StringField(name = fieldName, string = file.getName())
     doc.copy(metadata = doc.metadata ++ Seq(filenameField))
   }
 
   def writeDoc(config: Config, doc: OdinsonDocument): Unit = {
+    val docDir    = config.apply[File]("odinson.index.docsDir")
     val fieldName = config.apply[String]("odinson.index.parentDocFieldFileName")
     doc.metadata.find(f => f.name == fieldName) match {
       case Some(sf: StringField) =>
-        val f = new File(sf.string)
+        val f = new File(docDir, sf.string)
         f.writeString(doc.toJson)
       case None => ()
     }
