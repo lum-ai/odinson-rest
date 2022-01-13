@@ -88,7 +88,7 @@ lazy val buildInfoSettings = Seq(
   buildInfoOptions += BuildInfoOption.ToJson,
   buildInfoKeys := Seq[BuildInfoKey](
     "name" -> "odinson-rest",
-    version, scalaVersion, sbtVersion, libraryDependencies, scalacOptions,
+    version, scalaVersion, sbtVersion, scalacOptions, libraryDependencies,
     "gitCurrentBranch" -> { git.gitCurrentBranch.value },
     "gitHeadCommit" -> { git.gitHeadCommit.value.getOrElse("") },
     "gitHeadCommitDate" -> { git.gitHeadCommitDate.value.getOrElse("") },
