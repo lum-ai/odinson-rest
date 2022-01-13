@@ -54,9 +54,7 @@ object OdinsonIndexUtils {
     val odinsonDocsWildcards = Seq("*.json", "*.json.gz")
 
     docsDir.listFilesByWildcards(odinsonDocsWildcards, recursive = true).foreach{ f =>
-      println(s"file: ${f.getAbsolutePath()}")
       val od = OdinsonDocument.fromJson(f)
-      println(s"${od.toPrettyJson}")
       indexDoc(config, od, save)
     }
   }
