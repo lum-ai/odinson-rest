@@ -20,25 +20,24 @@ GET     /api/execute/pattern            controllers.OdinsonController.runQuery(o
 POST    /api/execute/grammar            controllers.OdinsonController.executeGrammar()
 
 # parent doc
-# FIXME: change this to path-based GET
+
 + nocsrf
-GET     /api/parent/by-document-id      controllers.OdinsonController.getParentDocJsonByDocumentId(documentId: String, pretty: Option[Boolean])
-# FIXME: change this to path-based GET
+GET     /api/parent/by-document-id/:documentId      controllers.OdinsonController.getParentDocJsonByDocumentId(documentId: String, pretty: Option[Boolean])
+
 + nocsrf
-GET     /api/parent/by-sentence-id      controllers.OdinsonController.getParentDocJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
+GET     /api/parent/by-sentence-id/:sentenceId      controllers.OdinsonController.getParentDocJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
 
 # metadata
-# FIXME: change this to path-based GET
-+ nocsrf
-GET     /api/metadata/by-document-id    controllers.OdinsonController.getMetadataJsonByDocumentId(documentId: String, pretty: Option[Boolean])
 
-# FIXME: change this to path-based GET
 + nocsrf
-GET     /api/metadata/by-sentence-id    controllers.OdinsonController.getMetadataJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
+GET     /api/metadata/by-document-id/:documentId    controllers.OdinsonController.getMetadataJsonByDocumentId(documentId: String, pretty: Option[Boolean])
+
++ nocsrf
+GET     /api/metadata/by-sentence-id/:sentenceId    controllers.OdinsonController.getMetadataJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
 
 # sentence json
-# FIXME: change this to path-based GET
-GET     /api/sentence                   controllers.OdinsonController.sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean])
+
+GET     /api/sentence/:sentenceId                   controllers.OdinsonController.sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean])
 
 # counts
 GET     /api/numdocs                    controllers.OdinsonController.numDocs

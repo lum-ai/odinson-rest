@@ -285,7 +285,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
     }
 
     "retrieve metadata using the /api/metadata/by-sentence-id endpoint" in {
-      val response = route(app, FakeRequest(GET, "/api/metadata/by-sentence-id?sentenceId=2")).get
+      val response = route(app, FakeRequest(GET, "/api/metadata/by-sentence-id/2")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -296,7 +296,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
 
     "retrieve metadata using the /api/metadata/by-document-id endpoint" in {
       val response =
-        route(app, FakeRequest(GET, "/api/metadata/by-document-id?documentId=tp-pies")).get
+        route(app, FakeRequest(GET, "/api/metadata/by-document-id/tp-pies")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -306,7 +306,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
     }
 
     "retrieve the parent doc using the /api/parent/by-sentence-id endpoint" in {
-      val response = route(app, FakeRequest(GET, "/api/parent/by-sentence-id?sentenceId=2")).get
+      val response = route(app, FakeRequest(GET, "/api/parent/by-sentence-id/2")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -318,7 +318,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
 
     "retrieve the parent doc using the /api/parent/by-document-id endpoint" in {
       val response =
-        route(app, FakeRequest(GET, "/api/parent/by-document-id?documentId=tp-pies")).get
+        route(app, FakeRequest(GET, "/api/parent/by-document-id/tp-pies")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
