@@ -38,7 +38,6 @@ object ExtractorEngineUtils {
     val parentDoc: LuceneDocument = engine.getMetadataDoc(documentId)
 
     val odinsonDocFile = new File(docsDir, parentDoc.getField(parentDocFileName).stringValue)
-    println(s"odinsonDocFile:\t${odinsonDocFile.getAbsolutePath()}")
     OdinsonDocument.fromJson(odinsonDocFile)
   }
 }

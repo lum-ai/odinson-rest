@@ -32,7 +32,7 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
   implicit val groupedRowFormat: Format[GroupedRow] = Json.format[GroupedRow]
   implicit val readGroupedRows: Reads[Seq[GroupedRow]] = Reads.seq(groupedRowFormat)
 
-  val defaultConfig: Config = ConfigFactory.load()
+  val defaultConfig: Config = ConfigFactory.load("test.conf")
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
@@ -62,7 +62,6 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
         "odinson.docsDir",
         ConfigValueFactory.fromAnyRef(docsDir)
       )
-
   }
 
   def hasResults(resp: JsValue): Boolean = (resp \ "scoreDocs") match {
@@ -85,7 +84,7 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
 
   deleteIndex
   // create index
-  OdinsonIndexUtils.indexDocs(testConfig, save = false)
+  OdinsonIndexUtils.indexDocs(testConfig, save = true)
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(

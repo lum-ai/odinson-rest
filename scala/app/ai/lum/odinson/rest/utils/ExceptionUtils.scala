@@ -10,8 +10,9 @@ import scala.util.control.NonFatal
 object ExceptionUtils {
   /** Generate the Result for when a throwable exception is encountered */
   def describeNonFatal(e: Throwable): Result = {
-    val stackTrace = ApacheExceptionUtils.getStackTrace(e)
-    val json = Json.toJson(Json.obj("error" -> stackTrace))
+    // .getMessage , .getStackTrace , .getRootCause
+    val errorMsg = ApacheExceptionUtils.getMessage(e)
+    val json = Json.toJson(Json.obj("error" -> errorMsg))
     BadRequest(json)
   }
 

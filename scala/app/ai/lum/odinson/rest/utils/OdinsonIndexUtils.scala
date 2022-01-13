@@ -2,14 +2,13 @@ package ai.lum.odinson.rest.utils
 
 import ai.lum.common.ConfigUtils._
 import ai.lum.common.FileUtils._
-import ai.lum.common.TryWithResources.using
 import ai.lum.odinson.{
 Document => OdinsonDocument,
-ExtractorEngine, OdinsonIndexWriter, StringField
+StringField
 }
 import com.typesafe.config.Config
 import java.io.File
-import org.apache.lucene.document.{ Document => LuceneDocument }
+//import org.apache.lucene.document.{ Document => LuceneDocument }
 import ai.lum.odinson.lucene.index.OdinsonIndex
 
 object OdinsonIndexUtils {
@@ -24,13 +23,13 @@ object OdinsonIndexUtils {
   }
 
   def writeDoc(config: Config, doc: OdinsonDocument): Unit = {
-    val docDir    = config.apply[File]("odinson.index.docsDir")
+    val docsDir    = config.apply[File]("odinson.docsDir")
     val fieldName = config.apply[String]("odinson.index.parentDocFieldFileName")
     doc.metadata.find(f => f.name == fieldName) match {
       case Some(sf: StringField) =>
-        val f = new File(docDir, sf.string)
+        val f = new File(docsDir, sf.string)
         f.writeString(doc.toJson)
-      case None => ()
+      case _ => ()
     }
   }
 
@@ -40,10 +39,11 @@ object OdinsonIndexUtils {
       val od = addFileNameMetadata(config, doc)
       index.indexOdinsonDoc(od)
       // save json file to docs dir
-      if (save == true) { writeDoc(config, od) }
+      if (save) { writeDoc(config, od) }
       true
     } catch {
-      case _ : Throwable =>
+      case error : Throwable =>
+        println(s"indexDoc failed:\t${error.getMessage}")
         false
     } finally {
       index.close()
