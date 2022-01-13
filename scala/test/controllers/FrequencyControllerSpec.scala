@@ -85,7 +85,7 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
 
   deleteIndex
   // create index
-  OdinsonIndexUtils.indexDocs(testConfig)
+  OdinsonIndexUtils.indexDocs(testConfig, save = false)
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(

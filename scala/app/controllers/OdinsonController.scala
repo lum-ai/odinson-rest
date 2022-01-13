@@ -52,7 +52,7 @@ class OdinsonController @Inject() (
     try {
       val jsonStr = request.body.asText.get
       val doc = OdinsonDocument.fromJson(jsonStr)
-      OdinsonIndexUtils.indexDoc(config, doc) match {
+      OdinsonIndexUtils.indexDoc(config, doc, save = true) match {
         case true => Ok
         case false => Status(500)
       }

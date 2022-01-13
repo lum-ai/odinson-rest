@@ -33,13 +33,13 @@ object OdinsonIndexUtils {
     }
   }
 
-  def indexDoc(config: Config, doc: OdinsonDocument): Boolean = {
+  def indexDoc(config: Config, doc: OdinsonDocument, save: Boolean = true): Boolean = {
     val index = OdinsonIndex.fromConfig(config)
     try {
       val od = addFileNameMetadata(config, doc)
       index.indexOdinsonDoc(od)
       // save json file to docs dir
-      writeDoc(config, od)
+      if (save == true) { writeDoc(config, od) }
       true
     } catch {
       case _ : Throwable =>
@@ -49,13 +49,15 @@ object OdinsonIndexUtils {
     }
   }
 
-  def indexDocs(config: Config): Unit = {
+  def indexDocs(config: Config, save: Boolean = false): Unit = {
     val docsDir              = config.apply[File]  ("odinson.docsDir")
     val odinsonDocsWildcards = Seq("*.json", "*.json.gz")
 
     docsDir.listFilesByWildcards(odinsonDocsWildcards, recursive = true).foreach{ f =>
+      println(s"file: ${f.getAbsolutePath()}")
       val od = OdinsonDocument.fromJson(f)
-      indexDoc(config, od)
+      println(s"${od.toPrettyJson}")
+      indexDoc(config, od, save)
     }
   }
 
