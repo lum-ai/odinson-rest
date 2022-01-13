@@ -50,13 +50,18 @@ class OdinsonController @Inject() (
 
   def indexDocument(): Action[AnyContent] = Action { request =>
     try {
-      val jsonStr = request.body.asText.get
-      val doc = OdinsonDocument.fromJson(jsonStr)
-      OdinsonIndexUtils.indexDoc(config, doc, save = true) match {
-        case true => Ok
-        case false => Status(500)
+      request.body.asJson match {
+        case Some(json) =>
+          // FIXME: better error handling with Try
+          val doc = OdinsonDocument.fromJson(json.toString)
+          OdinsonIndexUtils.indexDoc(config, doc, save = true) match {
+            case true => Ok
+            // FIXME: make this an informative error?
+            case false => Status(500)
+          }
+        // FIXME: better error
+        case None => Status(500)
       }
-      // FIXME: return {docId: }
     } catch handleNonFatal
   }
 
@@ -70,9 +75,13 @@ class OdinsonController @Inject() (
     json.format(pretty)
   }
 
-  def numDocs = Action {
-    val extractorEngine: ExtractorEngine = newEngine(config)
-    Ok(extractorEngine.numDocs.toString).as(ContentTypes.JSON)
+  def numDocs = Action.async {
+    Future {
+      usingNewEngine(config) { extractorEngine =>
+        val numDocs = extractorEngine.numDocs()
+        Ok(extractorEngine.numDocs.toString).as(ContentTypes.JSON)
+      }
+    }
   }
 
   /** Information about the current corpus. <br>
