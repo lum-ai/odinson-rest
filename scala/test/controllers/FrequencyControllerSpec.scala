@@ -92,7 +92,8 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
       Map(
         "odinson.dataDir" -> ConfigValueFactory.fromAnyRef(dataDir),
         "odinson.indexDir" -> ConfigValueFactory.fromAnyRef(indexDir.getAbsolutePath),
-        "odinson.docsDir" -> ConfigValueFactory.fromAnyRef(docsDir)
+        "odinson.docsDir" -> ConfigValueFactory.fromAnyRef(docsDir),
+        "odinson.index.incremental" -> ConfigValueFactory.fromAnyRef(true)
       )
     )
     .build()

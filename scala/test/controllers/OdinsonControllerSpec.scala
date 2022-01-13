@@ -50,6 +50,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
         "odinson.docsDir",
         ConfigValueFactory.fromAnyRef(docsDir)
       )
+      .withValue("odinson.index.incremental", ConfigValueFactory.fromAnyRef(true))
 
   }
 
