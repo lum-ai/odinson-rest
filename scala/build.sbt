@@ -87,7 +87,8 @@ lazy val buildInfoSettings = Seq(
   buildInfoOptions += BuildInfoOption.BuildTime,
   buildInfoOptions += BuildInfoOption.ToJson,
   buildInfoKeys := Seq[BuildInfoKey](
-    name, version, scalaVersion, sbtVersion, libraryDependencies, scalacOptions,
+    "name" -> "odinson-rest",
+    version, scalaVersion, sbtVersion, libraryDependencies, scalacOptions,
     "gitCurrentBranch" -> { git.gitCurrentBranch.value },
     "gitHeadCommit" -> { git.gitHeadCommit.value.getOrElse("") },
     "gitHeadCommitDate" -> { git.gitHeadCommitDate.value.getOrElse("") },
@@ -97,7 +98,7 @@ lazy val buildInfoSettings = Seq(
 
 val gitDockerTag = settingKey[String]("Git commit-based tag for docker")
 ThisBuild / gitDockerTag := {
-  val shortHash: String = git.gitHeadCommit.value.get.take(7)  
+  val shortHash: String = git.gitHeadCommit.value.get.take(7)
   val uncommittedChanges: Boolean = (git.gitUncommittedChanges).value
   s"""${shortHash}${if (uncommittedChanges) "-DIRTY" else ""}"""
 }
@@ -111,7 +112,7 @@ lazy val packagerSettings = {
       dockerAlias.value.withTag(Option(gitDockerTag.value)),
       // see https://github.com/sbt/sbt-native-packager/blob/master/src/main/scala/com/typesafe/sbt/packager/docker/DockerAlias.scala
     ),
-    packageName in Docker := "odinson-rest-api", 
+    packageName in Docker := "odinson-rest-api",
     // "openjdk:11-jre-alpine"
     // "adoptopenjdk:11-jre-hotspot", // arm and amd compat
     dockerBaseImage := "adoptopenjdk/openjdk11", // arm and amd compat

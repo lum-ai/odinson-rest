@@ -104,7 +104,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
 
       status(buildinfo) mustBe OK
       contentType(buildinfo) mustBe Some("application/json")
-      (contentAsJson(buildinfo) \ "name").as[String] mustBe "odinson-core"
+      (contentAsJson(buildinfo) \ "name").as[String] mustBe "odinson-rest"
 
     }
 
