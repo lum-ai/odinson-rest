@@ -27,8 +27,7 @@ class FrequencyTable(minIdx: Int, maxIdx: Int, reverse: Boolean) {
       val (before, after) = freqs.partition { case (_, extantFreq) => geq(extantFreq, newFreq) }
       // secondary sorting feature is alphanumeric, same as the input order
       // therefore we can safely ignore everything we cut out after maxIdx
-      // FIXME: correct this
-      //freqs = ((before :+ (newTerm, newFreq)) ++ after).take(maxIdx + 1)
+      freqs = ((before :+ Tuple2(newTerm, newFreq)) ++ after).take(maxIdx + 1)
     }
   }
 
