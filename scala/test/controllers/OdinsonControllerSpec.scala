@@ -9,7 +9,7 @@ import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
 import org.scalatestplus.play.guice._
 import play.api.test.Helpers._
 import org.apache.commons.io.FileUtils
-import org.scalatest.TestData
+//import org.scalatest.TestData
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
@@ -18,7 +18,8 @@ import play.api.test._
 
 import scala.reflect.io.Directory
 
-class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
+// with GuiceOneAppPerTest
+class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Injecting {
 
   val defaultConfig: Config = ConfigFactory.load("test.conf")
 
@@ -78,6 +79,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(
+      // FIXME: why can't we simply reuse testConfig here?
       Map(
         "odinson.dataDir" -> ConfigValueFactory.fromAnyRef(dataDir),
         "odinson.indexDir" -> ConfigValueFactory.fromAnyRef(indexDir.getAbsolutePath),
@@ -86,14 +88,13 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
     )
     .build()
 
-  implicit override def newAppForTest(testData: TestData): Application = fakeApplication()
+  // implicit override def newAppForTest(testData: TestData): Application = fakeApplication()
 
   val fakeApp: Application = fakeApplication()
 
   val controller =
     new OdinsonController(
       testConfig,
-      fakeApp.configuration,
       cc = Helpers.stubControllerComponents()
     )
 
@@ -285,7 +286,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
     }
 
     "retrieve metadata using the /api/metadata/by-sentence-id endpoint" in {
-      val response = route(app, FakeRequest(GET, "/api/metadata/by-sentence-id/2")).get
+      val response = route(app, FakeRequest(GET, "/api/metadata/sentence/2")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -294,9 +295,9 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
       Helpers.contentAsString(response) must include("Garland")
     }
 
-    "retrieve metadata using the /api/metadata/by-document-id endpoint" in {
+    "retrieve metadata using the /api/metadata/document endpoint" in {
       val response =
-        route(app, FakeRequest(GET, "/api/metadata/by-document-id/tp-pies")).get
+        route(app, FakeRequest(GET, "/api/metadata/document/tp-pies")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -305,8 +306,8 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
       Helpers.contentAsString(response) must include("Cooper")
     }
 
-    "retrieve the parent doc using the /api/parent/by-sentence-id endpoint" in {
-      val response = route(app, FakeRequest(GET, "/api/parent/by-sentence-id/2")).get
+    "retrieve the parent doc (an OdinsonDocument) using the /api/parent/sentence endpoint" in {
+      val response = route(app, FakeRequest(GET, "/api/parent/sentence/2")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -316,9 +317,9 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inject
       Helpers.contentAsString(response) must include("veranda") // other sentences in parent
     }
 
-    "retrieve the parent doc using the /api/parent/by-document-id endpoint" in {
+    "retrieve an OdinsonDocument using the /api/document endpoint" in {
       val response =
-        route(app, FakeRequest(GET, "/api/parent/by-document-id/tp-pies")).get
+        route(app, FakeRequest(GET, "/api/document/tp-pies")).get
       //println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")

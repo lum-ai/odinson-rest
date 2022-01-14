@@ -32,7 +32,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class OdinsonController @Inject() (
   config: Config = ConfigFactory.load(),
-  playConfig: Configuration,
+  //playConfig: Configuration,
   cc: ControllerComponents
 )(
   implicit ec: ExecutionContext
@@ -139,16 +139,47 @@ class OdinsonController @Inject() (
     }
   }
 
+  /** Retrieves JSON for given OdinsonDocument ID.
+    */
+  def odinsonDocumentJsonForId(documentId: String, pretty: Option[Boolean]) = Action.async {
+    Future {
+      usingNewEngine(config) { engine =>
+        try {
+          val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
+          val json: JsValue = Json.parse(odinsonDocument.toJson)
+          json.format(pretty)
+        } catch {
+          case _: NullPointerException =>
+            BadRequest(
+              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+            )
+          case _: Throwable =>
+            BadRequest(s"documentId ${documentId} not found")
+        }
+      }
+    }
+  }
+
   /** Retrieves JSON for given sentence ID. <br>
     * Used to visualize parse and token attributes.
     */
   def sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean]) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
-        // ensure doc id is correct
-        val json = mkAbridgedSentence(sentenceId, config, engine)
-        json.format(pretty)
-      }
+      try {
+        usingNewEngine(config) { engine =>
+          // ensure doc id is correct
+          val json = mkAbridgedSentence(sentenceId, config, engine)
+          json.format(pretty)
+        }
+      } catch {
+          case _: NullPointerException =>
+            // FIXME: should we check that this field is actually missing/not stored?
+           BadRequest(
+              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+            )
+          case _: Throwable =>
+            BadRequest(s"sentenceId ${sentenceId} not found")
+        }
     }
   }
 
@@ -302,9 +333,14 @@ class OdinsonController @Inject() (
           val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
           json.format(pretty)
-        } catch mkHandleNullPointer(
-          "This search index does not have document filenames saved as stored fields, so metadata cannot be retrieved."
-        ).orElse(handleNonFatal)
+        } catch {
+          case _: NullPointerException =>
+            BadRequest(
+              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+            )
+          case _: Throwable =>
+            BadRequest(s"documentId ${documentId} not found")
+        }
       }
     }
   }
@@ -322,9 +358,14 @@ class OdinsonController @Inject() (
           val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
           json.format(pretty)
-        } catch mkHandleNullPointer(
-          "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
-        ).orElse(handleNonFatal)
+        } catch {
+          case _: NullPointerException =>
+            BadRequest(
+              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+            )
+          case _: Throwable =>
+            BadRequest(s"sentenceId ${sentenceId} not found")
+        }
       }
     }
   }
@@ -342,26 +383,14 @@ class OdinsonController @Inject() (
           val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)
           json.format(pretty)
-        } catch mkHandleNullPointer(
-          "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
-        ).orElse(handleNonFatal)
-      }
-    }
-  }
-
-  def getParentDocJsonByDocumentId(
-    documentId: String,
-    pretty: Option[Boolean]
-  ) = Action.async {
-    Future {
-      usingNewEngine(config) { engine =>
-        try {
-          val odinsonDoc = loadParentDocByDocumentId(documentId, config, engine)
-          val json: JsValue = Json.parse(odinsonDoc.toJson)
-          json.format(pretty)
-        } catch mkHandleNullPointer(
-          "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
-        ).orElse(handleNonFatal)
+        } catch {
+          case _: NullPointerException =>
+            BadRequest(
+              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+            )
+          case _: Throwable =>
+            BadRequest(s"sentenceId ${sentenceId} not found")
+        }
       }
     }
   }

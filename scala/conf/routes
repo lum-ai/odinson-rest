@@ -19,25 +19,25 @@ GET     /api/execute/pattern            controllers.OdinsonController.runQuery(o
 + nocsrf
 POST    /api/execute/grammar            controllers.OdinsonController.executeGrammar()
 
+# document json
++ nocsrf
+GET     /api/document/:documentId                   controllers.OdinsonController.odinsonDocumentJsonForId(documentId: String, pretty: Option[Boolean])
+# sentence json
++ nocsrf
+GET     /api/sentence/:sentenceId                   controllers.OdinsonController.sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean])
+
 # parent doc
 
 + nocsrf
-GET     /api/parent/by-document-id/:documentId      controllers.OdinsonController.getParentDocJsonByDocumentId(documentId: String, pretty: Option[Boolean])
-
-+ nocsrf
-GET     /api/parent/by-sentence-id/:sentenceId      controllers.OdinsonController.getParentDocJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
+GET     /api/parent/sentence/:sentenceId      controllers.OdinsonController.getParentDocJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
 
 # metadata
 
 + nocsrf
-GET     /api/metadata/by-document-id/:documentId    controllers.OdinsonController.getMetadataJsonByDocumentId(documentId: String, pretty: Option[Boolean])
+GET     /api/metadata/document/:documentId    controllers.OdinsonController.getMetadataJsonByDocumentId(documentId: String, pretty: Option[Boolean])
 
 + nocsrf
-GET     /api/metadata/by-sentence-id/:sentenceId    controllers.OdinsonController.getMetadataJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
-
-# sentence json
-
-GET     /api/sentence/:sentenceId                   controllers.OdinsonController.sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean])
+GET     /api/metadata/sentence/:sentenceId    controllers.OdinsonController.getMetadataJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])
 
 # counts
 GET     /api/numdocs                    controllers.OdinsonController.numDocs
@@ -49,7 +49,6 @@ POST    /api/rule-hist                  controllers.FrequencyController.ruleHist
 # index
 POST    /api/index/document             controllers.OdinsonController.indexDocument()
 #DELETE  /api/index/document
-
 
 # validate
 #POST   /api/validate

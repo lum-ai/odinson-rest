@@ -9,17 +9,27 @@ import scala.util.control.NonFatal
 
 object ExceptionUtils {
   /** Generate the Result for when a throwable exception is encountered */
-  def describeNonFatal(e: Throwable): Result = {
-    // .getMessage , .getStackTrace , .getRootCause
-    val errorMsg = ApacheExceptionUtils.getMessage(e)
-    val json = Json.toJson(Json.obj("error" -> errorMsg))
-    BadRequest(json)
+  def describeNonFatal(
+    e: Throwable,
+    message: Option[String] = None
+  ): Result = {
+    val errorMsg: String = message match {
+      // .getMessage , .getStackTrace , .getRootCause
+      case None => ApacheExceptionUtils.getMessage(e)
+      case Some(msg) => msg
+    }
+    //val json = Json.toJson(Json.obj("error" -> errorMsg))
+    BadRequest(errorMsg)
   }
 
   /** Return a standard error handler for try blocks that throw a NullPointerException and expect a Result. */
   def mkHandleNullPointer(message: String): PartialFunction[Throwable, Result] = {
     case _: NullPointerException => InternalServerError(message)
   }
+
+  // def mkErrorResponse(message: String): PartialFunction[Throwable, Result] = {
+  //   InternalServerError(message)
+  // }
 
   /** Refer to the standard error handler for try blocks that throw a NonFatal exception and expect a Result. */
   val handleNonFatal: PartialFunction[Throwable, Result] = {

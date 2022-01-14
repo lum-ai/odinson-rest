@@ -1,10 +1,10 @@
 openapi: 3.0.2
 info:
   version: "1.0.0"
-  title: odinson
+  title: odinson-rest
   description: RESTful API exposing core functionality of Odinson.
   contact:
-    email: dev@lum.ai
+    email: ghp@lum.ai
 # https://swagger.io/docs/specification/api-host-and-base-path/
 #servers:
 #  - url: api/v1
@@ -13,12 +13,18 @@ info:
 #      Development server (read only; uses live data)
 #  #- url: http://localhost:9000/api/v1
 tags:
-  - name: "core"
+  - name: "search"
     description: |
       Operations related to Odinson patterns.
-  - name: "details"
+  - name: "index"
     description: |
-      Operations related to retrieving document details.
+      Operations related to adding and removing documents from the Odinson index.
+  - name: "documents"
+    description: |
+      Operations related to retrieving documents.
+  - name: "metadata"
+    description: |
+      Operations related to retrieving document and corpus metadata.
   # - name: "similarity"
   #   description: |
   #     Operations related to embeddings-based similarity.
@@ -28,15 +34,12 @@ tags:
   # - name: "export"
   #   description: |
   #     Operations related to results export.
-  - name: "info"
-    description: |
-      Information about the app.
 
 paths:
   /api/execute/pattern:
     get:
       tags:
-        - core
+        - search
       summary: |
         Performs an Odinson query against the corpus.
       description: |
@@ -113,7 +116,7 @@ paths:
   /api/execute/grammar:
     post:
       tags:
-        - core
+        - search
       summary: |
         Executes an Odinson grammar against a corpus.
       description: |
@@ -131,7 +134,6 @@ paths:
 #      consumes:
 #        - application/json
 
-
       responses:
         '200':
           description: Mentions matched by the grammar.
@@ -146,108 +148,73 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryError'
 
-  /api/metadata/by-document-id:
+  /api/index/document:
+    post:
+      tags:
+        - index
+      summary: |
+        Add an OdinsonDocument to the index.
+      description: |
+        Add an OdinsonDocument to the index.
+      operationId: index-document
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully indexed.
+          schema:
+            type: boolean
+        # '400':
+        #   description: Syntax error in query.
+        #   content:
+        #     application/json:
+        #       schema:
+        #         $ref: '#/components/schemas/QueryError'
+
+  /api/document/{documentId}:
     get:
       tags:
-        - metadata
+        - documents
       summary: |
-        Retrieves the OdinsonMetadata corresponding to the provided `documentId`.
-      operationId: search
+        Retrieves an OdinsonDocument by its ID.
+      description: |
+        Retrieves an OdinsonDocument by its ID.
+      operationId: document
       parameters:
         - name: documentId
-          in: query
-          required: true
+          in: path
           description: |
-            The `documentId` as returned by /api/execute/grammar or /api/execute/pattern.
+            The document ID associated with some indexed OdinsonDocument.
+          required: false
           schema:
             type: string
-          example: "PMC6360082"
       responses:
         '200':
-          description: OdinsonMetadata.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OdinsonMetadata'
-
-  /api/metadata/by-sentence-id:
-    get:
-      tags:
-        - metadata
-      summary: |
-        Retrieves the OdinsonMetadata corresponding to the provided `sentenceId`.
-      operationId: search
-      parameters:
-        - name: sentenceId
-          in: query
-          required: true
           description: |
-            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
-          schema:
-            type: integer
-            format: int64
-          example: 78
-      responses:
-        '200':
-          description: OdinsonMetadata.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OdinsonMetadata'
-
-  /api/parent/by-document-id:
-    get:
-      tags:
-        - details
-      summary: |
-        Retrieves the OdinsonDocument corresponding to the provided `documentId`.
-      operationId: search
-      parameters:
-        - name: documentId
-          in: query
-          required: true
-          description: |
-            The `documentId` as returned by /api/execute/grammar or /api/execute/pattern.
-          schema:
-            type: string
-          example: "PMC6360082"
-      responses:
-        '200':
-          description: An OdinsonDocument.
+            An OdinsonDocument.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OdinsonDocument'
-
-  /api/parent/by-sentence-id:
-    get:
-      tags:
-        - details
-      summary: |
-        Retrieves the OdinsonDocument corresponding to the provided `sentenceId`.
-      operationId: search
-      parameters:
-        - name: sentenceId
-          in: query
-          required: true
+        '400':
           description: |
-            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
-          schema:
-            type: integer
-            format: int64
-          example: 78
-      responses:
-        '200':
-          description: An OdinsonDocument.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OdinsonDocument'
+            An error message.
 
-  /api/sentence:
+  /api/sentence/{sentenceId}:
     get:
       tags:
-        - details
+        - documents
       summary: |
         Retrieves annotation details for a sentence.
       description: |
@@ -255,7 +222,7 @@ paths:
       operationId: sentence
       parameters:
         - name: sentenceId
-          in: query
+          in: path
           description: |
             The sentence ID for which annotation details are being requested.
           required: false
@@ -270,6 +237,92 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OdinsonSentence'
+        '400':
+          description: |
+            An error message.
+
+  /api/parent/sentence/{sentenceId}:
+    get:
+      tags:
+        - documents
+      summary: |
+        Retrieves the OdinsonDocument corresponding to the provided `sentenceId`.
+      operationId: search
+      parameters:
+        - name: sentenceId
+          in: path
+          required: true
+          description: |
+            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: integer
+            format: int64
+          example: 78
+      responses:
+        '200':
+          description: An OdinsonDocument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OdinsonDocument'
+        '400':
+          description: |
+            An error message.
+
+  /api/metadata/document/{documentId}:
+    get:
+      tags:
+        - metadata
+      summary: |
+        Retrieves the OdinsonMetadata corresponding to the provided `documentId`.
+      operationId: search
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: |
+            The `documentId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: string
+          example: "PMC6360082"
+      responses:
+        '200':
+          description: OdinsonMetadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OdinsonMetadata'
+        '400':
+          description: |
+            An error message.
+
+  /api/metadata/sentence/{sentenceId}:
+    get:
+      tags:
+        - metadata
+      summary: |
+        Retrieves the OdinsonMetadata corresponding to the provided `sentenceId`.
+      operationId: search
+      parameters:
+        - name: sentenceId
+          in: path
+          required: true
+          description: |
+            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: integer
+            format: int64
+          example: 78
+      responses:
+        '200':
+          description: OdinsonMetadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OdinsonMetadata'
+        '400':
+          description: |
+            An error message.
 
   /api/numdocs:
     get:
@@ -594,33 +647,11 @@ paths:
   #               type: string
   #               format: binary
 
-  /api/buildinfo:
-    get:
-      tags:
-        - info
-      summary: Information about the current version of this app.
-      description: Provides detailed build information about the currently running app.
-      operationId: buildinfo
-      parameters:
-        - name: pretty
-          in: query
-          description: |
-            Whether or not to pretty print the response.
-          required: false
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: "A JSON object containing build information."
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BuildInfo'
-
   /api/corpus:
     get:
       tags:
-        - info
+        - corpus
+        - metadata
       summary: Information about the current corpus.
       description: Provides information about the current corpus.
       operationId: corpus
@@ -639,6 +670,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CorpusInfo'
+
+  /api/buildinfo:
+    get:
+      tags:
+        - developers
+      summary: Information about the current version of this app.
+      description: Provides detailed build information about the currently running app.
+      operationId: buildinfo
+      parameters:
+        - name: pretty
+          in: query
+          description: |
+            Whether or not to pretty print the response.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: "A JSON object containing build information."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildInfo'
 
   # /api/config:
   #   get:
@@ -878,7 +932,7 @@ components:
       # properties:
       #   sentenceId:
       #     type: mention.luceneDocId
-      # // "score"         -> odinsonScoreDoc.score,
+      # // "score"         -> odinsonScoreDoc.ssearch,
       # "label"         -> mention.label,
       # "documentId"    -> getDocId(mention.luceneDocId),
       # "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
@@ -1015,13 +1069,8 @@ components:
           description: "Named captures for this match."
 
     QueryError:
-      type: object
-      required:
-        - error
-      properties:
-        error:
-          type: string
-          description: The stack trace corresponding to the malformed query.
+      type: string
+      description: The stack trace corresponding to the malformed query.
 
     BasicResults:
       type: object
