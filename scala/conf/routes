@@ -48,10 +48,12 @@ POST    /api/rule-hist                  controllers.FrequencyController.ruleHist
 
 # index
 POST    /api/index/document             controllers.OdinsonController.indexDocument()
-#DELETE  /api/index/document
+#DELETE  /api/index/document             controllers.OdinsonController.deleteDocument()
 
 # validate
-#POST   /api/validate
+POST   /api/validate                    controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
+POST   /api/validate/relaxed            controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
+POST   /api/validate/strict             controllers.OdinsonController.validateOdinsonDocumentStrictMode()
 
 # corpus info and statistics
 GET     /api/corpus                     controllers.OdinsonController.corpusInfo(pretty: Option[Boolean])

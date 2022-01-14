@@ -8,6 +8,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 
 object ExceptionUtils {
+
+  case class DocumentValidationError(s: String) extends Exception(s)
+
   /** Generate the Result for when a throwable exception is encountered */
   def describeNonFatal(
     e: Throwable,

@@ -3,6 +3,7 @@ package controllers
 
 import java.io.{ File, IOException }
 import java.nio.file.Files
+import ai.lum.common.FileUtils._
 import ai.lum.odinson.rest.utils.OdinsonIndexUtils
 import ai.lum.odinson.utils.exceptions.OdinsonException
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
@@ -108,6 +109,34 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
       contentType(buildinfo) mustBe Some("application/json")
       (contentAsJson(buildinfo) \ "name").as[String] mustBe "odinson-rest"
 
+    }
+
+    "validate a well-formed odinson document using the validateOdinsonDocumentRelaxedMode method" in {
+      val validDocs = new File(tmpFolder, "valid-docs")
+      val validDoc = new File(validDocs, "pies.json")
+      // val result = route(
+      //   app,
+      //   FakeRequest(GET, "/api/validate/relaxed")
+      // ).get
+
+      val body = Json.parse(validDoc.readString())
+
+      val res =
+        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(POST, "/api/validate/relaxed").withJsonBody(body))
+
+      status(res) mustBe OK
+    }
+
+    "validate a malformed odinson document using the validateOdinsonDocumentRelaxedMode method" in {
+      val invalidDocs = new File(tmpFolder, "invalid-docs")
+      val invalidDoc = new File(invalidDocs, "no-id.json")
+
+      val body = Json.parse(invalidDoc.readString())
+
+      val res =
+        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(POST, "/api/validate/relaxed").withJsonBody(body))
+
+      status(res) must not be (OK)
     }
 
     "process a pattern query using the runQuery method without a metadataQuery" in {

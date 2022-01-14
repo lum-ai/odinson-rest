@@ -48,6 +48,47 @@ class OdinsonController @Inject() (
   val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
   // format: on
 
+  /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error encountered.
+    */
+  def validateOdinsonDocument(json: JsValue, strict: Boolean = false): Unit = {
+    val doc = OdinsonDocument.fromJson(json.toString)
+    // FIXME: do we want to complain about any metadata fields not supported by the metadata query language?
+    (strict, doc.metadata.find(field => false)) match {
+      case (true, Some(badField)) =>
+        throw DocumentValidationError(s"field ${badField} not supported by metadata query language.")
+      case _ => ()
+    }
+    // FIXME: in strict mode, ensure that all fields are known to compiler.
+  }
+
+  /** Returns 200 if the Json body can be turned into an Odinson Document.
+    * @return A status code indicating validity
+    */
+  def validateOdinsonDocumentRelaxedMode(): Action[AnyContent] = Action { request =>
+    try {
+      val json = request.body.asJson.get
+      val validated = json match {
+        case jsArray: JsArray   => BadRequest("Send a single OdinsonDocument")
+        case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
+      }
+      Status(OK)
+    } catch handleNonFatal
+  }
+
+  /** Returns 200 if the Json body can be turned into an Odinson Document.
+    * @return A status code indicating validity
+    */
+  def validateOdinsonDocumentStrictMode(): Action[AnyContent] = Action { request =>
+    try {
+      val json = request.body.asJson.get
+      val validated = json match {
+        case jsArray: JsArray   => BadRequest("Send a single OdinsonDocument")
+        case jsObject: JsObject => validateOdinsonDocument(jsObject, true)
+      }
+      Status(OK)
+    } catch handleNonFatal
+  }
+
   def indexDocument(): Action[AnyContent] = Action { request =>
     try {
       request.body.asJson match {

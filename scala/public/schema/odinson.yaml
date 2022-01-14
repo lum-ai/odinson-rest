@@ -148,6 +148,84 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryError'
 
+  /api/validate:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      operationId: validate-doc
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          application/json:
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
+  /api/validate/strict:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (strict mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (strict mode).
+      operationId: validate-doc-strict
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          application/json:
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
+  /api/validate/relaxed:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      operationId: validate-doc-relaxed
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          application/json:
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
   /api/index/document:
     post:
       tags:
@@ -175,12 +253,6 @@ paths:
             Document was successfully indexed.
           schema:
             type: boolean
-        # '400':
-        #   description: Syntax error in query.
-        #   content:
-        #     application/json:
-        #       schema:
-        #         $ref: '#/components/schemas/QueryError'
 
   /api/document/{documentId}:
     get:
