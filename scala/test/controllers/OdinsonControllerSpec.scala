@@ -4,7 +4,7 @@ package controllers
 import java.io.{ File, IOException }
 import java.nio.file.Files
 import ai.lum.common.FileUtils._
-import ai.lum.odinson.rest.utils.OdinsonIndexUtils
+import ai.lum.odinson.index.CustomOdinsonIndex
 import ai.lum.odinson.utils.exceptions.OdinsonException
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
 import org.scalatestplus.play.guice._
@@ -76,7 +76,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
 
   deleteIndex
   // create index
-  OdinsonIndexUtils.indexDocs(testConfig, save = true)
+  CustomOdinsonIndex.indexOdinsonDocs(testConfig, save = true)
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(

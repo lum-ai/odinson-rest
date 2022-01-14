@@ -6,9 +6,10 @@ import ai.lum.odinson.{
 Document => OdinsonDocument,
 ExtractorEngine, OdinsonIndexWriter
 }
+import org.apache.lucene.document.{ Document => LuceneDocument }
 import com.typesafe.config.Config
 import java.io.File
-import org.apache.lucene.document.{ Document => LuceneDocument }
+
 
 object ExtractorEngineUtils {
 
@@ -40,4 +41,5 @@ object ExtractorEngineUtils {
     val odinsonDocFile = new File(docsDir, parentDoc.getField(parentDocFileName).stringValue)
     OdinsonDocument.fromJson(odinsonDocFile)
   }
+
 }

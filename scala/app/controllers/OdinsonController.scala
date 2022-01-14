@@ -12,6 +12,7 @@ import ai.lum.odinson.{
   Document => OdinsonDocument
 }
 import com.typesafe.config.{ Config, ConfigRenderOptions }
+import ai.lum.odinson.index.CustomOdinsonIndex
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.utils._
 import ai.lum.odinson.rest.requests._
@@ -68,8 +69,9 @@ class OdinsonController @Inject() (
     try {
       val json = request.body.asJson.get
       val validated = json match {
-        case jsArray: JsArray   => BadRequest("Send a single OdinsonDocument")
         case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
+        // case jsArray: JsArray
+        case _   => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
       }
       Status(OK)
     } catch handleNonFatal
@@ -82,8 +84,9 @@ class OdinsonController @Inject() (
     try {
       val json = request.body.asJson.get
       val validated = json match {
-        case jsArray: JsArray   => BadRequest("Send a single OdinsonDocument")
-        case jsObject: JsObject => validateOdinsonDocument(jsObject, true)
+        case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
+        // case jsArray: JsArray
+        case _   => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
       }
       Status(OK)
     } catch handleNonFatal
@@ -95,7 +98,7 @@ class OdinsonController @Inject() (
         case Some(json) =>
           // FIXME: better error handling with Try
           val doc = OdinsonDocument.fromJson(json.toString)
-          OdinsonIndexUtils.indexDoc(config, doc, save = true) match {
+          CustomOdinsonIndex.indexOdinsonDoc(config, doc, save = true) match {
             case true => Ok
             // FIXME: make this an informative error?
             case false => Status(500)
