@@ -12,6 +12,8 @@ GET     /api/config                     controllers.OdinsonController.configInfo
 # API spec
 GET     /api                            controllers.OpenApiController.openAPI
 
+# FIXME: remove when DELETE is ready
+GET     /api/ids-for-children/:documentId    controllers.OdinsonController.idsForChildren(documentId: String)
 # search
 + nocsrf
 GET     /api/execute/pattern            controllers.OdinsonController.runQuery(odinsonQuery: String, metadataQuery: Option[String], label: Option[String], commit: Option[Boolean], prevDoc: Option[Int], prevScore: Option[Float], enriched: Boolean = false, pretty: Option[Boolean])

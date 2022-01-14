@@ -120,12 +120,12 @@ object CustomOdinsonIndex {
   }
 
   def deleteDoc(config: Config, documentId: String): Unit = {
-    // val doc: LuceneDocument = engine.doc(luceneDocId)
-    // OdinsonIndexWriter.DOC_ID_FIELD
-    // OdinsonIndexWriter.SENT_ID_FIELD
-    // for sentences, ...
-    // engine.doc(docID: Int)
-    // engine.getMetadataDoc(documentId)
+    // see https://lucene.apache.org/core/6_6_6/core/org/apache/lucene/index/IndexWriter.html#deleteDocuments-org.apache.lucene.index.Term...-
+    // 1. build term or query from documentId
+    // 2. writer.deleteDocuments()
+    // 3. writer.commit()
+    // 4. writer.close()
+    // 5. try to delete JSON file as well
   }
 
   def writeDoc(config: Config, doc: OdinsonDocument): Unit = {
@@ -166,8 +166,9 @@ object CustomOdinsonIndex {
     }
   }
 
+  // FIXME: this seems to just return the doc ID for the metadata?
   /** Retrieves the Lucene doc ID for all sentences belonging to an OdinsonDocument ID */
-  def getChildrenFromOdinsonDocumentId(config: Config, documentId: String): Seq[Int] = {
+  def childrenForOdinsonDocumentId(config: Config, documentId: String): Seq[Int] = {
     val index = CustomOdinsonIndex.fromConfig(config)
     try {
       val queryBuilder = new LuceneBooleanQuery.Builder()
@@ -179,10 +180,10 @@ object CustomOdinsonIndex {
         )
       )
       val query = queryBuilder.build()
-      index.search(query, -1).scoreDocs.map(sd => sd.doc)
+      index.search(query).scoreDocs.map(sd => sd.doc)
     } catch {
       case error : Throwable =>
-        println(s"getChildrenFromOdinsonDocumentId(${documentId}) failed:\t${error.getMessage}")
+        println(s"childrenForOdinsonDocumentId(${documentId}) failed:\t${error.getMessage}")
         Nil
     } finally {
       index.close()

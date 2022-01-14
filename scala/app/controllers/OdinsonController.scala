@@ -49,6 +49,15 @@ class OdinsonController @Inject() (
   val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
   // format: on
 
+  def idsForChildren(documentId: String) = Action.async {
+    Future {
+      try {
+        val ids: Seq[Int] = CustomOdinsonIndex.childrenForOdinsonDocumentId(config, documentId)
+        Ok(Json.arr(ids))
+      } catch handleNonFatal
+    }
+  }
+
   /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error encountered.
     */
   def validateOdinsonDocument(json: JsValue, strict: Boolean = false): Unit = {
