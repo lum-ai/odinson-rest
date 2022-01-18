@@ -1,10 +1,8 @@
-
 package controllers
 
 import java.io.{ File, IOException }
 import java.nio.file.Files
 import ai.lum.common.FileUtils._
-import ai.lum.odinson.index.CustomOdinsonIndex
 import ai.lum.odinson.utils.exceptions.OdinsonException
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
 import org.scalatestplus.play.guice._
@@ -20,7 +18,7 @@ import play.api.test._
 import scala.reflect.io.Directory
 
 // with GuiceOneAppPerTest
-class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Injecting {
+class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting {
 
   val defaultConfig: Config = ConfigFactory.load("test.conf")
 
@@ -52,9 +50,9 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
         "odinson.docsDir",
         ConfigValueFactory.fromAnyRef(docsDir)
       )
-      //parseConfig(""" a : ${x}foo, x = 1 """).resolve()
+    // parseConfig(""" a : ${x}foo, x = 1 """).resolve()
   }
-  //println(s"""testConfig:\t${testConfig.getConfig("odinson")}""")
+  // println(s"""testConfig:\t${testConfig.getConfig("odinson")}""")
 
   def hasResults(resp: JsValue): Boolean = (resp \ "scoreDocs") match {
     // scoreDocs exists, but what is its type?
@@ -73,10 +71,6 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
     val dir = new Directory(indexDir)
     dir.deleteRecursively()
   }
-
-  deleteIndex
-  // create index
-  CustomOdinsonIndex.indexOdinsonDocs(testConfig, save = true)
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(
@@ -122,7 +116,10 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
       val body = Json.parse(validDoc.readString())
 
       val res =
-        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(POST, "/api/validate/relaxed").withJsonBody(body))
+        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(
+          POST,
+          "/api/validate/relaxed"
+        ).withJsonBody(body))
 
       status(res) mustBe OK
     }
@@ -134,7 +131,10 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
       val body = Json.parse(invalidDoc.readString())
 
       val res =
-        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(POST, "/api/validate/relaxed").withJsonBody(body))
+        controller.validateOdinsonDocumentRelaxedMode().apply(FakeRequest(
+          POST,
+          "/api/validate/relaxed"
+        ).withJsonBody(body))
 
       status(res) must not be (OK)
     }
@@ -173,7 +173,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
 
       status(res1) mustBe OK
       contentType(res1) mustBe Some("application/json")
-      //println(contentAsJson(res1))
+      // println(contentAsJson(res1))
       noResults(contentAsJson(res1)) mustBe true
 
       val res2 = controller.runQuery(
@@ -316,7 +316,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
 
     "retrieve metadata using the /api/metadata/by-sentence-id endpoint" in {
       val response = route(app, FakeRequest(GET, "/api/metadata/sentence/2")).get
-      //println(Helpers.contentAsString(response))
+      // println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
 
@@ -327,7 +327,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
     "retrieve metadata using the /api/metadata/document endpoint" in {
       val response =
         route(app, FakeRequest(GET, "/api/metadata/document/tp-pies")).get
-      //println(Helpers.contentAsString(response))
+      // println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
 
@@ -337,7 +337,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
 
     "retrieve the parent doc (an OdinsonDocument) using the /api/parent/sentence endpoint" in {
       val response = route(app, FakeRequest(GET, "/api/parent/sentence/2")).get
-      //println(Helpers.contentAsString(response))
+      // println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
 
@@ -349,7 +349,7 @@ class OdinsonControllerSpec extends PlaySpec with  GuiceOneAppPerSuite with Inje
     "retrieve an OdinsonDocument using the /api/document endpoint" in {
       val response =
         route(app, FakeRequest(GET, "/api/document/tp-pies")).get
-      //println(Helpers.contentAsString(response))
+      // println(Helpers.contentAsString(response))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
 

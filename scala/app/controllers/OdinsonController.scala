@@ -5,14 +5,9 @@ import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.digraph.Vocabulary
 import ai.lum.odinson.lucene._
 import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc }
-import ai.lum.odinson.{
-  ExtractorEngine,
-  Mention,
-  OdinsonIndexWriter,
-  Document => OdinsonDocument
-}
+import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
+import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions }
-import ai.lum.odinson.index.CustomOdinsonIndex
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.utils._
 import ai.lum.odinson.rest.requests._
@@ -33,7 +28,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 @Singleton
 class OdinsonController @Inject() (
   config: Config = ConfigFactory.load(),
-  //playConfig: Configuration,
+  // playConfig: Configuration,
   cc: ControllerComponents
 )(
   implicit ec: ExecutionContext
@@ -49,30 +44,25 @@ class OdinsonController @Inject() (
   val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
   // format: on
 
-  def idsForChildren(documentId: String) = Action.async {
-    Future {
-      try {
-        val ids: Seq[Int] = CustomOdinsonIndex.childrenForOdinsonDocumentId(config, documentId)
-        Ok(Json.arr(ids))
-      } catch handleNonFatal
-    }
-  }
-
-  /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error encountered.
+  /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error
+    * encountered.
     */
   def validateOdinsonDocument(json: JsValue, strict: Boolean = false): Unit = {
     val doc = OdinsonDocument.fromJson(json.toString)
     // FIXME: do we want to complain about any metadata fields not supported by the metadata query language?
     (strict, doc.metadata.find(field => false)) match {
       case (true, Some(badField)) =>
-        throw DocumentValidationError(s"field ${badField} not supported by metadata query language.")
+        throw DocumentValidationError(
+          s"field ${badField} not supported by metadata query language."
+        )
       case _ => ()
     }
     // FIXME: in strict mode, ensure that all fields are known to compiler.
   }
 
   /** Returns 200 if the Json body can be turned into an Odinson Document.
-    * @return A status code indicating validity
+    * @return
+    *   A status code indicating validity
     */
   def validateOdinsonDocumentRelaxedMode(): Action[AnyContent] = Action { request =>
     try {
@@ -80,14 +70,15 @@ class OdinsonController @Inject() (
       val validated = json match {
         case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
         // case jsArray: JsArray
-        case _   => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
+        case _ => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
       }
       Status(OK)
     } catch handleNonFatal
   }
 
   /** Returns 200 if the Json body can be turned into an Odinson Document.
-    * @return A status code indicating validity
+    * @return
+    *   A status code indicating validity
     */
   def validateOdinsonDocumentStrictMode(): Action[AnyContent] = Action { request =>
     try {
@@ -95,22 +86,56 @@ class OdinsonController @Inject() (
       val validated = json match {
         case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
         // case jsArray: JsArray
-        case _   => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
+        case _ => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
       }
       Status(OK)
     } catch handleNonFatal
   }
 
-  def indexDocument(): Action[AnyContent] = Action { request =>
+  def indexOdinsonDoc(): Action[AnyContent] = Action { request =>
     try {
       request.body.asJson match {
         case Some(json) =>
           // FIXME: better error handling with Try
           val doc = OdinsonDocument.fromJson(json.toString)
-          CustomOdinsonIndex.indexOdinsonDoc(config, doc, save = true) match {
-            case true => Ok
-            // FIXME: make this an informative error?
-            case false => Status(500)
+          ExtractorEngine.usingEngine(config) { engine =>
+            engine.index.indexOdinsonDoc(doc)
+            // FIXME: save file!!
+
+            Ok
+          }
+        // FIXME: better error
+        case None => Status(500)
+      }
+    } catch handleNonFatal
+  }
+
+  def deleteOdinsonDoc(documentId: String) = Action.async {
+    Future {
+      try {
+        ExtractorEngine.usingEngine(config) { engine =>
+          engine.index.deleteOdinsonDoc(documentId)
+          // FIXME: delete JSON file
+          Ok
+        }
+      } catch {
+        case _: Throwable =>
+          // FIXME: make BadRequest from OdinsonException
+          BadRequest(s"Failed to delete Document ${documentId}")
+      }
+    }
+  }
+
+  def updateOdinsonDoc(): Action[AnyContent] = Action { request =>
+    try {
+      request.body.asJson match {
+        case Some(json) =>
+          // FIXME: better error handling with Try
+          val doc = OdinsonDocument.fromJson(json.toString)
+          ExtractorEngine.usingEngine(config) { engine =>
+            engine.index.updateOdinsonDoc(doc)
+            // FIXME: save file!!
+            Ok
           }
         // FIXME: better error
         case None => Status(500)
@@ -130,18 +155,18 @@ class OdinsonController @Inject() (
 
   def numDocs = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         Ok(engine.numDocs.toString).as(ContentTypes.JSON)
       }
     }
   }
 
-  /** Information about the current corpus. <br>
-    * Directory name, num docs, num dependency types, etc.
+  /** Information about the current corpus. <br> Directory name, num docs, num dependency types,
+    * etc.
     */
   def corpusInfo(pretty: Option[Boolean]) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         val numDocs = engine.numDocs()
         val corpusDir = config.apply[File]("odinson.indexDir").getName
         val depsVocabSize = {
@@ -192,13 +217,14 @@ class OdinsonController @Inject() (
     }
   }
 
-  /** Retrieves JSON for given OdinsonDocument ID.
+  /** Retrieves JSON for given Odinson Document ID.
     */
   def odinsonDocumentJsonForId(documentId: String, pretty: Option[Boolean]) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
+          val odinsonDocument: OdinsonDocument =
+            loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)
           json.format(pretty)
         } catch {
@@ -213,35 +239,38 @@ class OdinsonController @Inject() (
     }
   }
 
-  /** Retrieves JSON for given sentence ID. <br>
-    * Used to visualize parse and token attributes.
+  /** Retrieves JSON for given sentence ID. <br> Used to visualize parse and token attributes.
     */
   def sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean]) = Action.async {
     Future {
       try {
-        usingNewEngine(config) { engine =>
+        ExtractorEngine.usingEngine(config) { engine =>
           // ensure doc id is correct
           val json = mkAbridgedSentence(sentenceId, config, engine)
           json.format(pretty)
         }
       } catch {
-          case _: NullPointerException =>
-            // FIXME: should we check that this field is actually missing/not stored?
-           BadRequest(
-              "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
-            )
-          case _: Throwable =>
-            BadRequest(s"sentenceId ${sentenceId} not found")
-        }
+        case _: NullPointerException =>
+          // FIXME: should we check that this field is actually missing/not stored?
+          BadRequest(
+            "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
+          )
+        case _: Throwable =>
+          BadRequest(s"sentenceId ${sentenceId} not found")
+      }
     }
   }
 
   /** Stores query results in state.
     *
-    * @param engine An extractor whose state should be altered.
-    * @param odinsonQuery An Odinson pattern.
-    * @param metadataQuery A query to filter documents (optional).
-    * @param label The label to use when committing matches.
+    * @param engine
+    *   An extractor whose state should be altered.
+    * @param odinsonQuery
+    *   An Odinson pattern.
+    * @param metadataQuery
+    *   A query to filter documents (optional).
+    * @param label
+    *   The label to use when committing matches.
     */
   def commitResults(
     engine: ExtractorEngine,
@@ -261,11 +290,16 @@ class OdinsonController @Inject() (
 
   /** Queries the index.
     *
-    * @param - engine - an open instance of Engine
-    * @param odinsonQuery An OdinsonQuery
-    * @param prevDoc The last Document ID seen on the previous page of results (required if retrieving page 2+).
-    * @param prevScore The score of the last Document see on the previous page (required if retrieving page 2+).
-    * @return JSON of matches
+    * @param -
+    *   engine - an open instance of Engine
+    * @param odinsonQuery
+    *   An OdinsonQuery
+    * @param prevDoc
+    *   The last Document ID seen on the previous page of results (required if retrieving page 2+).
+    * @param prevScore
+    *   The score of the last Document see on the previous page (required if retrieving page 2+).
+    * @return
+    *   JSON of matches
     */
   def retrieveResults(
     engine: ExtractorEngine,
@@ -284,13 +318,17 @@ class OdinsonController @Inject() (
 
   /** Executes the provided Odinson grammar.
     *
-    * @param grammar An Odinson grammar
-    * @param pageSize The maximum number of sentences to execute the rules against.
-    * @param allowTriggerOverlaps Whether or not event arguments are permitted to overlap with the event's trigger.
-    * @return JSON of matches
+    * @param grammar
+    *   An Odinson grammar
+    * @param pageSize
+    *   The maximum number of sentences to execute the rules against.
+    * @param allowTriggerOverlaps
+    *   Whether or not event arguments are permitted to overlap with the event's trigger.
+    * @return
+    *   JSON of matches
     */
   def executeGrammar() = Action { request =>
-    usingNewEngine(config) { engine =>
+    ExtractorEngine.usingEngine(config) { engine =>
       // FIXME: replace .get with validation check
       val gr = request.body.asJson.get.as[GrammarRequest]
       val grammar = gr.grammar
@@ -327,13 +365,20 @@ class OdinsonController @Inject() (
     }
   }
 
-  /** @param odinsonQuery An Odinson pattern
-    * @param metadataQuery A Lucene query to filter documents (optional).
-    * @param label The label to use when committing matches to the state.
-    * @param commit Whether or not results should be committed to the state.
-    * @param prevDoc The last Document ID seen on the previous page of results (required if retrieving page 2+).
-    * @param prevScore The score of the last Document see on the previous page (required if retrieving page 2+).
-    * @return JSON of matches
+  /** @param odinsonQuery
+    *   An Odinson pattern
+    * @param metadataQuery
+    *   A Lucene query to filter documents (optional).
+    * @param label
+    *   The label to use when committing matches to the state.
+    * @param commit
+    *   Whether or not results should be committed to the state.
+    * @param prevDoc
+    *   The last Document ID seen on the previous page of results (required if retrieving page 2+).
+    * @param prevScore
+    *   The score of the last Document see on the previous page (required if retrieving page 2+).
+    * @return
+    *   JSON of matches
     */
   def runQuery(
     odinsonQuery: String,
@@ -346,7 +391,7 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         try {
           val oq = metadataQuery match {
             case Some(pq) =>
@@ -369,7 +414,15 @@ class OdinsonController @Inject() (
             )
           }
 
-          val json = Json.toJson(mkJson(odinsonQuery, metadataQuery, duration, results, enriched, config, engine))
+          val json = Json.toJson(mkJson(
+            odinsonQuery,
+            metadataQuery,
+            duration,
+            results,
+            enriched,
+            config,
+            engine
+          ))
           json.format(pretty)
         } catch handleNonFatal
       }
@@ -381,9 +434,10 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
+          val odinsonDocument: OdinsonDocument =
+            loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
           json.format(pretty)
         } catch {
@@ -403,12 +457,13 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         try {
           val luceneDoc: LuceneDocument = engine.doc(sentenceId)
           // FIXME: getOrElse and return Option[]
           val documentId = luceneDoc.getValues(OdinsonIndexWriter.DOC_ID_FIELD).head
-          val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
+          val odinsonDocument: OdinsonDocument =
+            loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
           json.format(pretty)
         } catch {
@@ -428,12 +483,13 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
-      usingNewEngine(config) { engine =>
+      ExtractorEngine.usingEngine(config) { engine =>
         try {
           val luceneDoc: LuceneDocument = engine.doc(sentenceId)
           // FIXME: getOrElse and return Option[String]
           val documentId = luceneDoc.getValues(OdinsonIndexWriter.DOC_ID_FIELD).head
-          val odinsonDocument: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
+          val odinsonDocument: OdinsonDocument =
+            loadParentDocByDocumentId(documentId, config, engine)
           val json: JsValue = Json.parse(odinsonDocument.toJson)
           json.format(pretty)
         } catch {

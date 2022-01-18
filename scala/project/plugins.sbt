@@ -11,3 +11,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.2")
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 
 addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.16.0")
+
+// formatting
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")

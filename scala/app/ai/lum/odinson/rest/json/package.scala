@@ -4,11 +4,11 @@ import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.lucene.OdinResults
 import ai.lum.odinson.lucene.search.OdinsonScoreDoc
 import ai.lum.odinson.{
+  Document => OdinsonDocument,
+  ExtractorEngine,
   Mention,
   NamedCapture,
-  OdinsonMatch,
-  ExtractorEngine,
-  Document => OdinsonDocument
+  OdinsonMatch
 }
 import ai.lum.odinson.rest.utils.ExtractorEngineUtils
 import com.typesafe.config.Config
@@ -16,7 +16,6 @@ import play.api.http.ContentTypes
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.mvc.Results._
-
 
 package object json {
 
@@ -32,7 +31,7 @@ package object json {
 
   }
 
-    def mkJson(
+  def mkJson(
     odinsonQuery: String,
     metadataQuery: Option[String],
     duration: Float,
@@ -43,8 +42,9 @@ package object json {
   ): JsValue = {
 
     val scoreDocs: JsValue = enriched match {
-      case true  => Json.arr(results.scoreDocs.map{ sd => mkJsonWithEnrichedResponse(sd, config, engine)}: _*)
-      case false => Json.arr(results.scoreDocs.map{sd => mkJson(sd, engine)}: _*)
+      case true =>
+        Json.arr(results.scoreDocs.map { sd => mkJsonWithEnrichedResponse(sd, config, engine) }: _*)
+      case false => Json.arr(results.scoreDocs.map { sd => mkJson(sd, engine) }: _*)
     }
 
     Json.obj(
@@ -67,7 +67,7 @@ package object json {
     engine: ExtractorEngine
   ): JsValue = {
 
-    val mentionsJson: JsValue = Json.arr(mentions.map{ m => mkJson(m, engine)}: _*)
+    val mentionsJson: JsValue = Json.arr(mentions.map { m => mkJson(m, engine) }: _*)
 
     Json.obj(
       // format: off
@@ -82,7 +82,7 @@ package object json {
   def mkJson(mention: Mention, engine: ExtractorEngine): Json.JsValueWrapper = {
 
     val displayField = engine.index.displayField
-    //val doc: LuceneDocument = engine.indexSearcher.doc(mention.luceneDocId)
+    // val doc: LuceneDocument = engine.indexSearcher.doc(mention.luceneDocId)
     // We want **all** tokens for the sentence
     val tokens = engine.dataGatherer.getTokens(mention.luceneDocId, displayField)
 
@@ -102,7 +102,7 @@ package object json {
 
   def mkJson(odinsonScoreDoc: OdinsonScoreDoc, engine: ExtractorEngine): Json.JsValueWrapper = {
     val displayField = engine.index.displayField
-    //val doc = engine.indexSearcher.doc(odinsonScoreDoc.doc)
+    // val doc = engine.indexSearcher.doc(odinsonScoreDoc.doc)
     // we want **all** tokens for the sentence
     val tokens = engine.dataGatherer.getTokens(odinsonScoreDoc.doc, displayField)
 
@@ -121,7 +121,7 @@ package object json {
   def mkJson(m: OdinsonMatch, engine: ExtractorEngine): Json.JsValueWrapper = {
     Json.obj(
       "span" -> Json.obj("start" -> m.start, "end" -> m.end),
-      "captures" -> Json.arr(m.namedCaptures.map{ nc => mkJson(nc, engine)}: _*)
+      "captures" -> Json.arr(m.namedCaptures.map { nc => mkJson(nc, engine) }: _*)
     )
   }
 
@@ -129,7 +129,11 @@ package object json {
     Json.obj(namedCapture.name -> mkJson(namedCapture.capturedMatch, engine))
   }
 
-  def mkJsonWithEnrichedResponse(odinsonScoreDoc: OdinsonScoreDoc, config: Config, engine: ExtractorEngine): Json.JsValueWrapper = {
+  def mkJsonWithEnrichedResponse(
+    odinsonScoreDoc: OdinsonScoreDoc,
+    config: Config,
+    engine: ExtractorEngine
+  ): Json.JsValueWrapper = {
     Json.obj(
       // format: off
       "sentenceId"    -> odinsonScoreDoc.doc,
@@ -147,12 +151,18 @@ package object json {
     val documentId = getDocId(sentenceId, engine)
     val unabridgedJson = retrieveSentenceJson(documentId, sentenceIndex, config, engine)
     unabridgedJson
-    //unabridgedJson.as[JsObject] - "startOffsets" - "endOffsets" - "raw"
+    // unabridgedJson.as[JsObject] - "startOffsets" - "endOffsets" - "raw"
   }
 
-  def retrieveSentenceJson(documentId: String, sentenceIndex: Int, config: Config, engine: ExtractorEngine): JsValue = {
+  def retrieveSentenceJson(
+    documentId: String,
+    sentenceIndex: Int,
+    config: Config,
+    engine: ExtractorEngine
+  ): JsValue = {
     val odinsonDoc: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
     val docJson: JsValue = Json.parse(odinsonDoc.toJson)
     (docJson \ "sentences")(sentenceIndex)
   }
+
 }

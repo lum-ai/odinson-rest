@@ -1,4 +1,3 @@
-
 package controllers
 
 import java.io.{ File, IOException }
@@ -349,7 +348,7 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
         controller.ruleHist().apply(FakeRequest(POST, "/api/rule-hist").withJsonBody(body))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
-      //println(Helpers.contentAsString(response))
+      // println(Helpers.contentAsString(response))
       // println(Helpers.contentAsString(response))
       Helpers.contentAsString(response) must include("w")
       Helpers.contentAsString(response) must include("x")

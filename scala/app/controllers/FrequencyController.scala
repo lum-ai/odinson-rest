@@ -4,6 +4,7 @@ import ai.lum.common.ConfigFactory
 import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.Mention
 import com.typesafe.config.Config
+import ai.lum.odinson.ExtractorEngine
 import ai.lum.odinson.rest.{ FrequencyTable, TermsAndFreqs }
 import ai.lum.odinson.rest.utils._
 import ai.lum.odinson.rest.json._
@@ -34,29 +35,43 @@ class FrequencyController @Inject() (
   import ExceptionUtils._
   import ExtractorEngineUtils._
 
-  val vocabularyExpiry     = playConfig.get[Duration]("play.cache.vocabularyExpiry")
+  val vocabularyExpiry = playConfig.get[Duration]("play.cache.vocabularyExpiry")
 
-  val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
+  val posTagTokenField = config.apply[String]("odinson.index.posTagTokenField")
 
   /** Convenience method to determine if a string matches a given regular expression.
-  * @param s The String to be searched.
-  * @param regex The regular expression against which `s` should be compared.
-  * @return True if the whole expression matches.
-  */
+    * @param s
+    *   The String to be searched.
+    * @param regex
+    *   The regular expression against which `s` should be compared.
+    * @return
+    *   True if the whole expression matches.
+    */
   private def isMatch(s: String, regex: Option[String]): Boolean = s.matches(regex.getOrElse(".*"))
 
   /** For a given term field, find the terms ranked min to max (inclusive, 0-indexed)
-  * @param field The field to count (e.g., raw, token, lemma, tag, etc.)
-  * @param group Optional second field to condition the field counts on.
-  * @param filter Optional regular expression filter for terms within `field`
-  * @param order "freq" for greatest-to least frequency (default), "alpha" for alphanumeric order
-  * @param min Highest rank to return (0 is highest possible value).
-  * @param max Lowest rank to return (e.g., 9).
-  * @param scale "count" for raw frequencies (default), "log10" for log-transform, "percent" for percent of total.
-  * @param reverse Whether to reverse the order before slicing between `min` and `max` (default false).
-  * @param pretty Whether to pretty-print the JSON results.
-  * @return JSON frequency table as an array of objects.
-  */
+    * @param field
+    *   The field to count (e.g., raw, token, lemma, tag, etc.)
+    * @param group
+    *   Optional second field to condition the field counts on.
+    * @param filter
+    *   Optional regular expression filter for terms within `field`
+    * @param order
+    *   "freq" for greatest-to least frequency (default), "alpha" for alphanumeric order
+    * @param min
+    *   Highest rank to return (0 is highest possible value).
+    * @param max
+    *   Lowest rank to return (e.g., 9).
+    * @param scale
+    *   "count" for raw frequencies (default), "log10" for log-transform, "percent" for percent of
+    *   total.
+    * @param reverse
+    *   Whether to reverse the order before slicing between `min` and `max` (default false).
+    * @param pretty
+    *   Whether to pretty-print the JSON results.
+    * @return
+    *   JSON frequency table as an array of objects.
+    */
   def termFreq(
     field: String,
     group: Option[String],
@@ -77,7 +92,7 @@ class FrequencyController @Inject() (
         val minIdx = min.getOrElse(defaultMin)
         val maxIdx = max.getOrElse(defaultMax)
 
-        usingNewEngine(config) { extractorEngine =>
+        ExtractorEngine.usingEngine(config) { extractorEngine =>
           // ensure that the requested field exists in the index
           val fields = extractorEngine.index.listFields()
           val fieldNames = fields.iterator.asScala.toList
@@ -217,22 +232,33 @@ class FrequencyController @Inject() (
     }
   }
 
-    /** Count how many times each rule matches from the active grammar on the active dataset.
-    * @param grammar An Odinson grammar.
-    * @param allowTriggerOverlaps Whether or not event arguments are permitted to overlap with the event's trigger.
-    * @param filter Optional regular expression filter for the rule name.
-    * @param order "freq" for greatest-to least frequency (default), "alpha" for alphanumeric order.
-    * @param min Highest rank to return (0 is highest possible value).
-    * @param max Lowest rank to return (e.g., 9).
-    * @param scale "count" for raw frequencies (default), "log10" for log-transform, "percent" for percent of total.
-    * @param reverse Whether to reverse the order before slicing between `min` and `max` (default false).
-    * @param pretty Whether to pretty-print the JSON results.
-    * @return JSON frequency table as an array of objects.
+  /** Count how many times each rule matches from the active grammar on the active dataset.
+    * @param grammar
+    *   An Odinson grammar.
+    * @param allowTriggerOverlaps
+    *   Whether or not event arguments are permitted to overlap with the event's trigger.
+    * @param filter
+    *   Optional regular expression filter for the rule name.
+    * @param order
+    *   "freq" for greatest-to least frequency (default), "alpha" for alphanumeric order.
+    * @param min
+    *   Highest rank to return (0 is highest possible value).
+    * @param max
+    *   Lowest rank to return (e.g., 9).
+    * @param scale
+    *   "count" for raw frequencies (default), "log10" for log-transform, "percent" for percent of
+    *   total.
+    * @param reverse
+    *   Whether to reverse the order before slicing between `min` and `max` (default false).
+    * @param pretty
+    *   Whether to pretty-print the JSON results.
+    * @return
+    *   JSON frequency table as an array of objects.
     */
   def ruleFreq() = Action { request =>
-    usingNewEngine(config) { extractorEngine =>
+    ExtractorEngine.usingEngine(config) { extractorEngine =>
       val ruleFreqRequest = request.body.asJson.get.as[RuleFreqRequest]
-      //println(s"GrammarRequest: ${gr}")
+      // println(s"GrammarRequest: ${gr}")
       val grammar = ruleFreqRequest.grammar
       val allowTriggerOverlaps = ruleFreqRequest.allowTriggerOverlaps.getOrElse(false)
       // TODO: Allow grouping factor: "ruleType" (basic or event), "accuracy" (wrong or right), others?
@@ -266,7 +292,7 @@ class FrequencyController @Inject() (
           // filter the rules by name, if a filter was passed
           // NB: this is Scala style anchored regex, *not* Lucene's RegExp
           // TODO: unify regex style with that of termFreq's filter
-          .filter { case (ruleName, ms@_) => isMatch(ruleName, filter) }
+          .filter { case (ruleName, ms @ _) => isMatch(ruleName, filter) }
           // count how many matches for each rule
           .map { case (k, v) => k -> v.length }
           .toSeq
@@ -313,10 +339,14 @@ class FrequencyController @Inject() (
   }
 
   /** Return `nBins` quantile boundaries for `data`. Each bin will have equal probability.
-    * @param data The data to be binned.
-    * @param nBins The number of quantiles (e.g. 4 for quartiles).
-    * @param isContinuous True if the data is continuous (if it has been log10ed, for example)
-    * @return A sequence of quantile boundaries which should be inclusive of all data.
+    * @param data
+    *   The data to be binned.
+    * @param nBins
+    *   The number of quantiles (e.g. 4 for quartiles).
+    * @param isContinuous
+    *   True if the data is continuous (if it has been log10ed, for example)
+    * @return
+    *   A sequence of quantile boundaries which should be inclusive of all data.
     */
   def quantiles(data: Array[Double], nBins: Int, isContinuous: Option[Boolean]): Seq[Double] = {
     val sortedData = data.sorted
@@ -349,10 +379,14 @@ class FrequencyController @Inject() (
     bounds.reverse
   }
 
-  /** Count the instances of @data that fall within each consecutive pair of bounds (lower-bound inclusive).
-    * @param data The count/frequency data to be analyzed.
-    * @param bounds The boundaries that define the bins used for histogram summaries.
-    * @return The counts of `data` that fall into each bin.
+  /** Count the instances of @data that fall within each consecutive pair of bounds (lower-bound
+    * inclusive).
+    * @param data
+    *   The count/frequency data to be analyzed.
+    * @param bounds
+    *   The boundaries that define the bins used for histogram summaries.
+    * @return
+    *   The counts of `data` that fall into each bin.
     */
   def histify(data: List[Double], bounds: List[Double]): List[Long] = {
     @tailrec
@@ -361,7 +395,7 @@ class FrequencyController @Inject() (
         // empty list can't be counted
         case Nil => Nil
         // the last item in the list -- all remaining data fall into the last bin
-        case head@_ :: Nil => data.size :: result
+        case head @ _ :: Nil => data.size :: result
         // shave off the unallocated datapoints that fall under this boundary cutoff and count them
         case head :: tail =>
           val (leftward, rightward) = data.partition(_ < head)
@@ -442,12 +476,18 @@ class FrequencyController @Inject() (
   }
 
   /** Return coordinates defining a histogram of counts/frequencies for a given field.
-    * @param field The field to analyze, e.g. lemma.
-    * @param bins The number of bins to use for data partitioning (optional).
-    * @param equalProbability Use variable-width bins to equalize the probability of each bin (optional).
-    * @param xLogScale `log10`-transform the counts of each term (optional).
-    * @param pretty Whether to pretty-print the JSON returned by the function.
-    * @return A JSON array of each bin, defined by width, lower bound (inclusive), and frequency.
+    * @param field
+    *   The field to analyze, e.g. lemma.
+    * @param bins
+    *   The number of bins to use for data partitioning (optional).
+    * @param equalProbability
+    *   Use variable-width bins to equalize the probability of each bin (optional).
+    * @param xLogScale
+    *   `log10`-transform the counts of each term (optional).
+    * @param pretty
+    *   Whether to pretty-print the JSON returned by the function.
+    * @return
+    *   A JSON array of each bin, defined by width, lower bound (inclusive), and frequency.
     */
   def termHist(
     field: String,
@@ -457,7 +497,7 @@ class FrequencyController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
-      usingNewEngine(config) { extractorEngine =>
+      ExtractorEngine.usingEngine(config) { extractorEngine =>
         // ensure that the requested field exists in the index
         val fields = extractorEngine.index.listFields()
 
@@ -481,16 +521,23 @@ class FrequencyController @Inject() (
   }
 
   /** Return coordinates defining a histogram of counts/frequencies of matches of each rule.
-    * @param grammar An Odinson grammar.
-    * @param allowTriggerOverlaps Whether or not event arguments are permitted to overlap with the event's trigger.
-    * @param bins Number of bins to cut the rule counts into.
-    * @param equalProbability Whether to make bin widths variable to make them equally probable.
-    * @param xLogScale `log10`-transform the counts of each rule (optional).
-    * @param pretty Whether to pretty-print the JSON returned by the function.
-    * @return A JSON array of each bin, defined by width, lower bound (inclusive), and frequency.
+    * @param grammar
+    *   An Odinson grammar.
+    * @param allowTriggerOverlaps
+    *   Whether or not event arguments are permitted to overlap with the event's trigger.
+    * @param bins
+    *   Number of bins to cut the rule counts into.
+    * @param equalProbability
+    *   Whether to make bin widths variable to make them equally probable.
+    * @param xLogScale
+    *   `log10`-transform the counts of each rule (optional).
+    * @param pretty
+    *   Whether to pretty-print the JSON returned by the function.
+    * @return
+    *   A JSON array of each bin, defined by width, lower bound (inclusive), and frequency.
     */
   def ruleHist() = Action { request =>
-    usingNewEngine(config) { extractorEngine =>
+    ExtractorEngine.usingEngine(config) { extractorEngine =>
       val ruleHistRequest = request.body.asJson.get.as[RuleHistRequest]
       val grammar = ruleHistRequest.grammar
       val allowTriggerOverlaps = ruleHistRequest.allowTriggerOverlaps.getOrElse(false)
@@ -530,13 +577,15 @@ class FrequencyController @Inject() (
     }
   }
 
-    /** Return all terms for a given field in orthographic order.   *
-    * @param field A token field such as word, lemma, or tag.
-    * @return The complete [[List]] of terms in this field for the current index.
+  /** Return all terms for a given field in orthographic order. *
+    * @param field
+    *   A token field such as word, lemma, or tag.
+    * @return
+    *   The complete [[List]] of terms in this field for the current index.
     */
   private def fieldVocabulary(field: String): List[String] = {
     // get terms from the requested field (error if it doesn't exist)
-    usingNewEngine(config) { extractorEngine =>
+    ExtractorEngine.usingEngine(config) { extractorEngine =>
       val fields = extractorEngine.index.listFields()
       val terms = TermsAndFreqs(fields.terms(field).iterator()).map(_.term).toList
 
@@ -545,8 +594,10 @@ class FrequencyController @Inject() (
   }
 
   /** Retrieves the POS tags for the current index (limited to extant tags).
-    * @param pretty Whether to pretty-print the JSON results.
-    * @return A JSON array of the tags in use in this index.
+    * @param pretty
+    *   Whether to pretty-print the JSON results.
+    * @return
+    *   A JSON array of the tags in use in this index.
     */
   def tagsVocabulary(pretty: Option[Boolean]) = Action.async {
     // get ready to fail if tags aren't reachable
@@ -558,4 +609,5 @@ class FrequencyController @Inject() (
       }.map { json => json.format(pretty) }
     } catch handleNonFatalInFuture
   }
+
 }

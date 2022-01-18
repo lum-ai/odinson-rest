@@ -12,8 +12,6 @@ GET     /api/config                     controllers.OdinsonController.configInfo
 # API spec
 GET     /api                            controllers.OpenApiController.openAPI
 
-# FIXME: remove when DELETE is ready
-GET     /api/ids-for-children/:documentId    controllers.OdinsonController.idsForChildren(documentId: String)
 # search
 + nocsrf
 GET     /api/execute/pattern            controllers.OdinsonController.runQuery(odinsonQuery: String, metadataQuery: Option[String], label: Option[String], commit: Option[Boolean], prevDoc: Option[Int], prevScore: Option[Float], enriched: Boolean = false, pretty: Option[Boolean])
@@ -49,8 +47,10 @@ GET     /api/term-hist                  controllers.FrequencyController.termHist
 POST    /api/rule-hist                  controllers.FrequencyController.ruleHist()
 
 # index
-POST    /api/index/document             controllers.OdinsonController.indexDocument()
-#DELETE  /api/index/document             controllers.OdinsonController.deleteDocument()
+# NOTE: index/document will first attempt to delete any existing doc before updating
+POST    /api/index/document             controllers.OdinsonController.updateOdinsonDoc()
+DELETE  /api/delete/document/:documentId             controllers.OdinsonController.deleteOdinsonDoc(documentId: String)
+POST    /api/update/document             controllers.OdinsonController.updateOdinsonDoc()
 
 # validate
 POST   /api/validate                    controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()

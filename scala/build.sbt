@@ -45,7 +45,7 @@ lazy val commonSettings = Seq(
 
 lazy val sharedDeps = {
   libraryDependencies ++= {
-    val odinsonVersion  = "0.6.0"
+    val odinsonVersion  = "0.6.1"
     val json4sVersion   = "3.2.11" // "3.5.2"
     val luceneVersion   = "6.6.0"
     Seq(

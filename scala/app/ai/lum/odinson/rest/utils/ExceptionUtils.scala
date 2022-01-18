@@ -18,14 +18,16 @@ object ExceptionUtils {
   ): Result = {
     val errorMsg: String = message match {
       // .getMessage , .getStackTrace , .getRootCause
-      case None => ApacheExceptionUtils.getMessage(e)
+      case None      => ApacheExceptionUtils.getMessage(e)
       case Some(msg) => msg
     }
-    //val json = Json.toJson(Json.obj("error" -> errorMsg))
+    // val json = Json.toJson(Json.obj("error" -> errorMsg))
     BadRequest(errorMsg)
   }
 
-  /** Return a standard error handler for try blocks that throw a NullPointerException and expect a Result. */
+  /** Return a standard error handler for try blocks that throw a NullPointerException and expect a
+    * Result.
+    */
   def mkHandleNullPointer(message: String): PartialFunction[Throwable, Result] = {
     case _: NullPointerException => InternalServerError(message)
   }
@@ -34,13 +36,20 @@ object ExceptionUtils {
   //   InternalServerError(message)
   // }
 
-  /** Refer to the standard error handler for try blocks that throw a NonFatal exception and expect a Result. */
+  /** Refer to the standard error handler for try blocks that throw a NonFatal exception and expect
+    * a Result.
+    */
   val handleNonFatal: PartialFunction[Throwable, Result] = {
     case NonFatal(e) => describeNonFatal(e)
   }
 
-  /** Refer to the standard error handler for try blocks that throw a NonFatal exception and expect a Future[Result]. */
-  def handleNonFatalInFuture(implicit ec: ExecutionContext): PartialFunction[Throwable, Future[Result]] = {
+  /** Refer to the standard error handler for try blocks that throw a NonFatal exception and expect
+    * a Future[Result].
+    */
+  def handleNonFatalInFuture(implicit
+    ec: ExecutionContext
+  ): PartialFunction[Throwable, Future[Result]] = {
     case NonFatal(e) => Future(describeNonFatal(e))
   }
+
 }
