@@ -19,8 +19,6 @@ import play.api.mvc.Results._
 
 package object json {
 
-  import ExtractorEngineUtils._
-
   /** convenience methods for formatting Play 2 Json */
   implicit class JsonOps(json: JsValue) {
 
@@ -31,138 +29,136 @@ package object json {
 
   }
 
-  def mkJson(
-    odinsonQuery: String,
-    metadataQuery: Option[String],
-    duration: Float,
-    results: OdinResults,
-    enriched: Boolean,
-    config: Config,
-    engine: ExtractorEngine
-  ): JsValue = {
+  implicit class EngineJsonOps(engine: ExtractorEngine)
+      extends ExtractorEngineUtils.EngineOps(engine) {
 
-    val scoreDocs: JsValue = enriched match {
-      case true =>
-        Json.arr(results.scoreDocs.map { sd => mkJsonWithEnrichedResponse(sd, config, engine) }: _*)
-      case false => Json.arr(results.scoreDocs.map { sd => mkJson(sd, engine) }: _*)
+    def mkJson(
+      odinsonQuery: String,
+      metadataQuery: Option[String],
+      duration: Float,
+      results: OdinResults,
+      enriched: Boolean,
+      config: Config
+    ): JsValue = {
+
+      val scoreDocs: JsValue = enriched match {
+        case true =>
+          Json.arr(results.scoreDocs.map { sd => mkJsonWithEnrichedResponse(sd, config) }: _*)
+        case false => Json.arr(results.scoreDocs.map(mkJsonForScoreDoc): _*)
+      }
+
+      Json.obj(
+        // format: off
+        "odinsonQuery" -> odinsonQuery,
+        "metadataQuery"  -> metadataQuery,
+        "duration"     -> duration,
+        "totalHits"    -> results.totalHits,
+        "scoreDocs"    -> scoreDocs
+        // format: on
+      )
     }
 
-    Json.obj(
-      // format: off
-      "odinsonQuery" -> odinsonQuery,
-      "metadataQuery"  -> metadataQuery,
-      "duration"     -> duration,
-      "totalHits"    -> results.totalHits,
-      "scoreDocs"    -> scoreDocs
-      // format: on
-    )
-  }
+    /** Process results from executeGrammar */
+    def mkJson(
+      metadataQuery: Option[String],
+      duration: Float,
+      allowTriggerOverlaps: Boolean,
+      mentions: Seq[Mention]
+    ): JsValue = {
 
-  /** Process results from executeGrammar */
-  def mkJson(
-    metadataQuery: Option[String],
-    duration: Float,
-    allowTriggerOverlaps: Boolean,
-    mentions: Seq[Mention],
-    engine: ExtractorEngine
-  ): JsValue = {
+      val mentionsJson: JsValue = Json.arr(mentions.map(mkJsonForMention): _*)
 
-    val mentionsJson: JsValue = Json.arr(mentions.map { m => mkJson(m, engine) }: _*)
+      Json.obj(
+        // format: off
+        "metadataQuery"          -> metadataQuery,
+        "duration"             -> duration,
+        "allowTriggerOverlaps" -> allowTriggerOverlaps,
+        "mentions"             -> mentionsJson
+        // format: on
+      )
+    }
 
-    Json.obj(
-      // format: off
-      "metadataQuery"          -> metadataQuery,
-      "duration"             -> duration,
-      "allowTriggerOverlaps" -> allowTriggerOverlaps,
-      "mentions"             -> mentionsJson
-      // format: on
-    )
-  }
+    def mkJsonForMention(mention: Mention): Json.JsValueWrapper = {
 
-  def mkJson(mention: Mention, engine: ExtractorEngine): Json.JsValueWrapper = {
+      val displayField = engine.index.displayField
+      // val doc: LuceneDocument = engine.indexSearcher.doc(mention.luceneDocId)
+      // We want **all** tokens for the sentence
+      val tokens = engine.dataGatherer.getTokens(mention.luceneDocId, displayField)
 
-    val displayField = engine.index.displayField
-    // val doc: LuceneDocument = engine.indexSearcher.doc(mention.luceneDocId)
-    // We want **all** tokens for the sentence
-    val tokens = engine.dataGatherer.getTokens(mention.luceneDocId, displayField)
+      Json.obj(
+        // format: off
+        "sentenceId"    -> mention.luceneDocId,
+        // "score"         -> odinsonScoreDoc.score,
+        "label"         -> mention.label,
+        "documentId"    -> getOdinsonDocId(mention.luceneDocId),
+        "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
+        "words"         -> JsArray(tokens.map(JsString)),
+        "foundBy"       -> mention.foundBy,
+        "match"         -> Json.arr(mkJsonForMatch(mention.odinsonMatch))
+        // format: on
+      )
+    }
 
-    Json.obj(
-      // format: off
-      "sentenceId"    -> mention.luceneDocId,
-      // "score"         -> odinsonScoreDoc.score,
-      "label"         -> mention.label,
-      "documentId"    -> getDocId(mention.luceneDocId, engine),
-      "sentenceIndex" -> getSentenceIndex(mention.luceneDocId, engine),
-      "words"         -> JsArray(tokens.map(JsString)),
-      "foundBy"       -> mention.foundBy,
-      "match"         -> Json.arr(mkJson(mention.odinsonMatch, engine))
-      // format: on
-    )
-  }
+    def mkJsonForScoreDoc(odinsonScoreDoc: OdinsonScoreDoc): Json.JsValueWrapper = {
+      val displayField = engine.index.displayField
+      // val doc = engine.indexSearcher.doc(odinsonScoreDoc.doc)
+      // we want **all** tokens for the sentence
+      val tokens = engine.dataGatherer.getTokens(odinsonScoreDoc.doc, displayField)
 
-  def mkJson(odinsonScoreDoc: OdinsonScoreDoc, engine: ExtractorEngine): Json.JsValueWrapper = {
-    val displayField = engine.index.displayField
-    // val doc = engine.indexSearcher.doc(odinsonScoreDoc.doc)
-    // we want **all** tokens for the sentence
-    val tokens = engine.dataGatherer.getTokens(odinsonScoreDoc.doc, displayField)
+      Json.obj(
+        // format: off
+        "sentenceId"    -> odinsonScoreDoc.doc,
+        "score"         -> odinsonScoreDoc.score,
+        "documentId"    -> getOdinsonDocId(odinsonScoreDoc.doc),
+        "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc),
+        "words"         -> JsArray(tokens.map(JsString)),
+        "matches"       -> Json.arr(odinsonScoreDoc.matches.map(mkJsonForMatch): _*)
+        // format: on
+      )
+    }
 
-    Json.obj(
-      // format: off
-      "sentenceId"    -> odinsonScoreDoc.doc,
-      "score"         -> odinsonScoreDoc.score,
-      "documentId"    -> getDocId(odinsonScoreDoc.doc, engine),
-      "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc, engine),
-      "words"         -> JsArray(tokens.map(JsString)),
-      "matches"       -> Json.arr(odinsonScoreDoc.matches.map{ om => mkJson(om, engine)}: _*)
-      // format: on
-    )
-  }
+    def mkJsonForMatch(m: OdinsonMatch): Json.JsValueWrapper = {
+      Json.obj(
+        "span" -> Json.obj("start" -> m.start, "end" -> m.end),
+        "captures" -> Json.arr(m.namedCaptures.map(mkJsonForNamedCapture): _*)
+      )
+    }
 
-  def mkJson(m: OdinsonMatch, engine: ExtractorEngine): Json.JsValueWrapper = {
-    Json.obj(
-      "span" -> Json.obj("start" -> m.start, "end" -> m.end),
-      "captures" -> Json.arr(m.namedCaptures.map { nc => mkJson(nc, engine) }: _*)
-    )
-  }
+    def mkJsonForNamedCapture(namedCapture: NamedCapture): Json.JsValueWrapper = {
+      Json.obj(namedCapture.name -> mkJsonForMatch(namedCapture.capturedMatch))
+    }
 
-  def mkJson(namedCapture: NamedCapture, engine: ExtractorEngine): Json.JsValueWrapper = {
-    Json.obj(namedCapture.name -> mkJson(namedCapture.capturedMatch, engine))
-  }
+    def mkJsonWithEnrichedResponse(
+      odinsonScoreDoc: OdinsonScoreDoc,
+      config: Config
+    ): Json.JsValueWrapper = {
+      Json.obj(
+        // format: off
+        "sentenceId"    -> odinsonScoreDoc.doc,
+        "score"         -> odinsonScoreDoc.score,
+        "documentId"    -> getOdinsonDocId(odinsonScoreDoc.doc),
+        "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc),
+        "sentence"      -> mkUnabridgedSentenceJson(odinsonScoreDoc.doc, config),
+        "matches"       -> Json.arr(odinsonScoreDoc.matches.map(mkJsonForMatch): _*)
+        // format: on
+      )
+    }
 
-  def mkJsonWithEnrichedResponse(
-    odinsonScoreDoc: OdinsonScoreDoc,
-    config: Config,
-    engine: ExtractorEngine
-  ): Json.JsValueWrapper = {
-    Json.obj(
-      // format: off
-      "sentenceId"    -> odinsonScoreDoc.doc,
-      "score"         -> odinsonScoreDoc.score,
-      "documentId"    -> getDocId(odinsonScoreDoc.doc, engine),
-      "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc, engine),
-      "sentence"      -> mkAbridgedSentence(odinsonScoreDoc.doc, config, engine),
-      "matches"       -> Json.arr(odinsonScoreDoc.matches.map{om => mkJson(om, engine)}: _*)
-      // format: on
-    )
-  }
+    def mkUnabridgedSentenceJson(
+      sentenceLuceneDocId: Int,
+      config: Config
+    ): JsValue = {
+      val sentenceIndex = getSentenceIndex(sentenceLuceneDocId)
+      val odinsonDocId = getOdinsonDocId(sentenceLuceneDocId)
+      val sentence = getSentence(odinsonDocId, sentenceIndex, config)
+      Json.parse(sentence.toJson)
+    }
 
-  def mkAbridgedSentence(sentenceId: Int, config: Config, engine: ExtractorEngine): JsValue = {
-    val sentenceIndex = getSentenceIndex(sentenceId, engine)
-    val documentId = getDocId(sentenceId, engine)
-    val unabridgedJson = retrieveSentenceJson(documentId, sentenceIndex, config, engine)
-    unabridgedJson
-    // unabridgedJson.as[JsObject] - "startOffsets" - "endOffsets" - "raw"
-  }
+    def mkAbridgedSentenceJson(sentenceLuceneDocId: Int, config: Config): JsValue = {
+      val unabridgedJson = mkUnabridgedSentenceJson(sentenceLuceneDocId, config)
+      unabridgedJson.as[JsObject] - "startOffsets" - "endOffsets" - "raw"
+    }
 
-  def retrieveSentenceJson(
-    documentId: String,
-    sentenceIndex: Int,
-    config: Config,
-    engine: ExtractorEngine
-  ): JsValue = {
-    val odinsonDoc: OdinsonDocument = loadParentDocByDocumentId(documentId, config, engine)
-    val docJson: JsValue = Json.parse(odinsonDoc.toJson)
-    (docJson \ "sentences")(sentenceIndex)
   }
 
 }

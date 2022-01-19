@@ -21,9 +21,9 @@ lazy val commonScalacOptions = Seq(
 
 routesGenerator := InjectedRoutesGenerator
 
-licenses in ThisBuild := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-homepage in ThisBuild := Some(url("https://github.com/lum-ai/odinson-rest"))
+ThisBuild / homepage := Some(url("https://github.com/lum-ai/odinson-rest"))
 
 lazy val commonSettings = Seq(
   organization := "ai.lum",
@@ -32,12 +32,12 @@ lazy val commonSettings = Seq(
   scalacOptions ++= commonScalacOptions,
   scalacOptions += "-Ywarn-unused-import",
   // -Ywarn-unused-import is annoying in the console
-  scalacOptions in (Compile, console) := commonScalacOptions,
+  Compile / console / scalacOptions := commonScalacOptions,
   // show test duration
-  testOptions in Test += Tests.Argument("-oD"),
+  Test / testOptions += Tests.Argument("-oD"),
   // avoid dep. conflict in assembly task for webapp
   excludeDependencies += "commons-logging" % "commons-logging",
-  parallelExecution in Test := false
+  Test / parallelExecution := false
 )
 
 // example specifying credentials using ENV variables:
@@ -56,7 +56,7 @@ lazy val sharedDeps = {
       "com.typesafe.scala-logging" %%  "scala-logging" % "3.5.0",
       "ch.qos.logback" %  "logback-classic" % "1.1.7",
       "org.json4s" %% "json4s-core" % json4sVersion,
-      "ai.lum"        %% "common"               % "0.1.2",
+      "ai.lum"        %% "common"               % "0.1.5",
       "ai.lum"        %% "odinson-core"         % odinsonVersion,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
     )
@@ -65,10 +65,10 @@ lazy val sharedDeps = {
 
 lazy val assemblySettings = Seq(
   // Trick to use a newer version of json4s with spark (see https://stackoverflow.com/a/49661115/1318989)
-  assemblyShadeRules in assembly := Seq(
+  assembly / assemblyShadeRules := Seq(
     ShadeRule.rename("org.json4s.**" -> "shaded_json4s.@1").inAll
   ),
-  assemblyMergeStrategy in assembly := {
+  assembly / assemblyMergeStrategy := {
     case refOverrides if refOverrides.endsWith("reference-overrides.conf") => MergeStrategy.first
     case logback if logback.endsWith("logback.xml") => MergeStrategy.first
     case netty if netty.endsWith("io.netty.versions.properties") => MergeStrategy.first
@@ -77,7 +77,7 @@ lazy val assemblySettings = Seq(
     case PathList("play", "api", "libs", "ws", xs @ _*) => MergeStrategy.first
     case PathList("org", "apache", "lucene", "analysis", xs @ _ *) => MergeStrategy.first
     case x =>
-      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
 )
@@ -112,18 +112,18 @@ lazy val packagerSettings = {
       dockerAlias.value.withTag(Option(gitDockerTag.value)),
       // see https://github.com/sbt/sbt-native-packager/blob/master/src/main/scala/com/typesafe/sbt/packager/docker/DockerAlias.scala
     ),
-    packageName in Docker := "odinson-rest-api",
+    Docker / packageName := "annotaurus-rest-api",
     // "openjdk:11-jre-alpine"
     // "adoptopenjdk:11-jre-hotspot", // arm and amd compat
     dockerBaseImage := "adoptopenjdk/openjdk11", // arm and amd compat
-    maintainer in Docker := "Gus Hahn-Powell <ghp@lum.ai>",
-    dockerExposedPorts in Docker := Seq(9000),
-    javaOptions in Universal ++= Seq(
+    Docker / maintainer := "Gus Hahn-Powell <ghp@lum.ai>",
+    Docker / dockerExposedPorts := Seq(9000),
+    Universal / javaOptions ++= Seq(
       "-J-Xmx4G",
       // avoid writing a PID file
       "-Dplay.server.pidfile.path=/dev/null",
       //"-Dplay.server.akka.requestTimeout=20s"
-      "-Dlogger.resource=logback.xml"
+      //"-Dlogger.resource=logback.xml"
     )
   )
 }
@@ -137,9 +137,9 @@ lazy val root = (project in file("."))
   .settings(buildInfoSettings)
   .settings(assemblySettings)
   .settings(
-    test in assembly := {},
-    mainClass in assembly := Some("play.core.server.ProdServerStart"), // FIXME template, is this core subproject?
-    fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
+    assembly / test := {},
+    assembly / mainClass := Some("play.core.server.ProdServerStart"),
+    assembly / fullClasspath += Attributed.blank(PlayKeys.playPackageAssets.value),
     // these are used by the sbt web task
     PlayKeys.devSettings ++= Seq(
       "play.server.akka.requestTimeout" -> "infinite",
@@ -165,7 +165,7 @@ cp := {
   copyDocs()
 }
 lazy val web = taskKey[Unit]("Launches the webapp in dev mode.")
-web := (run in Compile in root).toTask("").value
+web := (root / Compile / run).toTask("").value
 
 addCommandAlias("dockerize", ";docker:publishLocal")
 

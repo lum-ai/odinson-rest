@@ -21,7 +21,7 @@ POST    /api/execute/grammar            controllers.OdinsonController.executeGra
 
 # document json
 + nocsrf
-GET     /api/document/:documentId                   controllers.OdinsonController.odinsonDocumentJsonForId(documentId: String, pretty: Option[Boolean])
+GET     /api/document/:odinsonDocId                   controllers.OdinsonController.odinsonDocumentJsonForId(odinsonDocId: String, pretty: Option[Boolean])
 # sentence json
 + nocsrf
 GET     /api/sentence/:sentenceId                   controllers.OdinsonController.sentenceJsonForSentId(sentenceId: Int, pretty: Option[Boolean])
@@ -34,7 +34,7 @@ GET     /api/parent/sentence/:sentenceId      controllers.OdinsonController.getP
 # metadata
 
 + nocsrf
-GET     /api/metadata/document/:documentId    controllers.OdinsonController.getMetadataJsonByDocumentId(documentId: String, pretty: Option[Boolean])
+GET     /api/metadata/document/:odinsonDocId    controllers.OdinsonController.getMetadataJsonByDocumentId(odinsonDocId: String, pretty: Option[Boolean])
 
 + nocsrf
 GET     /api/metadata/sentence/:sentenceId    controllers.OdinsonController.getMetadataJsonBySentenceId(sentenceId: Int, pretty: Option[Boolean])

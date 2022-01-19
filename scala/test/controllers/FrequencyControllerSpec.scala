@@ -2,8 +2,10 @@ package controllers
 
 import java.io.{ File, IOException }
 import java.nio.file.Files
-import ai.lum.odinson.index.CustomOdinsonIndex
+import ai.lum.common.FileUtils._
+import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine }
 import ai.lum.odinson.utils.exceptions.OdinsonException
+import ai.lum.odinson.rest.utils.OdinsonDocumentUtils._
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
 import org.scalatestplus.play.guice._
 import play.api.test.Helpers._
@@ -42,7 +44,7 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
     FileUtils.copyDirectory(srcDir, tmpFolder)
   } catch {
     case e: IOException =>
-      throw new OdinsonException(s"Can't copy resources directory ${srcDir}")
+      throw OdinsonException(s"Can't copy resources directory ${srcDir}")
   }
 
   val dataDir = tmpFolder.getAbsolutePath
@@ -81,9 +83,25 @@ class FrequencyControllerSpec extends PlaySpec with GuiceOneAppPerTest with Inje
     dir.deleteRecursively()
   }
 
+  // FIXME: do this before each test?
+  // FIXME: move to test MixIn or TestUtils
   deleteIndex
-  // create index
-  CustomOdinsonIndex.indexOdinsonDocs(testConfig, save = true)
+  // populate index
+  ExtractorEngine.usingEngine(testConfig) { engine =>
+    new File(docsDir).listFilesByWildcards(
+      wildcards = Seq("*.json", "*.json.gz"),
+      caseInsensitive = true,
+      recursive = true
+    ).map { odf =>
+      // Add file field
+      val doc = {
+        OdinsonDocument.fromJson(odf.readString()).addFileNameMetadata(testConfig)
+      }
+      engine.index.indexOdinsonDoc(doc)
+      // write JSON to disk
+      doc.writeDoc(testConfig)
+    }
+  }
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(

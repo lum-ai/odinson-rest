@@ -9,7 +9,6 @@ import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
 import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions }
 import ai.lum.odinson.rest.BuildInfo
-import ai.lum.odinson.rest.utils._
 import ai.lum.odinson.rest.requests._
 import org.apache.lucene.document.{ Document => LuceneDocument }
 import org.apache.lucene.store.FSDirectory
@@ -35,8 +34,8 @@ class OdinsonController @Inject() (
 ) extends AbstractController(cc) {
 
   import ai.lum.odinson.rest.json._
-  import ExceptionUtils._
-  import ExtractorEngineUtils._
+  import ai.lum.odinson.rest.utils.ExceptionUtils._
+  import ai.lum.odinson.rest.utils.OdinsonDocumentUtils._
 
   // format: off
   val docsDir              = config.apply[File]  ("odinson.docsDir")
@@ -96,12 +95,15 @@ class OdinsonController @Inject() (
     try {
       request.body.asJson match {
         case Some(json) =>
-          // FIXME: better error handling with Try
-          val doc = OdinsonDocument.fromJson(json.toString)
+          // Add file field
+          val doc = {
+            OdinsonDocument.fromJson(json.toString).addFileNameMetadata(config)
+          }
+
           ExtractorEngine.usingEngine(config) { engine =>
             engine.index.indexOdinsonDoc(doc)
-            // FIXME: save file!!
-
+            // write JSON to disk
+            doc.writeDoc(config)
             Ok
           }
         // FIXME: better error
@@ -110,18 +112,20 @@ class OdinsonController @Inject() (
     } catch handleNonFatal
   }
 
-  def deleteOdinsonDoc(documentId: String) = Action.async {
+  def deleteOdinsonDoc(odinsonDocId: String) = Action.async {
     Future {
       try {
         ExtractorEngine.usingEngine(config) { engine =>
-          engine.index.deleteOdinsonDoc(documentId)
+          engine.index.deleteOdinsonDoc(odinsonDocId)
           // FIXME: delete JSON file
+          val doc = engine.odinsonDoc(odinsonDocId, config)
+          doc.writeDoc(config)
           Ok
         }
       } catch {
         case _: Throwable =>
           // FIXME: make BadRequest from OdinsonException
-          BadRequest(s"Failed to delete Document ${documentId}")
+          BadRequest(s"Failed to delete Document ${odinsonDocId}")
       }
     }
   }
@@ -134,7 +138,7 @@ class OdinsonController @Inject() (
           val doc = OdinsonDocument.fromJson(json.toString)
           ExtractorEngine.usingEngine(config) { engine =>
             engine.index.updateOdinsonDoc(doc)
-            // FIXME: save file!!
+            // FIXME: save JSON file!!
             Ok
           }
         // FIXME: better error
@@ -219,13 +223,12 @@ class OdinsonController @Inject() (
 
   /** Retrieves JSON for given Odinson Document ID.
     */
-  def odinsonDocumentJsonForId(documentId: String, pretty: Option[Boolean]) = Action.async {
+  def odinsonDocumentJsonForId(odinsonDocId: String, pretty: Option[Boolean]) = Action.async {
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val odinsonDocument: OdinsonDocument =
-            loadParentDocByDocumentId(documentId, config, engine)
-          val json: JsValue = Json.parse(odinsonDocument.toJson)
+          val doc = engine.odinsonDoc(odinsonDocId, config)
+          val json: JsValue = Json.parse(doc.toJson)
           json.format(pretty)
         } catch {
           case _: NullPointerException =>
@@ -233,7 +236,7 @@ class OdinsonController @Inject() (
               "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
             )
           case _: Throwable =>
-            BadRequest(s"documentId ${documentId} not found")
+            BadRequest(s"odinsonDocId '${odinsonDocId}' not found")
         }
       }
     }
@@ -246,7 +249,7 @@ class OdinsonController @Inject() (
       try {
         ExtractorEngine.usingEngine(config) { engine =>
           // ensure doc id is correct
-          val json = mkAbridgedSentence(sentenceId, config, engine)
+          val json = engine.mkUnabridgedSentenceJson(sentenceId, config)
           json.format(pretty)
         }
       } catch {
@@ -359,7 +362,7 @@ class OdinsonController @Inject() (
 
         val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
 
-        val json = Json.toJson(mkJson(None, duration, allowTriggerOverlaps, mentions, engine))
+        val json = Json.toJson(engine.mkJson(None, duration, allowTriggerOverlaps, mentions))
         json.format(pretty)
       } catch handleNonFatal
     }
@@ -414,14 +417,13 @@ class OdinsonController @Inject() (
             )
           }
 
-          val json = Json.toJson(mkJson(
+          val json = Json.toJson(engine.mkJson(
             odinsonQuery,
             metadataQuery,
             duration,
             results,
             enriched,
-            config,
-            engine
+            config
           ))
           json.format(pretty)
         } catch handleNonFatal
@@ -430,15 +432,15 @@ class OdinsonController @Inject() (
   }
 
   def getMetadataJsonByDocumentId(
-    documentId: String,
+    odinsonDocId: String,
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val odinsonDocument: OdinsonDocument =
-            loadParentDocByDocumentId(documentId, config, engine)
-          val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
+          val doc: OdinsonDocument =
+            engine.odinsonDoc(odinsonDocId, config)
+          val json: JsValue = Json.parse(doc.toJson)("metadata")
           json.format(pretty)
         } catch {
           case _: NullPointerException =>
@@ -446,7 +448,7 @@ class OdinsonController @Inject() (
               "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
             )
           case _: Throwable =>
-            BadRequest(s"documentId ${documentId} not found")
+            BadRequest(s"odinsonDocId '${odinsonDocId}' not found")
         }
       }
     }
@@ -459,12 +461,10 @@ class OdinsonController @Inject() (
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val luceneDoc: LuceneDocument = engine.doc(sentenceId)
-          // FIXME: getOrElse and return Option[]
-          val documentId = luceneDoc.getValues(OdinsonIndexWriter.DOC_ID_FIELD).head
-          val odinsonDocument: OdinsonDocument =
-            loadParentDocByDocumentId(documentId, config, engine)
-          val json: JsValue = Json.parse(odinsonDocument.toJson)("metadata")
+          val odinsonDocId = engine.getOdinsonDocId(sentenceId)
+          val doc: OdinsonDocument =
+            engine.odinsonDoc(odinsonDocId, config)
+          val json: JsValue = Json.parse(doc.toJson)("metadata")
           json.format(pretty)
         } catch {
           case _: NullPointerException =>
@@ -472,7 +472,7 @@ class OdinsonController @Inject() (
               "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
             )
           case _: Throwable =>
-            BadRequest(s"sentenceId ${sentenceId} not found")
+            BadRequest(s"sentenceId '${sentenceId}' not found")
         }
       }
     }
@@ -485,12 +485,10 @@ class OdinsonController @Inject() (
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
         try {
-          val luceneDoc: LuceneDocument = engine.doc(sentenceId)
-          // FIXME: getOrElse and return Option[String]
-          val documentId = luceneDoc.getValues(OdinsonIndexWriter.DOC_ID_FIELD).head
-          val odinsonDocument: OdinsonDocument =
-            loadParentDocByDocumentId(documentId, config, engine)
-          val json: JsValue = Json.parse(odinsonDocument.toJson)
+          val odinsonDocId = engine.getOdinsonDocId(sentenceId)
+          val doc: OdinsonDocument =
+            engine.odinsonDoc(odinsonDocId, config)
+          val json: JsValue = Json.parse(doc.toJson)
           json.format(pretty)
         } catch {
           case _: NullPointerException =>
@@ -498,7 +496,7 @@ class OdinsonController @Inject() (
               "This search index does not have document filenames saved as stored fields, so the parent document cannot be retrieved."
             )
           case _: Throwable =>
-            BadRequest(s"sentenceId ${sentenceId} not found")
+            BadRequest(s"sentenceId '${sentenceId}' not found")
         }
       }
     }
