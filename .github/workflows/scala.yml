@@ -1,4 +1,4 @@
-name: Scala CI
+name: Tests (scala)
 
 on:
   push:
@@ -20,14 +20,26 @@ jobs:
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # see https://github.com/actions/setup-java#testing-against-different-java-versions
+      matrix:
+        os: [ "ubuntu-latest" ] #, macos-latest, windows-latest]
+        distribution: [ "zulu", "temurin" ]
+        java: [ "8", "11", "17" ]
+    name: Build docs
     needs: setup
     steps:
     # Checkout code
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Setup java
+      uses: actions/setup-java@v2
+      with:
+        distribution: ${{ matrix.distribution }}
+        java-version: ${{ matrix.java }}
     # Setup docker
-    - name: Set up QEMUclu-template
+    - name: Set up QEMU
       uses: docker/setup-buildx-action@v1
     - name: Login to DockerHub
       continue-on-error: true
@@ -35,32 +47,5 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{  secrets.DOCKERHUB_TOKEN }}
-    # JDK 11 and tests
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: "11"
-        java-package: jdk
     - name: Run tests
-      run: sbt cleanTest
-    # docs
-    - name: "Create documentation (API docs)"
-      run: sbt documentize
-    # docs
-    - name: "Create documentation (other)"
-      env: 
-        ORG: "parsertongue"
-        IMAGE_NAME: "mkdocs"
-        TAG: "latest"
-      run: |
-        docker run -i -v "$GITHUB_WORKSPACE:/app" "${ORG}/${IMAGE_NAME}:${TAG}" mkdocs build -c
-    - name: Deploy docs
-      if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        # see https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./site
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: ${{ github.event.head_commit.message }}
+      run: sbt test
