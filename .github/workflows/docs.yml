@@ -31,6 +31,12 @@ jobs:
     - name: "Create documentation (odinson-rest API docs)"
       run: |
         sbt documentize
+    - name: "Copy OpenAPI YAML"
+      run: |
+        cp $GITHUB_WORKSPACE/public/schema/odinson.yaml $GITHUB_WORKSPACE/docs/openapi/
+    # - name: "Convert OpenAPI YAML to JSON"
+    #   run: |
+    #     docker run -v "$GITHUB_WORKSPACE/public/schema:/app" -v "$GITHUB_WORKSPACE/docs/openapi:/openapi" "swaggerapi/swagger-codegen-cli-v3:latest" generate -i /app/odinson.yaml -l swagger -o /openapi
     - name: "Create documentation (other)"
       env:
         ORG: "parsertongue"

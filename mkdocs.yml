@@ -52,7 +52,7 @@ markdown_extensions:
     - attr_list
     - def_list
 
-copyright: Copyright &copy; 2021 <a href="https://parsertongue.org/about">Gus Hahn-Powell</a>.
+copyright: Copyright &copy; 2021 <a href="https://lum.ai">Lum AI, LLC</a>.
 
 plugins:
     - search
@@ -67,3 +67,5 @@ plugins:
     - git-authors
     # see https://github.com/fralau/mkdocs-mermaid2-plugin
     - mermaid2
+    # see https://github.com/bharel/mkdocs-render-swagger-plugin
+    - render_swagger

@@ -1,10 +1,23 @@
-# cgiar-reader
+# odinson-rest
 
+This project provides a REST API for Odinson, as well as a [Python library for easily interacting with this REST API](./python).
+
+Using the REST interface, you can ...
+
+- **Validate** Odinson documents
+- **Index** Odinson documents
+- **Delete** indexed Odinson documents
+- **Update** indexed Odinson documents
+- **Search** over a collection of Odinson documents
+- **Retrieve** documents and their metadata
+
+The [Python library](./python) provides an easy way of manipulating Odinson documents from Python.
 ## Requirements
 
-- [sbt](https://scala-sbt.org)
+- [sbt](https://sdkman.io/sdks#sbt)
 - [docker](https://docs.docker.com/get-docker)
-- 8G of RAM
+
+For details, [see the docs](https://lum-ai.github.io/odinson-rest).
 
 ## Testing
 
@@ -13,14 +26,6 @@ You can run all project tests with the following command:
 ```scala
 sbt test
 ```
-
-We use [ScalaTest with `FlatSpec` and `Matchers`](https://www.scalatest.org/user_guide/using_matchers) for BDD-style unit tests.
-
-- Entity tests: `reader/src/test/scala/ai/lum/mr/cgiar/entities`
-
-- Event/relation tests: `reader/src/test/scala/ai/lum/mr/cgiar/events`
-
-
 
 ## Documentation
 
@@ -32,18 +37,18 @@ sbt doc
 
 This will generate HTML pages documenting the API:
 
-- `rest`: rest/target/scala-2.12/api/index.html
+- `rest`: target/scala-2.12/api/index.html
 
 ## REST API
 
 ### Releases
 
-We publish releases in the form of docker images:
-- DockerHub: lumai/odinson-rest-api
+We publish releases in the form of multiplatform docker images:
+- DockerHub: [`lumai/odinson-rest-api`](https://hub.docker.com/r/lumai/odinson-rest-api)
 
 ### Build
 
-The project can be built using either docker or sbt; however, the recommended method is to use docker.
+The REST API is meant to be run via Docker.  Images are built using an SBT task.
 
 #### Docker
 
@@ -78,9 +83,6 @@ docker run --name="odinson-rest-api" \
 
 Navigate to [localhost:9000/api](http://localhost:9000/api) to interactively explore the API through the [OpenAPI 3.0](http://spec.openapis.org/oas/v3.0.3) specification.
 
-### Examples
-
-See [this gist](https://gist.github.com/myedibleenso/???) for sample input and output corresponding to the `/api/???` endpoint.
 
 ## Develop
 
@@ -92,6 +94,9 @@ sbt web
 
 For feature requests and bug reports, please open an issue.
 
+## Citing
+
+Please see [CITATION.cff](./CITATION.cff)
 
 ## Authors
 

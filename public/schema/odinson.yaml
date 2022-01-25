@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.0.3
 info:
   version: "1.0.0"
   title: odinson-rest
@@ -44,7 +44,7 @@ paths:
         Performs an Odinson query against the corpus.
       description: |
         Applies an Odinson pattern to the corpus.  Optionally include a doc-level Lucene query to identify a subset of documents to which the query should be applied.
-      operationId: search
+      operationId: execute-pattern
       parameters:
         - name: odinsonQuery
           in: query
@@ -57,7 +57,6 @@ paths:
         - name: metadataQuery
           in: query
           required: false
-          type: string
           schema:
             type: string
           description: |
@@ -101,7 +100,7 @@ paths:
         '200':
           description: Paginated matches for the query.
           content:
-            application/json:
+            "application/json":
               schema:
                 type: array
                 items:
@@ -109,7 +108,7 @@ paths:
         '400':
           description: Syntax error in query.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/QueryError'
 
@@ -128,7 +127,7 @@ paths:
           An Odinson grammar.
         required: true
         content:
-          application/json:
+          "application/json":
             schema:
               $ref: '#/components/schemas/OdinsonGrammarRequest'
 #      consumes:
@@ -138,13 +137,13 @@ paths:
         '200':
           description: Mentions matched by the grammar.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonGrammarResults'
         '400':
           description: Syntax error in query.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/QueryError'
 
@@ -163,9 +162,9 @@ paths:
           An OdinsonDocument.
         required: true
         content:
-          application/json:
-          schema:
-            type: string
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
 
       responses:
         '200':
@@ -189,9 +188,9 @@ paths:
           An OdinsonDocument.
         required: true
         content:
-          application/json:
-          schema:
-            type: string
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
 
       responses:
         '200':
@@ -215,9 +214,9 @@ paths:
           An OdinsonDocument.
         required: true
         content:
-          application/json:
-          schema:
-            type: string
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
 
       responses:
         '200':
@@ -241,7 +240,7 @@ paths:
           An OdinsonDocument.
         required: true
         content:
-          application/json:
+          "application/json":
             schema:
               $ref: '#/components/schemas/OdinsonDocument'
 #      consumes:
@@ -251,8 +250,6 @@ paths:
         '200':
           description: |
             Document was successfully indexed.
-          schema:
-            type: boolean
 
   /api/document/{documentId}:
     get:
@@ -268,7 +265,7 @@ paths:
           in: path
           description: |
             The document ID associated with some indexed OdinsonDocument.
-          required: false
+          required: true
           schema:
             type: string
       responses:
@@ -276,7 +273,7 @@ paths:
           description: |
             An OdinsonDocument.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonDocument'
         '400':
@@ -297,7 +294,7 @@ paths:
           in: path
           description: |
             The sentence ID for which annotation details are being requested.
-          required: false
+          required: true
           schema:
             type: integer
             format: int64
@@ -306,7 +303,7 @@ paths:
           description: |
             `JSON` describing the `org.clulab.processors.Sentence`.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonSentence'
         '400':
@@ -319,7 +316,7 @@ paths:
         - documents
       summary: |
         Retrieves the OdinsonDocument corresponding to the provided `sentenceId`.
-      operationId: search
+      operationId: sentence-to-parent
       parameters:
         - name: sentenceId
           in: path
@@ -334,7 +331,7 @@ paths:
         '200':
           description: An OdinsonDocument.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonDocument'
         '400':
@@ -347,7 +344,7 @@ paths:
         - metadata
       summary: |
         Retrieves the OdinsonMetadata corresponding to the provided `documentId`.
-      operationId: search
+      operationId: doc-to-metadata
       parameters:
         - name: documentId
           in: path
@@ -361,7 +358,7 @@ paths:
         '200':
           description: OdinsonMetadata.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonMetadata'
         '400':
@@ -374,7 +371,7 @@ paths:
         - metadata
       summary: |
         Retrieves the OdinsonMetadata corresponding to the provided `sentenceId`.
-      operationId: search
+      operationId: sentence-to-metadata
       parameters:
         - name: sentenceId
           in: path
@@ -389,7 +386,7 @@ paths:
         '200':
           description: OdinsonMetadata.
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/OdinsonMetadata'
         '400':
@@ -409,7 +406,7 @@ paths:
         '200':
           description: Total number of documents (num. docs = num. sentences) in the corpus.
           content:
-            application/json:
+            "application/json":
               schema:
                 type: integer
                 format: int32
@@ -501,7 +498,7 @@ paths:
         '200':
           description: Frequencies of token annotations such as word and lemma counts.
           content:
-             application/json:
+             "application/json":
                schema:
                  type: array
                  items:
@@ -521,14 +518,14 @@ paths:
           An Odinson grammar.
         required: true
         content:
-          application/json:
+          "application/json":
             schema:
               $ref: '#/components/schemas/RuleFreqRequest'
       responses:
         '200':
           description: Frequencies of extraction matches by rule name.
           content:
-             application/json:
+             "application/json":
                schema:
                  type: array
                  items:
@@ -588,7 +585,7 @@ paths:
         '200':
           description: Binned frequencies of token annotations such as word and lemma counts.
           content:
-             application/json:
+             "application/json":
                schema:
                  type: array
                  items:
@@ -609,14 +606,14 @@ paths:
           An Odinson grammar.
         required: true
         content:
-          application/json:
+          "application/json":
             schema:
               $ref: '#/components/schemas/RuleHistRequest'
       responses:
         '200':
           description: Binned frequencies of rule match counts.
           content:
-             application/json:
+             "application/json":
                schema:
                  type: array
                  items:
@@ -656,7 +653,7 @@ paths:
   #       '200':
   #         description: Top k most common matches (ignores case). Optionally specify the argument to define frequency on.
   #         content:
-  #           application/json:
+  #           "application/json":
   #             schema:
   #               type: array
   #               items:
@@ -673,7 +670,7 @@ paths:
         '200':
           description: "An array of unique dependencies."
           content:
-            application/json:
+            "application/json":
               schema:
                 type: array
                 items:
@@ -692,7 +689,7 @@ paths:
         '200':
           description: "An array of unique POS tags."
           content:
-            application/json:
+            "application/json":
               schema:
                 type: array
                 items:
@@ -739,7 +736,7 @@ paths:
         '200':
           description: "A JSON object containing corpus information."
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/CorpusInfo'
 
@@ -762,7 +759,7 @@ paths:
         '200':
           description: "A JSON object containing build information."
           content:
-            application/json:
+            "application/json":
               schema:
                 $ref: '#/components/schemas/BuildInfo'
 
@@ -785,7 +782,7 @@ paths:
   #       '200':
   #         description: "A JSON object containing config information."
   #         content:
-  #           application/json:
+  #           "application/json":
   #             schema:
   #               type: object
 
@@ -950,19 +947,16 @@ components:
           format: int32
           description: |
             How many bins to cut the data into.
-          required: false
           example: 3
         equalProbability:
           type: boolean
           description: |
             Whether to determine bin widths by quantile (instead of even bins).
             Y values will be probability density estimates rather than counts.
-          required: false
         xLogScale:
           type: boolean
           description: |
             Whether to apply log10 scaling to token frequency counts or not (default).
-          required: false
         pretty:
           type: boolean
           description: |
@@ -1016,22 +1010,20 @@ components:
       type: string
       description: An Odinson pattern.
       example: |
-      rules:
-        - name: "example"
-          label: Death
-          type: event
-          pattern: |
-            trigger = [lemma=die]
-            date: ^Date  = >nmod_on
+        rules:
+          - name: "example"
+            label: Death
+            type: event
+            pattern: |
+              trigger = [lemma=die]
+              date: ^Date  = >nmod_on
 
     OdinsonPattern:
-      name: odinsonQuery
       type: string
       description: An Odinson pattern.
       example: "[lemma=phosphorylate] []"
 
     MetadataQuery:
-      name: metadataQuery
       type: string
       description: |
         A query to filter Documents by their metadata before applying an Odinson pattern. See https://gh.lum.ai/odinson/metadata for details.
@@ -1068,7 +1060,8 @@ components:
           description: A grouping term from a second token field (e.g., tag).
           example: VBD
         frequency:
-          type: float
+          type: number
+          format: float
           description: The number of occurrences of the term (potentially scaled).
           example: 104291.0
 
@@ -1238,12 +1231,18 @@ components:
         - words
         - matches
       properties:
-        - $ref: '#/components/schemas/sentenceId'
-        - $ref: '#/components/schemas/score'
-        - $ref: '#/components/schemas/documentId'
-        - $ref: '#/components/schemas/sentenceIndex'
-        - $ref: '#/components/schemas/words'
-        - $ref: '#/components/schemas/matches'
+        sentenceId:
+          $ref: '#/components/schemas/sentenceId'
+        score:
+          $ref: '#/components/schemas/score'
+        documentId:
+          $ref: '#/components/schemas/documentId'
+        sentenceIndex:
+          $ref: '#/components/schemas/sentenceIndex'
+        words:
+          $ref: '#/components/schemas/words'
+        matches:
+          $ref: '#/components/schemas/matches'
 
     EnrichedDocHit:
       description: A `DocHit` that include sentence details.

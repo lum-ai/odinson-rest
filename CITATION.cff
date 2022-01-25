@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "odinson-rest"
+abstract: REST API for the Odinson information extraction engine.
+authors:
+- family-names: "Hahn-Powell"
+  given-names: "Gus"
+  orcid: "https://orcid.org/0000-0002-7957-3586"
+- family-names: "Bell"
+  given-names: "Dane"
+  orcid: "https://orcid.org/0000-0002-7462-0208"
+- name: "Lum AI"
+version: 0.0.1
+date-released: 2022-01-26
+identifiers:
+  - description: Identifier for any version of odinson-rest.
+    type: doi
+    value: "???"
+license: Apache-2.0
+repository-code: "https://github.com/lum-ai/odinson-rest"
