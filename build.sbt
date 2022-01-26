@@ -112,7 +112,7 @@ lazy val packagerSettings = {
       dockerAlias.value.withTag(Option(gitDockerTag.value)),
       // see https://github.com/sbt/sbt-native-packager/blob/master/src/main/scala/com/typesafe/sbt/packager/docker/DockerAlias.scala
     ),
-    Docker / packageName := "annotaurus-rest-api",
+    Docker / packageName := "odinson-rest-api",
     // "openjdk:11-jre-alpine"
     // "adoptopenjdk:11-jre-hotspot", // arm and amd compat
     dockerBaseImage := "adoptopenjdk/openjdk11", // arm and amd compat
