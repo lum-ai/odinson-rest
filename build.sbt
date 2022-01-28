@@ -112,10 +112,9 @@ lazy val packagerSettings = {
       dockerAlias.value.withTag(Option(gitDockerTag.value)),
       // see https://github.com/sbt/sbt-native-packager/blob/master/src/main/scala/com/typesafe/sbt/packager/docker/DockerAlias.scala
     ),
+    Docker / daemonUser  := "odinson",
     Docker / packageName := "odinson-rest-api",
-    // "openjdk:11-jre-alpine"
-    // "adoptopenjdk:11-jre-hotspot", // arm and amd compat
-    dockerBaseImage := "adoptopenjdk/openjdk11", // arm and amd compat
+    dockerBaseImage := "eclipse-temurin:11-jre-focal", // arm46 and amd64 compat
     Docker / maintainer := "Gus Hahn-Powell <ghp@lum.ai>",
     Docker / dockerExposedPorts := Seq(9000),
     Universal / javaOptions ++= Seq(
@@ -164,5 +163,5 @@ lazy val web = taskKey[Unit]("Launches the webapp in dev mode.")
 web := (root / Compile / run).toTask("").value
 
 addCommandAlias("dockerize", ";docker:publishLocal")
-
+addCommandAlias("dockerfile", ";docker:stage")
 addCommandAlias("documentize", ";clean;doc;cp")
