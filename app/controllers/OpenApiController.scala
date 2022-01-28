@@ -8,7 +8,7 @@ class OpenApiController @Inject() (cc: ControllerComponents)
     extends AbstractController(cc) {
 
   def openAPI() = Action {
-    Ok(views.html.api())
+    Ok(views.html.rapidoc())
   }
 
 }

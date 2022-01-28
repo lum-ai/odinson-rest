@@ -1,0 +1,35 @@
+<!doctype html> <!-- Important: must specify -->
+<html>
+<head>
+  <meta charset="utf-8"> <!-- Important: rapi-doc uses utf8 characters -->
+  <script type="module" src="@routes.Assets.at("rapidoc/rapidoc-min.js")"> </script>
+  <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+</head>
+<body>
+  <rapi-doc
+    id = "openapi"
+    spec-url="@routes.Assets.at("schema/odinson.yaml")"
+    allow-server-selection = "false"
+    header-color = "#444444"
+    primary-color = "#FF791A"
+    font-size = "largest"
+    allow-try = "true"
+    regular-font = "Open Sans"
+    show-header = "true"
+  >
+  <div slot="logo">
+    <div style="padding-left: 20px;">
+      <button class='btn' onclick="document.getElementById('openapi').setAttribute('theme', 'dark')" >☽</button>
+      <button class='btn' onclick="document.getElementById('openapi').setAttribute('theme', 'light')" >☼</button>
+    </div>
+  </div>
+  <div slot="nav-logo" style="display: flex; align-items: center; justify-content: center;">
+    <img src = "@routes.Assets.at("images/logo.png")" style="width:40px; margin-right: 20px"> <span style="color:#fff"> <b>LUM</b> AI </span>
+  </div>
+
+  <p slot="footer" style="margin:0; padding:16px 36px; background-color:orange; color:#fff; text-align:center;" >
+    <b> footer</b> slot | <span style="font-size:12px"> may provide copyright info and other links</span>
+  </p>
+</rapi-doc>
+</body>
+</html>
