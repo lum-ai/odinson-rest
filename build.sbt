@@ -121,8 +121,14 @@ lazy val packagerSettings = {
       "-J-Xmx4G",
       // avoid writing a PID file
       "-Dplay.server.pidfile.path=/dev/null",
-      //"-Dplay.server.akka.requestTimeout=20s"
       //"-Dlogger.resource=logback.xml"
+      "-Dplay.secret.key=odinson-rest-api-is-not-production-ready",
+      // NOTE: bind mount odison dir to /data/odinson
+      "-Dodinson.dataDir=/data/odinson",
+      // timeouts
+      "-Dplay.server.akka.requestTimeout=infinite",
+      //"play.server.akka.terminationTimeout=10s",
+      //"-Dplay.server.http.idleTimeout=2400s"
     )
   )
 }
@@ -130,6 +136,7 @@ lazy val packagerSettings = {
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(DockerPlugin)
   .settings(commonSettings)
   .settings(packagerSettings)
   .settings(sharedDeps)
@@ -141,6 +148,7 @@ lazy val root = (project in file("."))
     assembly / fullClasspath += Attributed.blank(PlayKeys.playPackageAssets.value),
     // these are used by the sbt web task
     PlayKeys.devSettings ++= Seq(
+      "play.secret.key" -> "odinson-rest-api-is-not-production-ready",
       "play.server.akka.requestTimeout" -> "infinite",
       //"play.server.akka.terminationTimeout" -> "10 seconds",
       "play.server.http.idleTimeout" -> "2400 seconds"
@@ -162,6 +170,6 @@ cp := {
 lazy val web = taskKey[Unit]("Launches the webapp in dev mode.")
 web := (root / Compile / run).toTask("").value
 
-addCommandAlias("dockerize", ";docker:publishLocal")
 addCommandAlias("dockerfile", ";docker:stage")
+addCommandAlias("dockerize", ";docker:publishLocal")
 addCommandAlias("documentize", ";clean;doc;cp")

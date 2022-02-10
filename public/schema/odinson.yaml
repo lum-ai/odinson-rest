@@ -77,7 +77,7 @@ paths:
         - name: prevDoc
           in: query
           description: |
-            The document ID for the last document seen in the previous page of results.
+            The ID (`sentenceId`) for the last document (sentence) seen in the previous page of results.
           required: false
           schema:
             type: integer
@@ -90,7 +90,7 @@ paths:
         - name: prevScore
           in: query
           description: |
-            The score for the last document seen in the previous page of results.
+            The score for the last document (sentence) seen in the previous page of results.
           required: false
           schema:
             type: number
