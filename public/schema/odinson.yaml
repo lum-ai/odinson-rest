@@ -82,15 +82,15 @@ paths:
           schema:
             type: integer
             format: int32
-            minimum: 1
-            exclusiveMinimum: false
-            maximum: 3
-            exclusiveMaximum: false
+            # minimum: 1
+            # exclusiveMinimum: false
+            # maximum: 3
+            # exclusiveMaximum: false
           #example: 1
         - name: prevScore
           in: query
           description: |
-            The score for the last document (sentence) seen in the previous page of results.
+            The score for the last result seen in the previous page of results.
           required: false
           schema:
             type: number
@@ -251,6 +251,67 @@ paths:
           description: |
             Document was successfully indexed.
 
+  /api/delete/document/{documentId}:
+    delete:
+      tags:
+        - index
+      summary: |
+        Removes an OdinsonDocument from the index.
+      description: |
+        Removes an OdinsonDocument from the index.
+      operationId: delete-document
+      parameters:
+        - name: documentId
+          in: path
+          description: |
+            The document ID associated with some indexed OdinsonDocument.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: |
+            Successfully deleted the document.
+        '400':
+          description: |
+            An error message.
+
+  /api/update/document/{documentId}:
+    post:
+      tags:
+        - index
+      summary: |
+        Updates an OdinsonDocument in the index.
+      description: |
+        Updates an OdinsonDocument in the index.
+      operationId: update-document
+      parameters:
+        - name: documentId
+          in: path
+          description: |
+            The document ID associated with some indexed OdinsonDocument.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully updated/re-indexed.
+        '400':
+          description: |
+            An error message.
+
   /api/document/{documentId}:
     get:
       tags:
@@ -271,7 +332,7 @@ paths:
       responses:
         '200':
           description: |
-            An OdinsonDocument.
+            Successfully indexed the document.
           content:
             "application/json":
               schema:
