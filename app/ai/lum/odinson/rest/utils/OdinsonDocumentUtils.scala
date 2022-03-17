@@ -3,6 +3,7 @@ package ai.lum.odinson.rest.utils
 import ai.lum.common.ConfigUtils._
 import ai.lum.common.FileUtils._
 import ai.lum.odinson.{ Document => OdinsonDocument, StringField => OdinsonStringField }
+import ai.lum.odinson.utils.exceptions.OdinsonException
 import com.typesafe.config.Config
 import java.io.File
 
@@ -38,7 +39,8 @@ object OdinsonDocumentUtils {
         case Some(sf: OdinsonStringField) =>
           val f = new File(docsDir, sf.string)
           f.delete()
-        case _ => ()
+        case None =>
+          throw OdinsonException(s"No parentDocFieldFileName found for ${doc.id}")
       }
     }
 

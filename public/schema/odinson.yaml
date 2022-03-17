@@ -53,7 +53,7 @@ paths:
             An Odinson pattern.
           schema:
             type: string
-          example: "[lemma=phosphorylate] []"
+          example: "[lemma=pie] []"
         - name: metadataQuery
           in: query
           required: false
@@ -61,7 +61,7 @@ paths:
             type: string
           description: |
             A query to filter Documents by their metadata before applying an Odinson pattern.
-          example: "year == 1973"
+          example: "character contains 'Special Agent'"
         - name: label
           in: query
           description: |
@@ -243,6 +243,47 @@ paths:
           "application/json":
             schema:
               $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
+
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully indexed.
+
+  /api/index/document/maxTokensPerSentence/{maxTokens}:
+    post:
+      tags:
+        - index
+      summary: |
+        Add an OdinsonDocument to the index, allowing for a specified maximum number of tokens per sentence.
+      description: |
+        Add an OdinsonDocument to the index, allowing for a specified maximum number of tokens per sentence.
+      operationId: index-document-max-tokens
+      parameters:
+        - name: maxTokens
+          in: path
+          description: |
+            The maximum number of tokens to allow per sentence.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
 #      consumes:
 #        - application/json
 
@@ -268,6 +309,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "tp-pies"
       responses:
         '200':
           description: |
@@ -293,6 +335,48 @@ paths:
           required: true
           schema:
             type: string
+          example: "tp-pies"
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully updated/re-indexed.
+        '400':
+          description: |
+            An error message.
+
+  /api/update/document/maxTokensPerSentence/{maxTokens}:
+    post:
+      tags:
+        - index
+      summary: |
+        Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.
+      description: |
+        Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.
+      operationId: update-document-max-tokens
+
+      parameters:
+        - name: maxTokens
+          in: path
+          description: |
+            The maximum number of tokens to allow per sentence.
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
         description: |
           An OdinsonDocument.
@@ -329,6 +413,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "tp-pies"
       responses:
         '200':
           description: |
@@ -359,6 +444,7 @@ paths:
           schema:
             type: integer
             format: int64
+          example: 1
       responses:
         '200':
           description: |
@@ -387,7 +473,7 @@ paths:
           schema:
             type: integer
             format: int64
-          example: 78
+          example: 1
       responses:
         '200':
           description: An OdinsonDocument.
@@ -414,7 +500,7 @@ paths:
             The `documentId` as returned by /api/execute/grammar or /api/execute/pattern.
           schema:
             type: string
-          example: "PMC6360082"
+          example: "tp-pies"
       responses:
         '200':
           description: OdinsonMetadata.
@@ -442,7 +528,7 @@ paths:
           schema:
             type: integer
             format: int64
-          example: 78
+          example: 1
       responses:
         '200':
           description: OdinsonMetadata.
@@ -848,6 +934,56 @@ paths:
   #               type: object
 
 components:
+  examples:
+    odinsonDocPies:
+      summary: A simple example of an Odinson Document with metadata.
+      value:
+        id: "tp-pies"
+        metadata:
+          - $type: "ai.lum.odinson.TokensField"
+            name: "show"
+            tokens: ["Twin", "Peaks"]
+          - $type: "ai.lum.odinson.TokensField"
+            name: "actor"
+            tokens: ["Kyle", "MacLachlan"]
+          - $type: "ai.lum.odinson.TokensField"
+            name: "character"
+            tokens: ["Special", "Agent", "Dale", "Cooper"]
+        sentences:
+          - numTokens: 10
+            fields:
+              - $type: "ai.lum.odinson.TokensField"
+                name: "raw"
+                tokens: [ "This", "must", "be", "where", "pies", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "word"
+                tokens: [ "This", "must", "be", "where", "pies", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "tag"
+                tokens: [ "DT", "MD", "VB", "WRB", "NNS", "VBP", "WRB", "PRP", "VBP", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "lemma"
+                tokens: [ "This", "must", "be", "where", "pie", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "entity"
+                tokens: [ "O", "O", "O", "O", "O", "O", "O", "O", "O", "O" ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "chunk"
+                tokens: [ "B-NP", "B-VP", "I-VP", "B-ADVP", "B-NP", "B-VP", "B-ADVP", "B-NP", "B-VP", "O" ]
+              - $type: "ai.lum.odinson.GraphField"
+                name: "dependencies"
+                edges:
+                  - [ 2, 1, "aux"]
+                  - [ 2, 0, "nsubj" ]
+                  - [ 2, 9, "punct" ]
+                  - [ 2, 5, "advcl" ]
+                  - [ 5, 4, "nsubj" ]
+                  - [ 5, 3, "advmod" ]
+                  - [ 5, 8, "advcl" ]
+                  - [ 8, 6, "advmod" ]
+                  - [ 8, 7, "nsubj" ]
+                roots: [ 2 ]
+
   schemas:
 
     OdinsonGrammarRequest:

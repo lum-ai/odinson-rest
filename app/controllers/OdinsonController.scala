@@ -7,7 +7,7 @@ import ai.lum.odinson.lucene._
 import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc }
 import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
 import ai.lum.odinson.lucene.index.OdinsonIndexWriter
-import com.typesafe.config.{ Config, ConfigRenderOptions }
+import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.requests._
 import org.apache.lucene.document.{ Document => LuceneDocument }
@@ -41,6 +41,7 @@ class OdinsonController @Inject() (
   val docsDir              = config.apply[File]  ("odinson.docsDir")
   val pageSize             = config.apply[Int]   ("odinson.pageSize")
   val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
+  val defaultMaxTokens     = config.apply[Int]("odinson.index.maxNumberOfTokensPerSentence")
   // format: on
 
   /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error
@@ -91,54 +92,67 @@ class OdinsonController @Inject() (
     } catch handleNonFatal
   }
 
-  def indexOdinsonDoc(): Action[AnyContent] = Action { request =>
-    try {
-      request.body.asJson match {
-        case Some(json) =>
-          // Add file field
-          val doc = {
-            OdinsonDocument.fromJson(json.toString).addFileNameMetadata(config)
-          }
-
-          ExtractorEngine.usingEngine(config) { engine =>
-            engine.index.indexOdinsonDoc(doc)
-            // write JSON to disk
-            doc.writeDoc(config)
-            Ok
-          }
-        // FIXME: better error
-        case None => Status(500)
-      }
-    } catch handleNonFatal
-  }
+  // def indexOdinsonDoc(): Action[AnyContent] = Action { request =>
+  //   try {
+  //     request.body.asJson match {
+  //       case Some(json) =>
+  //         // Add file field
+  //         val doc = {
+  //           OdinsonDocument.fromJson(json.toString).addFileNameMetadata(config)
+  //         }
+  //         ExtractorEngine.usingEngine(config) { engine =>
+  //           engine.index.indexOdinsonDoc(doc)
+  //           // write JSON to disk
+  //           doc.writeDoc(config)
+  //           Ok
+  //         }
+  //       // FIXME: better error
+  //       case None => Status(500)
+  //     }
+  //   } catch handleNonFatal
+  // }
 
   def deleteOdinsonDoc(odinsonDocId: String) = Action.async {
     Future {
       try {
         ExtractorEngine.usingEngine(config) { engine =>
+          // Delete doc's JSON file
+          val oldDocFile = engine.getDocJsonFile(odinsonDocId, config)
+          oldDocFile.delete()
+          // Delete doc from index
           engine.index.deleteOdinsonDoc(odinsonDocId)
-          // FIXME: delete JSON file
-          val doc = engine.odinsonDoc(odinsonDocId, config)
-          doc.writeDoc(config)
           Ok
         }
       } catch {
-        case _: Throwable =>
+        case e: Throwable =>
+          println(e)
           // FIXME: make BadRequest from OdinsonException
+          println(s"failed to delete Doc: ${e}")
           BadRequest(s"Failed to delete Document ${odinsonDocId}")
       }
     }
   }
 
-  def updateOdinsonDoc(): Action[AnyContent] = Action { request =>
+  def updateOdinsonDoc(maxTokens: Int = -1): Action[AnyContent] = Action { request =>
     try {
       request.body.asJson match {
         case Some(json) =>
-          // FIXME: better error handling with Try
-          val doc = OdinsonDocument.fromJson(json.toString)
-          ExtractorEngine.usingEngine(config) { engine =>
+          val doc = {
+            OdinsonDocument.fromJson(json.toString).addFileNameMetadata(config)
+          }
+
+          val maxTokensPerSentence: Int = maxTokens.max(defaultMaxTokens)
+          val tempConfig = config.withValue("odinson.index.maxNumberOfTokensPerSentence", ConfigValueFactory.fromAnyRef(maxTokensPerSentence))
+          println(s"maxTokensPerSentence: ${maxTokensPerSentence}")
+          ExtractorEngine.usingEngine(tempConfig) { engine =>
+            // Delete old JSON file (if exists)
+            try {
+              val oldDocFile = engine.getDocJsonFile(doc.id, tempConfig)
+              oldDocFile.delete()
+            } catch {case e: Throwable => { () } }
+            // Update index & write JSON file
             engine.index.updateOdinsonDoc(doc)
-            // FIXME: save JSON file!!
+            doc.writeDoc(config)
             Ok
           }
         // FIXME: better error

@@ -48,9 +48,11 @@ POST    /api/rule-hist                  controllers.FrequencyController.ruleHist
 
 # index
 # NOTE: index/document will first attempt to delete any existing doc before updating
-POST    /api/index/document             controllers.OdinsonController.updateOdinsonDoc()
+POST    /api/index/document             controllers.OdinsonController.updateOdinsonDoc(maxTokens: Int = -1)
+POST    /api/index/document/maxTokensPerSentence/:maxTokens controllers.OdinsonController.updateOdinsonDoc(maxTokens: Int)
 DELETE  /api/delete/document/:documentId             controllers.OdinsonController.deleteOdinsonDoc(documentId: String)
-POST    /api/update/document             controllers.OdinsonController.updateOdinsonDoc()
+POST    /api/update/document             controllers.OdinsonController.updateOdinsonDoc(maxTokens: Int = -1)
+POST    /api/update/document/maxTokensPerSentence/:maxTokens controllers.OdinsonController.updateOdinsonDoc(maxTokens: Int)
 
 # validate
 POST   /api/validate                    controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
