@@ -44,6 +44,25 @@ class OdinsonController @Inject() (
   val defaultMaxTokens     = config.apply[Int]("odinson.index.maxNumberOfTokensPerSentence")
   // format: on
 
+  /** Initializes index directory structure if the app is started with an empty index.
+   *
+   */
+  def initializeIndex(): Unit = {
+    if (!docsDir.exists()) {
+      println(f"creating empty docs directory:\t${docsDir.getAbsolutePath}")
+      docsDir.mkdirs()
+    }
+    val indexDir = config.apply[File]("odinson.indexDir")
+    if (! indexDir.exists()) {
+      println(f"creating empty index directory:\t${indexDir.getAbsolutePath}")
+      indexDir.mkdirs()
+    }
+    ExtractorEngine.usingEngine(config) { engine =>
+    // initialize empty index
+    }
+  }
+  initializeIndex()
+
   /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error
     * encountered.
     */
@@ -364,7 +383,7 @@ class OdinsonController @Inject() (
         }
 
         val mentions: Seq[Mention] = {
-          // FIXME: should deal in iterators to allow for, e.g., pagination...?
+          // FIXME: should deal in iterators to better support pagination...?
           val iterator = engine.extractMentions(
             extractors,
             numSentences = maxSentences,
@@ -376,7 +395,7 @@ class OdinsonController @Inject() (
 
         val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
 
-        val json = Json.toJson(engine.mkJson(None, duration, allowTriggerOverlaps, mentions))
+        val json = Json.toJson(engine.mkMentionsJson(None, duration, allowTriggerOverlaps, mentions))
         json.format(pretty)
       } catch handleNonFatal
     }

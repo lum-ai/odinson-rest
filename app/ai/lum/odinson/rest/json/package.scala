@@ -5,10 +5,12 @@ import ai.lum.odinson.lucene.OdinResults
 import ai.lum.odinson.lucene.search.OdinsonScoreDoc
 import ai.lum.odinson.{
   Document => OdinsonDocument,
+  EventMatch,
   ExtractorEngine,
   Mention,
   NamedCapture,
-  OdinsonMatch
+  NGramMatch,
+  OdinsonMatch,
 }
 import ai.lum.odinson.rest.utils.ExtractorEngineUtils
 import com.typesafe.config.Config
@@ -49,17 +51,17 @@ package object json {
 
       Json.obj(
         // format: off
-        "odinsonQuery" -> odinsonQuery,
-        "metadataQuery"  -> metadataQuery,
-        "duration"     -> duration,
-        "totalHits"    -> results.totalHits,
-        "scoreDocs"    -> scoreDocs
+        "odinsonQuery"  -> odinsonQuery,
+        "metadataQuery" -> metadataQuery,
+        "duration"      -> duration,
+        "totalHits"     -> results.totalHits,
+        "scoreDocs"     -> scoreDocs
         // format: on
       )
     }
 
     /** Process results from executeGrammar */
-    def mkJson(
+    def mkMentionsJson(
       metadataQuery: Option[String],
       duration: Float,
       allowTriggerOverlaps: Boolean,
@@ -70,7 +72,7 @@ package object json {
 
       Json.obj(
         // format: off
-        "metadataQuery"          -> metadataQuery,
+        "metadataQuery"        -> metadataQuery,
         "duration"             -> duration,
         "allowTriggerOverlaps" -> allowTriggerOverlaps,
         "mentions"             -> mentionsJson
@@ -117,15 +119,36 @@ package object json {
       )
     }
 
-    def mkJsonForMatch(m: OdinsonMatch): Json.JsValueWrapper = {
-      Json.obj(
-        "span" -> Json.obj("start" -> m.start, "end" -> m.end),
-        "captures" -> Json.arr(m.namedCaptures.map(mkJsonForNamedCapture): _*)
-      )
+    def mkJsonForMatch(m: OdinsonMatch): Json.JsValueWrapper = m match {
+      case em: EventMatch =>
+        Json.obj(
+          "start" -> em.trigger.start,
+          "end" -> em.trigger.end,
+          // FIXME: should we simplify this?
+          "trigger" -> mkJsonForMatch(em),
+          "namedCaptures" -> Json.arr(em.namedCaptures.map(mkJsonForNamedCapture): _*),
+          // ignore argumentMetadata
+        )
+      case ngram: NGramMatch =>
+        Json.obj(
+          "start" -> ngram.start,
+          "end" -> ngram.end,
+          // avoid including empty namedCaptures
+        )
+      case other =>
+        Json.obj(
+          "start" -> m.start,
+          "end" -> m.end,
+          "namedCaptures" -> Json.arr(m.namedCaptures.map(mkJsonForNamedCapture): _*)
+        )
     }
 
     def mkJsonForNamedCapture(namedCapture: NamedCapture): Json.JsValueWrapper = {
-      Json.obj(namedCapture.name -> mkJsonForMatch(namedCapture.capturedMatch))
+      Json.obj(
+        "name" -> namedCapture.name,
+        "label" -> namedCapture.label,
+        "capturedMatch" -> mkJsonForMatch(namedCapture.capturedMatch)
+      )
     }
 
     def mkJsonWithEnrichedResponse(
