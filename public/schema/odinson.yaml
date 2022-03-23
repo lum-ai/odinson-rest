@@ -444,7 +444,7 @@ paths:
           schema:
             type: integer
             format: int64
-          example: 1
+          example: 0
       responses:
         '200':
           description: |
