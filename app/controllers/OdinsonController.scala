@@ -18,7 +18,7 @@ import play.api.libs.json._
 import play.api.mvc._
 
 import java.io.File
-import java.nio.file.Path
+import java.nio.file.{ Files, Path }
 import javax.inject._
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -53,10 +53,12 @@ class OdinsonController @Inject() (
       docsDir.mkdirs()
     }
     val indexDir = config.apply[File]("odinson.indexDir")
-    if (! indexDir.exists()) {
+    if (!indexDir.exists()) {
       println(f"creating empty index directory:\t${indexDir.getAbsolutePath}")
       indexDir.mkdirs()
     }
+    // Files.setPosixFilePermissions(docsDir.toPath(), permissions)
+    // Files.setPosixFilePermissions(indexDir.toPath(), permissions)
     ExtractorEngine.usingEngine(config) { engine =>
     // initialize empty index
     }

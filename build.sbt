@@ -1,5 +1,6 @@
 import sbtassembly.MergeStrategy
-import com.typesafe.sbt.packager.docker.DockerChmodType
+import com.typesafe.sbt.packager.docker.{ DockerChmodType }
+
 
 
 // use commit hash as the version
@@ -129,7 +130,7 @@ lazy val packagerSettings = {
       "-Dplay.server.akka.requestTimeout=infinite",
       //"play.server.akka.terminationTimeout=10s",
       //"-Dplay.server.http.idleTimeout=2400s"
-    )
+    ),
   )
 }
 
