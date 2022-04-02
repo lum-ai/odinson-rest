@@ -125,7 +125,7 @@ lazy val packagerSettings = {
       //"-Dlogger.resource=logback.xml"
       "-Dplay.secret.key=odinson-rest-api-is-not-production-ready",
       // NOTE: bind mount odison dir to /data/odinson
-      "-Dodinson.dataDir=/data/odinson",
+      "-Dodinson.dataDir=/app/data/odinson",
       // timeouts
       "-Dplay.server.akka.requestTimeout=infinite",
       //"play.server.akka.terminationTimeout=10s",

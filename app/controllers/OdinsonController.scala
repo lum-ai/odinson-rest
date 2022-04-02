@@ -48,6 +48,10 @@ class OdinsonController @Inject() (
    *
    */
   def initializeIndex(): Unit = {
+    // def setPermissions(f: File): Unit = {
+    //   f.setReadable(true, false)
+    //   f.setWritable(true, false)
+    // }
     if (!docsDir.exists()) {
       println(f"creating empty docs directory:\t${docsDir.getAbsolutePath}")
       docsDir.mkdirs()
