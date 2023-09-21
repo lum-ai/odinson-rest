@@ -1,56 +1,79 @@
-name: Docs
+name: Project documentation
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 jobs:
-  setup:
-    name: setup
-    runs-on: ubuntu-latest
-    outputs:
-      sha_short: ${{ steps.sha.outputs.sha_short }}
+  docs:
+    name: "Generate project documenation"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [ '3.9' ]
     steps:
+    # Checkout code
     - name: Checkout code
-      uses: actions/checkout@v2
-    - name: generate short commit hash
-      id: sha
-      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      uses: actions/checkout@v3
 
-  build:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-    - name: Setup java
-      uses: actions/setup-java@v2
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        distribution: "temurin"
-        java-version: "11"
-    - name: "Create documentation (odinson-rest API docs)"
+        python-version: ${{ matrix.python-version }}
+        #architecture: x64
+    - name: Display Python version
       run: |
-        sbt documentize
-    - name: "Copy OpenAPI YAML"
+        python -c "import sys; print(sys.version)"
+    - name: Setup JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+    # Install dependencies
+    - name: Doc deps
+      working-directory: "./docs"
       run: |
-        cp $GITHUB_WORKSPACE/public/schema/odinson.yaml $GITHUB_WORKSPACE/docs/openapi/
-    # - name: "Convert OpenAPI YAML to JSON"
+        pip install ".[all]"
+    - name: "Create documentation for Python components (API docs)"
+      run: |
+        # FIXME: once issues with text reading submodule resolved, top command will be sufficient
+        #pdoc --html -c latex_math=True --force --output-dir docs/api/python skema
+        pdoc --html -c latex_math=True --force --output-dir docs/api/python lum.odinson.rest
+    # docs (API)
+    # generate python docs using pdoc
+    # - name: "Create API docs"
     #   run: |
-    #     docker run -v "$GITHUB_WORKSPACE/public/schema:/app" -v "$GITHUB_WORKSPACE/docs/openapi:/openapi" "swaggerapi/swagger-codegen-cli-v3:latest" generate -i /app/odinson.yaml -l swagger -o /openapi
+    #     sbt doc
+    #     mkdir -p $GITHUB_WORKSPACE/docs/api/scala
+    #     mv target/doc/* $GITHUB_WORKSPACE/docs/api/scala/
+    # generate Rust docs using cargo doc
+
+    # code coverage (Scala)
+    # FIXME: downloading project deps is far too slow to include this step
+    # - name: "Code coverage reports for Scala components"
+    #   working-directory: ./skema/text_reading/scala
+    #   run: |
+    #     sbt clean coverage test
+    #     sbt coverageReport
+    #     sbt coverageAggregate
+
+    # docs (other)
     - name: "Create documentation (other)"
-      env:
-        ORG: "parsertongue"
-        IMAGE_NAME: "mkdocs"
-        TAG: "latest"
       run: |
-        docker run -i -v "$GITHUB_WORKSPACE:/app" "${ORG}/${IMAGE_NAME}:${TAG}" mkdocs build -c
+        mkdocs build -c
     - name: Deploy docs
       if: github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3
       with:
         # see https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
+        enable_jekyll: false
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site
+        destination_dir: "odinson-rest"
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         commit_message: ${{ github.event.head_commit.message }}
