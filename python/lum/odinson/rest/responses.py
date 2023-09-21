@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Optional, Text, Union
+from typing import Dict, Iterable, List, Optional, Text, Union
 from lum.odinson.doc import (Document, Sentence)
 from pydantic import BaseModel, ConfigDict
 from dataclasses import dataclass
@@ -56,7 +56,11 @@ class ScoreDoc(BaseModel):
     sentence_index: int = pydantic.Field(alias="sentenceIndex", description="The index of this sentence in the parent document (0-based).")
     words: List[str] = pydantic.Field(description="Tokens for the document (sentence).")
     matches: List[Union[BaseMatch, EventMatch, NamedCaptureMatch]] = pydantic.Field(description="The list of matching spans for this document.")
-
+    def spans(self) -> Iterable[str]:
+        """Convenience method for getting spans corresponding to matches"""
+        for m in self.matches:
+            # FIXME: should this be joined on whitespace?
+            yield " ".join(self.words[m.start:m.end])
 
 class Results(BaseModel):
     odinson_query: str = pydantic.Field(alias="odinsonQuery", description="An Odinson pattern.")

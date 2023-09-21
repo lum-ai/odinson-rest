@@ -140,7 +140,7 @@ class OdinsonBaseAPI:
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
 
-    def search(
+    def _search(
         self,
         # An Odinson pattern.
         # Example: [lemma=pie] []
@@ -167,18 +167,66 @@ class OdinsonBaseAPI:
           "prevScore": prev_score
         }
         params = {k:v for (k, v) in params.items() if v}
-        print(params)
+        #print(params)
         res = requests.get(endpoint, params=params).json()
-        print(res)
+        #print(res)
         return Results(**res)
-        # get res
-        # remaining = True
-        # while remaining:
-        #  
-        #return res
-        # for sd in res:
-        #     # TODO: return a generator where we get next res until none left.
-        #     print(_res)
-        #     r = Result(**_res)
-        #     yield r
+    
+    def search(
+        self,
+        # An Odinson pattern.
+        # Example: [lemma=pie] []
+        odinson_query: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains 'Special Agent'
+        label: Optional[str] = None,
+        # Whether or not the results of this query should be committed to the State.
+        commit: bool = False,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None 
+    ) -> Results: #-> Iterator[S]:
+        endpoint = f"{self.address}/api/execute/pattern"
+        params = {
+          "odinsonQuery": odinson_query,
+          "metadataQuery": metadata_query,
+          "label": label,
+          "commit": commit,
+          "prevDoc": prev_doc,
+          "prevScore": prev_score
+        }
+        seen = 0
+        results: Results = self._search(
+            odinson_query=odinson_query,
+            metadata_query=metadata_query,
+            label=label,
+            commit=commit,
+            prev_doc=prev_doc
+        )
+        total = results.total_hits
+        last = results.score_docs[-1]
+        while seen < total:
+            for sd in results.score_docs:
+                seen += 1
+                last = sd
+                # print(f"{seen-1}/{total}")
+                # print(f"sd.document_id:\t{sd.document_id}")
+                # print(f"sd.sentence_id:\t{sd.sentence_id}\n")
+                # FIXME: should this be a Results() with a single doc?
+                yield sd
+            # paginate
+            results: Results = self._search(
+              odinson_query=odinson_query,
+              metadata_query=metadata_query,
+              label=label,
+              commit=commit,
+              prev_doc=last.sentence_id
+            )
+            #print(f"total_hits:\t{results.total_hits}")
 
+      # TODO: add method to retrieve doc for id
+      # TODO: add rewrite method
+      # for any token that matches the pattern, replace its entry in field <field> with <label>
