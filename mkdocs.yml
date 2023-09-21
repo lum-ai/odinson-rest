@@ -1,9 +1,9 @@
 site_name: odinson-rest
-site_url: https://gh.lum-ai/odinson-rest
+site_url: https://docs.parsertongue.org/odinson-rest
 site_description: Project documentation with Markdown.
 site_author: Gus Hahn-Powell
 
-repo_url: https://github.com/lum-ai/odinson-rest/
+repo_url: https://github.com/clu-ling/odinson-rest/
 edit_uri: "blob/main/docs/"
 
 theme:
@@ -39,7 +39,7 @@ nav:
         - How it Works: dev/howitworks.md
         - FAQ: dev/faq.md
     - API Documentation:
-        - "rest": api/rest/index.html
+        - "rest": api/python/lum/odinson/rest/index.html
     - Contributors: authors.md
 
 extra_css:
@@ -52,7 +52,7 @@ markdown_extensions:
     - attr_list
     - def_list
 
-copyright: Copyright &copy; 2021 <a href="https://lum.ai">Lum AI, LLC</a>.
+copyright: Copyright &copy; 2023 <a href="https://parsertongue.org">parsertongue.org</a>.
 
 plugins:
     - search
