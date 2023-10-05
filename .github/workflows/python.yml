@@ -42,16 +42,6 @@ jobs:
         pip install ".[all]"
     # Tests
     - name: "Tests and coverage"
+      working-directory: ./python
       run: |
         pytest
-    # Type checks
-    - name: "Type checks"
-      continue-on-error: true
-      run: |
-        mypy --install-types --non-interactive --ignore-missing-imports --follow-imports=skip --strict-optional --no-site-packages --exclude "^(build|misc)/$" .
-    # code formatting and linting
-    - name: "Code formatting & linting"
-      continue-on-error: true
-      run: |
-        black --check .
-    # docs (other)
