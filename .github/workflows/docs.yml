@@ -2,26 +2,30 @@ name: Project documentation
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
+    tags:
+      - "**"
   pull_request:
     branches: [main]
+  release:
+    types: [published]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
   docs:
-    name: "Generate project documenation"
+    name: "Run tests and generate project documenation"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        python-version: [ '3.9' ]
+        os: [ubuntu-latest] #, macos-latest, windows-latest]
+        python-version: [ '3.9' ] #[ '3.8', '3.9' ]
     steps:
     # Checkout code
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
         #architecture: x64
@@ -34,46 +38,53 @@ jobs:
         distribution: temurin
         java-version: 11
     # Install dependencies
-    - name: Doc deps
-      working-directory: "./docs"
+    # - name: System-wide deps
+    #   run: |
+    #     sudo apt-get install -y graphviz \
+    #     libgraphviz-dev
+    # Install packages (for API doc gen)
+    - name: Install Python library
+      working-directory: ./python
       run: |
         pip install ".[all]"
+    # docs (API)
+    # generate python docs using pdoc
     - name: "Create documentation for Python components (API docs)"
       run: |
         # FIXME: once issues with text reading submodule resolved, top command will be sufficient
-        #pdoc --html -c latex_math=True --force --output-dir docs/api/python skema
-        pdoc --html -c latex_math=True --force --output-dir docs/api/python lum.odinson.rest
-    # docs (API)
-    # generate python docs using pdoc
-    # - name: "Create API docs"
-    #   run: |
-    #     sbt doc
-    #     mkdir -p $GITHUB_WORKSPACE/docs/api/scala
-    #     mv target/doc/* $GITHUB_WORKSPACE/docs/api/scala/
-    # generate Rust docs using cargo doc
+        pdoc --html -c latex_math=True --force --output-dir docs/api/python lum
+    # generate Scala docs using sbt doc
+    - name: "Create documentation for Scala components (API docs)"
+      working-directory: .
+      run: |
+        sbt doc
+        mkdir -p $GITHUB_WORKSPACE/docs/api/scala
+        mv target/doc/* $GITHUB_WORKSPACE/docs/api/scala/
 
     # code coverage (Scala)
-    # FIXME: downloading project deps is far too slow to include this step
-    # - name: "Code coverage reports for Scala components"
-    #   working-directory: ./skema/text_reading/scala
-    #   run: |
-    #     sbt clean coverage test
-    #     sbt coverageReport
-    #     sbt coverageAggregate
+    - name: "Code coverage reports for Scala components"
+      working-directory: .
+      run: |
+        sbt clean coverage test
+        sbt coverageReport
+        sbt coverageAggregate
+
+    # code coverage (Python)
+    - name: "Code coverage reports for Python components"
+      run: |
+        pytest
 
     # docs (other)
     - name: "Create documentation (other)"
       run: |
-        mkdocs build -c
+        docker run -i -v "$GITHUB_WORKSPACE:/app" parsertongue/mkdocs:latest mkdocs build -c
     - name: Deploy docs
       if: github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3
       with:
         # see https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
-        enable_jekyll: false
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site
-        destination_dir: "odinson-rest"
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         commit_message: ${{ github.event.head_commit.message }}

@@ -11,33 +11,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
+      uses: actions/checkout@v4
+    - name: Set up Python
       # see https://github.com/actions/setup-python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Upgrade pip to latest version
       run: |
         pip install --upgrade pip
     - name: Install package
       run: |
-        pip install -e ".[all]"
+        pip install ".[all]"
     - name: Test
       run: |
-        green -vvv .
+        pytest
   publish-package:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
-    needs: test-package
+    environment:
+      name: pypi
+      url: https://pypi.org/p/odinson-rest
+    permissions:
+      id-token: write 
+    needs: [test-package]
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
+      uses: actions/checkout@v4
+    - name: Set up Python
       # see https://github.com/actions/setup-python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.8
+        python-version: 3.9
     - name: Upgrade pip to latest version
       run: |
         pip install --upgrade pip
@@ -56,8 +61,4 @@ jobs:
         --outdir dist/
     - name: Publish package
       # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-      #continue-on-error: true
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
