@@ -105,50 +105,21 @@
 </div>
 <div role="main">
 <div class="section">
-<h1 id="installing-cgiar-reader-for-development">Installing <code>cgiar-reader</code> (For Development)<a class="headerlink" href="#installing-cgiar-reader-for-development" title="Permanent link"></a></h1>
+<h1 id="installing-odinson-rest-for-development">Installing <code>odinson-rest</code> (For Development)<a class="headerlink" href="#installing-odinson-rest-for-development" title="Permanent link"></a></h1>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link"></a></h2>
 <ul>
 <li><a href="https://docs.docker.com/get-docker/">docker</a></li>
 <li><a href="https://sdkman.io/jdks#AdoptOpenJDK">JDK 11</a></li>
 <li><a href="https://www.scala-sbt.org/1.x/docs/Installing-sbt-on-Linux.html">sbt</a></li>
-<li>8G of RAM</li>
+<li>2G of RAM</li>
 </ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link"></a></h2>
-<p>Clone the <a href="https://github.com/cgiar-reader/cgiar-reader">cgiar-reader</a> repository.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>We suggest developing the <code>cgiar-reader</code> on a Linux environment under the <code>~/repos/cgiar-reader</code> directory. This documentation contains commands which run under these assumptions.</p>
-</div>
-<!--- FIXME: docker run command for odin-tutorial image -->
-<p>To run the visualizer alongside the cgiar-reader REST API, clone the <a href="https://github.com/cgiar-reader/odin-tutorial">odin-tuorial</a> repository and change the <code>docker-compose.yml</code> file to:</p>
-<pre><code class="language-yaml">version: "3.8"
-services:
-  frontend:
-    image: parsertongue/odin-tutorial:local
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "8880:7777"
-    env_file:
-      - ./.env
-    environment:
-      ODIN_API_BASE_URL: http://0.0.0.0:9000/api
-</code></pre>
+<p>Clone the <a href="https://github.com/lum-ai/odinson-rest">odinson-rest</a> repository.</p>
 <h2 id="running">Running<a class="headerlink" href="#running" title="Permanent link"></a></h2>
-<p>To run the cgiar-reader REST API in development mode, run the following command under the <code>cgiar-reader</code> directory to redirect to the external grammars:</p>
-<pre><code class="language-bash">RULES_PREFIX=file://$HOME/repos/cgiar-reader/cgiar-reader/reader/grammars/cgiar sbt web
+<p>To run the Odinson REST API in development mode, run the following command:</p>
+<pre><code class="language-bash">sbt web
 </code></pre>
 <p>Open your browser to <a href="http://localhost:9000">localhost:9000</a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you didn't clone the <code>cgiar-reader</code> repository under the recomended directory, change the <code>RULES_PREFIX</code> path to reflect your local path.</p>
-</div>
-<p>To run the visualizer <em>without docker</em>, you'll need a version of Node installed.  Clone the <code>odin-tutorial</code> repo run the command from the project root:</p>
-<pre><code class="language-bash">npm install &amp;&amp; npm run start
-</code></pre>
-<p>Open your browser to <a href="http://localhost:7777/playground">localhost:7777/playground</a>.</p>
 </div>
 </div>
 <footer>

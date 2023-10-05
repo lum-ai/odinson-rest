@@ -58,7 +58,7 @@
 </li>
 <li class="toctree-l1 current"><a class="reference internal current" href="./">Documentation</a>
 <ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="#api-documentation">API Documentation</a>
+<li class="toctree-l2"><a class="reference internal" href="#api-documentation-scala">API Documentation (Scala)</a>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#general-documentation">General Documentation</a>
 </li>
@@ -104,19 +104,14 @@
 <div role="main">
 <div class="section">
 <h1 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link"></a></h1>
-<p>You can view the latest documentation at the <a href="https://cgiar-reader.github.io/cgiar-reader/"><code>cgiar-reader Website</code></a>.</p>
-<h2 id="api-documentation">API Documentation<a class="headerlink" href="#api-documentation" title="Permanent link"></a></h2>
+<h2 id="api-documentation-scala">API Documentation (Scala)<a class="headerlink" href="#api-documentation-scala" title="Permanent link"></a></h2>
 <p>We use <code>scaladoc</code> to generate our API documentation. To generate API documentaion use the following command:</p>
 <pre><code class="language-bash">sbt doc
 </code></pre>
-<p>This will generate HTML pages documenting the API for each subproject:</p>
-<ul>
-<li><code>reader</code>: reader/target/scala-2.12/api/index.html</li>
-<li><code>rest</code>: rest/target/scala-2.12/api/index.html</li>
-</ul>
+<p>This will generate HTML pages documenting the Scala API under <code>target/scala-2.12/api/</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>These files are copied to the <code>docs/api</code> directory when the command <code>sbt documentize</code> is used.</p>
+<p>These files are copied to the <code>docs/api/odinson-rest</code> directory when the command <code>sbt documentize</code> is used.</p>
 </div>
 <h2 id="general-documentation">General Documentation<a class="headerlink" href="#general-documentation" title="Permanent link"></a></h2>
 <p>We use <code>mkdocs</code> to generate our site documentation from markdown. Markdown source files are located under the <code>docs</code> directory. To develop the documentation with live updates use the following command:</p>
@@ -125,7 +120,7 @@
     parsertongue/mkdocs:latest \
     mkdocs serve -a 0.0.0.0:8000
 </code></pre>
-<p>Open your browser to <a href="http://localhost:80000">localhost:8000</a>.</p>
+<p>Open your browser to <a href="http://localhost:8000">localhost:8000</a>.</p>
 </div>
 </div>
 <footer>
