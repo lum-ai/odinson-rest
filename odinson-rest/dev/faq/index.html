@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gus Hahn-Powell" name="author"/>
+<link href="https://docs.parsertongue.org/odinson-rest/dev/faq/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>FAQ - odinson-rest</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" rel="stylesheet">
+<link href="../../css/theme.css" rel="stylesheet">
+<link href="../../css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" rel="stylesheet"/>
+<link href="../../css/extra.css" rel="stylesheet"/>
+<script>
+    // Current page data
+    var mkdocs_page_name = "FAQ";
+    var mkdocs_page_input_path = "dev/faq.md";
+    var mkdocs_page_url = "/odinson-rest/dev/faq/";
+  </script>
+<script defer="" src="../../js/jquery-2.1.1.min.js"></script>
+<script defer="" src="../../js/modernizr-2.8.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/scala.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</link></link></head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href="../.."> odinson-rest</a>
+<div role="search">
+<form action="../../search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">Installation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/">Usage</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation/">Documentation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developing/">Developing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../test/">Testing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../annotations/">Annotations</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../howitworks/">How it Works</a>
+</li>
+<li class="toctree-l1 current"><a class="reference internal current" href="./">FAQ</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#when-do-i-have-to-rebuild-the-docker-image">When do I have to rebuild the Docker image?</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-rebuild-the-docker-image">How do I rebuild the Docker image?</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#there-are-two-identical-grammars-in-different-directories-where-do-i-add-rules">There are two identical grammars in different directories, where do I add rules?</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-change-annotation-pipelines">How do I change annotation pipelines?</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-variables-can-i-specify-in-the-config-file">What variables can I specify in the config file?</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#what-sbt-command-line-options-are-there">What sbt command line options are there?</a>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/">python</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/">odinson-rest</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../authors/">Contributors</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="../..">odinson-rest</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a href="../..">Docs</a> »</li>
+<li>Development »</li>
+<li>FAQ</li>
+<li class="wy-breadcrumbs-aside">
+<a class="icon icon-github" href="https://github.com/clu-ling/odinson-rest/blob/main/docs/dev/faq.md"> Edit on GitHub</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div role="main">
+<div class="section">
+<h1 id="development-faqs">Development FAQs<a class="headerlink" href="#development-faqs" title="Permanent link"></a></h1>
+<h2 id="when-do-i-have-to-rebuild-the-docker-image">When do I have to rebuild the Docker image?<a class="headerlink" href="#when-do-i-have-to-rebuild-the-docker-image" title="Permanent link"></a></h2>
+<p>When you have changed <code>build.sbt</code> or any scala files in <code>reader.src</code>.</p>
+<h2 id="how-do-i-rebuild-the-docker-image">How do I rebuild the Docker image?<a class="headerlink" href="#how-do-i-rebuild-the-docker-image" title="Permanent link"></a></h2>
+<p>To rebuild the Docker image, simply run <code>sbt dockerize</code> in your terminal. Make sure you are in the correct directory, which should be where you cloned the cgiar-reader repo.</p>
+<h2 id="there-are-two-identical-grammars-in-different-directories-where-do-i-add-rules">There are two identical grammars in different directories, where do I add rules?<a class="headerlink" href="#there-are-two-identical-grammars-in-different-directories-where-do-i-add-rules" title="Permanent link"></a></h2>
+<p>Always add/change rules in the yml files under <code>reader.grammars.cgiar</code>. The changes made to these files will be updated in the src files automatically.</p>
+<h2 id="how-do-i-change-annotation-pipelines">How do I change annotation pipelines?<a class="headerlink" href="#how-do-i-change-annotation-pipelines" title="Permanent link"></a></h2>
+<p>The config file passed to the API upon startup should include a specification for the preffered processor. Currently only "ProxiedProcessor", "CluProcessor", and "Custom" are supported processor options. To specify a custom processor use "ProxiedProcessor."</p>
+<h2 id="what-variables-can-i-specify-in-the-config-file">What variables can I specify in the config file?<a class="headerlink" href="#what-variables-can-i-specify-in-the-config-file" title="Permanent link"></a></h2>
+<p>The user can specify <code>RULES_PREFIX</code> and <code>PROCESSORS_SERVICE_URL</code>. The latter is the url of the proxied processor service.</p>
+<h2 id="what-sbt-command-line-options-are-there">What sbt command line options are there?<a class="headerlink" href="#what-sbt-command-line-options-are-there" title="Permanent link"></a></h2>
+<p>To see what commands are available, run <code>sbt tasks</code>.</p>
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="../../api/python/lum/odinson/rest/" title="python">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../howitworks/" title="How it Works"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>Copyright © 2023 <a href="https://parsertongue.org">parsertongue.org</a>.</p>
+</div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a class="fa fa-github" href="https://github.com/clu-ling/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
+</span>
+<span><a href="../howitworks/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../../api/python/lum/odinson/rest/" style="color: #fcfcfc">Next »</a></span>
+</span>
+</div>
+<script>var base_url = '../..';</script>
+<script defer="" src="../../js/theme_extra.js"></script>
+<script defer="" src="../../js/theme.js"></script>
+<script defer="" src="../../search/main.js"></script>
+<script defer="">
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+</body>
+</html>

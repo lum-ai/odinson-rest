@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gus Hahn-Powell" name="author"/>
+<link href="https://docs.parsertongue.org/odinson-rest/dev/developing/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Developing - odinson-rest</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" rel="stylesheet">
+<link href="../../css/theme.css" rel="stylesheet">
+<link href="../../css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" rel="stylesheet"/>
+<link href="../../css/extra.css" rel="stylesheet"/>
+<script>
+    // Current page data
+    var mkdocs_page_name = "Developing";
+    var mkdocs_page_input_path = "dev/developing.md";
+    var mkdocs_page_url = "/odinson-rest/dev/developing/";
+  </script>
+<script defer="" src="../../js/jquery-2.1.1.min.js"></script>
+<script defer="" src="../../js/modernizr-2.8.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/scala.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</link></link></head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href="../.."> odinson-rest</a>
+<div role="search">
+<form action="../../search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">Installation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/">Usage</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation/">Documentation</a>
+</li>
+<li class="toctree-l1 current"><a class="reference internal current" href="./">Developing</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#rules">Rules</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#writing-rules">Writing Rules</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#taxonomy">Taxonomy</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#actions">Actions</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../test/">Testing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../annotations/">Annotations</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../howitworks/">How it Works</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/">python</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/">odinson-rest</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../authors/">Contributors</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="../..">odinson-rest</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a href="../..">Docs</a> »</li>
+<li>Development »</li>
+<li>Developing</li>
+<li class="wy-breadcrumbs-aside">
+<a class="icon icon-github" href="https://github.com/clu-ling/odinson-rest/blob/main/docs/dev/developing.md"> Edit on GitHub</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div role="main">
+<div class="section">
+<h1 id="developing-the-reader">Developing The Reader<a class="headerlink" href="#developing-the-reader" title="Permanent link"></a></h1>
+<p>In developing the <code>cgiar-reader</code> there are three pieces: <code>rules</code> (and corresponding tests), <code>taxonomy</code>, and <code>actions</code>. The REST API and its endpoints are already defined. For information on how annotations are generated for use in rules, or how to use alternate processors, see the <a href="../annotations/">Annotations</a> section.</p>
+<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link"></a></h2>
+<p>Before developing a new rule or set of related rules, it is best to first define tests which describe the expected behavior of the rule(s). To develop tests follow the <a href="../test/">Testing</a> section.</p>
+<p>Rules in the <code>cgiar-reader</code> are defined using Odin. For an in depth look at Odin and writing a grammar, please see the <a href="https://arxiv.org/pdf/1509.07513.pdf">manual</a>.</p>
+<p>The <code>cgiar-reader</code> has two grammars, <code>entities</code> and <code>events</code>. The grammars can be found under <code>reader/grammars/cgiar</code>. An identical set of grammars can be found under <code>reader/src/main/resources/ai/lum/reader/grammars/cgiar</code>, however, when developing the grammars the user should only modify the top level grammars. These will later be edited and copied to the <code>src</code> grammars via action.</p>
+<p>Rules can be developed with live reloading following the instructions in the <a href="../install/">Development/Install</a> section.</p>
+<h3 id="writing-rules">Writing Rules<a class="headerlink" href="#writing-rules" title="Permanent link"></a></h3>
+<p>Odin rules are written in yaml and run over annotated text (the Odin manual includes a gentle introduction to <a href="https://arxiv.org/pdf/1509.07513.pdf#subsection.4.1">YAML syntax</a>). Annotated text is produced using an external NLP service (such as <code>StanfordCoreNLP</code> or <code>SpaCY</code>), however, <a href="https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html">Penn Tags</a> and <a href="https://universaldependencies.org/">Universal Dependencies</a> are always included in the annotations.</p>
+<p>There are two types of rules, <code>token</code> and <code>dependency</code>. If the type is not specified it defaults to <code>type=dependency</code>. Token rules are defined over the set of tokens and their values, while dependency rules are defined over the set of dependencies.</p>
+<p><strong>Token rule</strong></p>
+<p>If you wanted to label all tokens which carry the NER tag "LOCATION" as "Location," the following rule can be used.</p>
+<pre><code class="language-yaml">- name: ner-loc
+  label: Location
+  priority: 1
+  type: token
+  pattern: |
+    [entity=LOCATION]+
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Rules can be given a priority which determines the order in which rules apply. For example, a rule with <code>priority: 1</code> will only be run on the first iteration, whereas a rule with <code>priority: "2+"</code> will be run on all iterations following the first.</p>
+</div>
+<p>For example, given the text "How many F16 engines are heading to The United Kingdom?" the sequence "The United Kingdom" would be labeled <code>Location</code> by this rule.</p>
+<p><strong>Graph traversal rule</strong></p>
+<p>If you wanted to capture a "risk of" event, you could start with a simple rule defining a traversal over a syntactic dependency graph such as the following:</p>
+<pre><code class="language-yaml">- name: risk-of
+    label: RiskOf
+    example: "What is the risk of spoilage for frozen fish heading to Dubai on August 24th 2020?"
+    pattern: |
+      trigger = [lemma=risk] of
+      type:Entity = nmod_of
+</code></pre>
+<p>This rule finds all words whose lemma is "risk" and if followed by "of" labels the sequence as a trigger of a <code>RiskOf</code> event, which is given a <code>type</code> defined by the dependency relation "nmod_of." In the provided example "spoilage" would be labeled as the <code>type</code> of the <code>RiskOf</code> event.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the rules are run on text, a JSON file of labeled <code>mentions</code> is generated. Mentions are the matches found by the rules within the text, and the labels are included in a heiarchy defined in the <code>Taxonomy</code>.</p>
+</div>
+<h2 id="taxonomy">Taxonomy<a class="headerlink" href="#taxonomy" title="Permanent link"></a></h2>
+<p>The <code>taxonomy</code> is a set of heiarchical relationships between mention labels. Like the grammars, the taxonomy can be found in two places but only the top level taxonomy should be modified in development.</p>
+<p>A sample of the <code>cgiar-reader</code> taxonomy can be seen here:</p>
+<pre><code class="language-yaml">- Measurement:
+  - Unit
+  - NumericExpression:
+    - Quantity
+</code></pre>
+<h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link"></a></h2>
+<p>Generally, when developing rules there should be no need to change the existing actions. However, if it is necessary, new actions or modifications to existing actions can be made in <a href="https://github.com/lum-ai/cgiar-reader/blob/master/reader/src/main/scala/ai/lum/mr/cgiar/odin/CustomActions.scala"><code>reader/src/main/scala/ai/lum/mr/cgiar/odin/CustomActions.scala</code></a>. For more information about actions, see <a href="../howitworks/">How it Works</a>.</p>
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="../test/" title="Testing">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../documentation/" title="Documentation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>Copyright © 2023 <a href="https://parsertongue.org">parsertongue.org</a>.</p>
+</div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a class="fa fa-github" href="https://github.com/clu-ling/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
+</span>
+<span><a href="../documentation/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../test/" style="color: #fcfcfc">Next »</a></span>
+</span>
+</div>
+<script>var base_url = '../..';</script>
+<script defer="" src="../../js/theme_extra.js"></script>
+<script defer="" src="../../js/theme.js"></script>
+<script defer="" src="../../search/main.js"></script>
+<script defer="">
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+</body>
+</html>

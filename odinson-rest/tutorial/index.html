@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gus Hahn-Powell" name="author"/>
+<link href="https://docs.parsertongue.org/odinson-rest/tutorial/" rel="canonical"/>
+<link href="../img/favicon.ico" rel="shortcut icon"/>
+<title>Usage - odinson-rest</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" rel="stylesheet">
+<link href="../css/theme.css" rel="stylesheet">
+<link href="../css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" rel="stylesheet"/>
+<link href="../css/extra.css" rel="stylesheet"/>
+<script>
+    // Current page data
+    var mkdocs_page_name = "Usage";
+    var mkdocs_page_input_path = "tutorial.md";
+    var mkdocs_page_url = "/odinson-rest/tutorial/";
+  </script>
+<script defer="" src="../js/jquery-2.1.1.min.js"></script>
+<script defer="" src="../js/modernizr-2.8.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/scala.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</link></link></head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href=".."> odinson-rest</a>
+<div role="search">
+<form action="../search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Installation</a>
+</li>
+<li class="toctree-l1 current"><a class="reference internal current" href="./">Usage</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#python-library">Python library</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#launching-and-interacting-with-a-service-using-docker">Launching and interacting with a service using docker</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-workflows">Common Workflows</a>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev/install/">Install</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/documentation/">Documentation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/developing/">Developing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/test/">Testing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/annotations/">Annotations</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/howitworks/">How it Works</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/faq/">FAQ</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/python/lum/odinson/rest/">python</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/odinson-rest/">odinson-rest</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../authors/">Contributors</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="..">odinson-rest</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a href="..">Docs</a> »</li>
+<li>User Guide »</li>
+<li>Usage</li>
+<li class="wy-breadcrumbs-aside">
+<a class="icon icon-github" href="https://github.com/clu-ling/odinson-rest/blob/main/docs/tutorial.md"> Edit on GitHub</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div role="main">
+<div class="section">
+<h1 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Permanent link"></a></h1>
+<p>The reader can be used through the REST API. After building the docker image, launch a container using the following command:</p>
+<!-- ```bash
+docker run --name="odinson-rest" \
+  -it \
+  --restart "on-error" \
+  -e "HOME=/app" \
+  -p "0.0.0.0:9000:9000" \
+  --rm \
+  "lumai/odinson-rest-api:latest"
+``` -->
+<p>Navigate to <a href="http://localhost:9000/api">localhost:9000/api</a> to interactively explore the API through the <a href="http://spec.openapis.org/oas/v3.0.3">OpenAPI 3.0</a> specification.</p>
+<h2 id="python-library">Python library<a class="headerlink" href="#python-library" title="Permanent link"></a></h2>
+<p>We also provide a Python library as a simple way to build applications that interact with the Odinson REST API.  You can either connect to an existing odinson-rest service or launch one using docker.</p>
+<h3 id="launching-and-interacting-with-a-service-using-docker">Launching and interacting with a service using docker<a class="headerlink" href="#launching-and-interacting-with-a-service-using-docker" title="Permanent link"></a></h3>
+<pre><code class="language-python">from lum.odinson.doc import Document, Fields
+from lum.odinson.rest.docker import DockerBasedOdinsonAPI
+
+# create a local index
+data_dir = "/local/path/to/my/data/dir"
+engine = DockerBasedOdinsonAPI(local_path=data_dir)
+
+# load an Odinson document
+doc_file = "path/to/odinson/document.json"
+doc = Document.from_file(doc_file)
+
+# index the document
+engine.index(doc)
+
+# query the index
+for res in engine.search(odinson_query="[lemma=be]"):
+  for span in res.spans():
+    print(f"{res.document_id} ({res.sentence_index}):  {span}")
+</code></pre>
+<!-- ## API Endpoints and Examples
+
+The main endpoint is `/api/extract`, which returns a json file of extracted mentions over the query.
+
+| Endpoint | Example |
+| :--- | :--- |
+| /api/extract | [Github Gist](https://gist.github.com/myedibleenso/9241a4c9c71d29f148ef0b8c44602b60) |
+| /api/annotate | [Github Gist](https://gist.github.com/zwellington/21688441b3d8a62f8e2f2051e1792a63) |
+| /api/taxonomy/hyponyms-for | [Github Gist](https://gist.github.com/zwellington/7a7ae44bff5cd890198d2eea4f2f0145) |
+| /api/taxonomy/hypernyms-for | [Github Gist](https://gist.github.com/zwellington/59041ebd68e60e1b7f21bb30545a4213) | -->
+<h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link"></a></h2>
+<ul>
+<li>??</li>
+</ul>
+<h1 id="sbt">sbt<a class="headerlink" href="#sbt" title="Permanent link"></a></h1>
+<p>Several <code>command aliases</code> are defined in the <code>build.sbt</code>. These can be altered and added to at the developers discretion.</p>
+<h2 id="-dockerfile-command-for-generating-and-publishing-a-docker-image-targetdockerstage">- <code>dockerfile</code>: Command for generating and publishing a docker image (<code>target/docker/stage</code>).<a class="headerlink" href="#-dockerfile-command-for-generating-and-publishing-a-docker-image-targetdockerstage" title="Permanent link"></a></h2>
+<ul>
+<li>
+<p><code>dockerize</code>: Command for generating and publishing a docker image.</p>
+</li>
+<li>
+<p><code>documentize</code>: Generates <code>scaladoc</code> and copies documentation to the <code>docs/</code> directory.</p>
+</li>
+</ul>
+<!--- 
+- Manipulating mentions
+  - python
+  - scala
+-->
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="../dev/install/" title="Install">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../install/" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>Copyright © 2023 <a href="https://parsertongue.org">parsertongue.org</a>.</p>
+</div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a class="fa fa-github" href="https://github.com/clu-ling/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
+</span>
+<span><a href="../install/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../dev/install/" style="color: #fcfcfc">Next »</a></span>
+</span>
+</div>
+<script>var base_url = '..';</script>
+<script defer="" src="../js/theme_extra.js"></script>
+<script defer="" src="../js/theme.js"></script>
+<script defer="" src="../search/main.js"></script>
+<script defer="">
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+</body>
+</html>
