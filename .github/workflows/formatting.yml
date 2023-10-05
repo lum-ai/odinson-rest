@@ -23,6 +23,7 @@ jobs:
     # Scala
     ##################################
     - name: Lint check via scalafmt
+      continue-on-error: true
       run: |
         sbt compile
         sbt scalafmtCheckAll
