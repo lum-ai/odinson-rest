@@ -14,29 +14,27 @@ import time
 #   pass
 
 
-
-
-
 # see https://docs.python.org/3/library/unittest.html#basic-example
 class TestDockerAPI(unittest.TestCase):
-
     def setUp(self):
         """special method called before each test.
         See https://docs.python.org/3/library/unittest.html
         """
         self.test_doc = odinson.Document.from_file(TEST_DOC_PATH)
         self.indexdir = tempfile.TemporaryDirectory()
-        self.api = DockerBasedOdinsonAPI(local_path=self.indexdir.name, keep_alive=False)
+        self.api = DockerBasedOdinsonAPI(
+            local_path=self.indexdir.name, keep_alive=False
+        )
         MAX_WAIT = 5
         STEP = 0.5
         ELAPSED = 0
         while ELAPSED < MAX_WAIT:
-          try:
-            len(self.api)
-          except:
-            pass
-          time.sleep(STEP)
-          ELAPSED += STEP
+            try:
+                len(self.api)
+            except:
+                pass
+            time.sleep(STEP)
+            ELAPSED += STEP
 
     def tearDown(self):
         """special method called after each test.
@@ -51,10 +49,11 @@ class TestDockerAPI(unittest.TestCase):
     def test_index_doc(self):
         """api.index(doc) should store an odinson.Document in the index."""
         self.api.index(self.test_doc, max_tokens=-1)
-        #print(f"Num. docs:\t{len(self.api)}")
+        # print(f"Num. docs:\t{len(self.api)}")
         actual = len(self.api)
         self.assertTrue(
-            actual > 0, f"index {self.indexdir.name} did not contain any docs after indexing.  Instead found {actual}"
+            actual > 0,
+            f"index {self.indexdir.name} did not contain any docs after indexing.  Instead found {actual}",
         )
 
     def test_delete_doc(self):
@@ -63,5 +62,6 @@ class TestDockerAPI(unittest.TestCase):
         self.api.delete(self.test_doc)
         actual = len(self.api)
         self.assertTrue(
-            actual == 0, f"index {self.indexdir.name} should not contain any docs after indexing and deleting the same doc.  Instead found {actual}"
+            actual == 0,
+            f"index {self.indexdir.name} should not contain any docs after indexing and deleting the same doc.  Instead found {actual}",
         )

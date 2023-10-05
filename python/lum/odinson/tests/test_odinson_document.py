@@ -5,6 +5,7 @@ import os
 import unittest
 import pytest
 
+
 # see https://docs.python.org/3/library/unittest.html#basic-example
 class TestOdinsonDocument(unittest.TestCase):
     def test_load_from(self):

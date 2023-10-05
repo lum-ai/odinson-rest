@@ -24,6 +24,7 @@ class Fields(Text, Enum):
     def __repr__(self) -> str:
         return str.__repr__(self.value)
 
+
 class Field(BaseModel):
     name: Text
     type: Fields = pydantic.Field(alias="$type", default="ai.lum.odinson.Field")
@@ -67,7 +68,6 @@ class NumberField(Field):
 
 
 class NestedField(Field):
-
     fields: List[Type[Field]]
     type: Literal[Fields.NESTED_FIELD] = pydantic.Field(
         alias="$type", default=Fields.NESTED_FIELD.value, frozen=True
@@ -78,8 +78,10 @@ AnyField = Union[
     TokensField, GraphField, StringField, DateField, NumberField, NestedField
 ]
 
+
 class Metadata:
     """Utility methods for contructing metadata"""
+
     @staticmethod
     def from_dict(d) -> List[AnyField]:
         fields = []
@@ -105,14 +107,19 @@ class Sentence(BaseModel):
     numTokens: int
     # FIXME: figure out how to just use List[Type[Field]]
     fields: List[AnyField]
+
     def model_dump(self, by_alias=True, **kwargs):
-      return super().model_dump(by_alias=by_alias, **kwargs)
+        return super().model_dump(by_alias=by_alias, **kwargs)
+
     def model_dump_json(self, by_alias=True, **kwargs):
-      return super().model_dump_json(by_alias=by_alias, **kwargs)
+        return super().model_dump_json(by_alias=by_alias, **kwargs)
+
     def dict(self, **kwargs):
-       return self.model_dump(**kwargs)
+        return self.model_dump(**kwargs)
+
     def json(self, **kwargs):
-       return self.model_dump_json(**kwargs)
+        return self.model_dump_json(**kwargs)
+
 
 class Document(BaseModel):
     """ai.lum.odinson.Document"""
@@ -122,26 +129,28 @@ class Document(BaseModel):
     sentences: List[Sentence]
 
     def metadata_by_name(self, name: str) -> List[AnyField]:
-       return [m for m in self.metadata if m.name == name]
+        return [m for m in self.metadata if m.name == name]
 
     def metadata_by_type(self, mtype: AnyField) -> List[AnyField]:
-       return [m for m in self.metadata if m.type == mtype]
+        return [m for m in self.metadata if m.type == mtype]
 
     def model_dump(self, by_alias=True, **kwargs):
-      return super().model_dump(by_alias=by_alias, **kwargs)
+        return super().model_dump(by_alias=by_alias, **kwargs)
+
     def model_dump_json(self, by_alias=True, **kwargs):
-      return super().model_dump_json(by_alias=by_alias, **kwargs)
-    
+        return super().model_dump_json(by_alias=by_alias, **kwargs)
+
     def dict(self, **kwargs):
-       return self.model_dump(**kwargs)
+        return self.model_dump(**kwargs)
+
     def json(self, **kwargs):
-       return self.model_dump_json(**kwargs)
-    
+        return self.model_dump_json(**kwargs)
+
     @staticmethod
     def from_file(fp: Text) -> Document:
-      if fp.lower().endswith(".gz"):
-        with gzip.open(fp, 'rb') as f:
-          return Document(**json.loads(f.read()))
-      else:
-        with open(fp, 'r') as f:
-          return Document(**json.loads(f.read()))
+        if fp.lower().endswith(".gz"):
+            with gzip.open(fp, "rb") as f:
+                return Document(**json.loads(f.read()))
+        else:
+            with open(fp, "r") as f:
+                return Document(**json.loads(f.read()))
