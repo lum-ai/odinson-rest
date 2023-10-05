@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
-from lum.odinson.doc import (Document, Sentence)
-from lum.odinson.rest.responses import (CorpusInfo, Statistic, Results)
+from lum.odinson.doc import (AnyField, Document, Sentence)
+from lum.odinson.rest.responses import (CorpusInfo, OdinsonErrors, Statistic, Results)
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -113,13 +113,48 @@ class OdinsonBaseAPI:
             headers=headers
         )
 
-    def validate(self, doc: Document, strict: bool = True) -> bool:
+    def _post_text(
+      self, 
+      endpoint: str, 
+      text: str, 
+      headers: Optional[Dict[str, str]] = None
+    ) -> requests.Response:
+        return requests.post(
+            endpoint, 
+            json=text,
+            # NOTE: data takes str & .json() returns json str
+            # strange as it seems, this round trip is seems necessary for at least some files
+            #data=json.dumps(json.loads(doc.json())),
+            headers=headers
+        )
+    
+    def validate_document(self, doc: Document, strict: bool = True) -> bool:
         """Inspects and validates an OdinsonDocument"""
-        endpoint = f"{self.address}/api/validate/strict" if strict else f"{self.address}/api/validate/relaxed"
+        endpoint = f"{self.address}/api/validate/document/strict" if strict else f"{self.address}/api/validate/document/relaxed"
         res = self._post_doc(endpoint=endpoint, doc=doc)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+  
+    def validate_rule(self, rule: str, verbose: bool = False) -> Union[bool, OdinsonErrors]:
+        """Inspects and validates an Odinson rule"""
+        endpoint = f"{self.address}/api/validate/rule"
+        res = self._post_text(endpoint=endpoint, contents=rule)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:
+            
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
     
+    def validate_grammar(self, grammar: str, verbose: bool = False) -> Union[bool, OdinsonErrors]:
+        """Inspects and validates an Odinson grammar"""
+        endpoint = f"{self.address}/api/validate/grammar"
+        res = self._post_text(endpoint=endpoint, contents=grammar)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:        
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
+
     def index(self, doc: Document, max_tokens: int = -1) -> bool:
+        """Indexes a single Document"""
         #endpoint = f"{self.address}/api/index/document"
         endpoint = f"{self.address}/api/index/document/maxTokensPerSentence/{max_tokens}"
         # NOTE: data takes str & .json() returns json str
@@ -139,6 +174,46 @@ class OdinsonBaseAPI:
         endpoint = f"{self.address}/api/delete/document/{doc_id}"
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def sentence(self, sentence_id: int) -> Sentence:
+        """Retrieves an Odinson Sentence from the doc store."""
+        endpoint = f"{self.address}/api/sentence/{sentence_id}"
+        res = requests.get(endpoint)
+        return Sentence.model_validate(res.json())
+
+    def document(self, document_id: str) -> Document:
+        """Retrieves an Odinson Document from the doc store."""
+        endpoint = f"{self.address}/api/document/{document_id}"
+        res = requests.get(endpoint)
+        return Document.model_validate(res.json())
+
+     
+    def metadata_for_sentence(self, sentence_id: str) -> List[AnyField]:
+        """Retrieves Odinson Document Metadata from the doc store."""
+        endpoint = f"{self.address}/api/metadata/sentence/{sentence_id}"
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate({"id" : "UNK", "metadata" : res.json(), "sentences" : [] })
+        return doc.metadata
+    
+    def metadata_for_document(self, document_id: str) -> List[AnyField]:
+        """Retrieves Odinson Document Metadata from the doc store."""
+        endpoint = f"{self.address}/api/metadata/document/{document_id}"
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate({"id" : document_id, "metadata" : res.json(), "sentences" : [] })
+        return doc.metadata
+
+    def metadata(self, id: Union[str, int]) -> List[AnyField]:
+        """Retrieves Odinson Document Metadata from the doc store."""
+        if isinstance(id, str):
+            return self.metadata_for_document(id)
+        elif isinstance(id, int):
+            return self.metadata_for_sentence(id)
+    
+# /api/parent/sentence/:sentenceId
+# /api/metadata/document/:odinsonDocId
+# /api/metadata/sentence/:sentenceId
 
     def _search(
         self,
@@ -230,3 +305,4 @@ class OdinsonBaseAPI:
       # TODO: add method to retrieve doc for id
       # TODO: add rewrite method
       # for any token that matches the pattern, replace its entry in field <field> with <label>
+      # ex [word="Table" & tag=/NNP.*/] -> {scratch: "CAPTION"}

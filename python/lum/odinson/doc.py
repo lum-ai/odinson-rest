@@ -1,4 +1,5 @@
 from __future__ import annotations
+import dateutil
 from lum.odinson.typing import Tokens
 from enum import Enum
 from typing import List, Literal, Sequence, Text, Tuple, Type, Union
@@ -20,6 +21,8 @@ class Fields(Text, Enum):
     NUMBER_FIELD = "ai.lum.odinson.NumberField"
     NESTED_FIELD = "ai.lum.odinson.NestedField"
 
+    def __repr__(self) -> str:
+        return str.__repr__(self.value)
 
 class Field(BaseModel):
     name: Text
@@ -30,7 +33,7 @@ class Field(BaseModel):
 class TokensField(Field):
     tokens: Tokens
     type: Literal[Fields.TOKENS_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.TOKENS_FIELD.value
+        alias="$type", default=Fields.TOKENS_FIELD.value, frozen=True
     )
 
 
@@ -38,28 +41,28 @@ class GraphField(Field):
     edges: List[Tuple[int, int, Text]]
     roots: Sequence[int]
     type: Literal[Fields.GRAPH_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.GRAPH_FIELD.value
+        alias="$type", default=Fields.GRAPH_FIELD.value, frozen=True
     )
 
 
 class StringField(Field):
     string: Text
     type: Literal[Fields.STRING_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.STRING_FIELD.value
+        alias="$type", default=Fields.STRING_FIELD.value, frozen=True
     )
 
 
 class DateField(Field):
     date: Text
     type: Literal[Fields.DATE_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.DATE_FIELD.value
+        alias="$type", default=Fields.DATE_FIELD.value, frozen=True
     )
 
 
 class NumberField(Field):
     value: float
     type: Literal[Fields.NUMBER_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.NUMBER_FIELD.value
+        alias="$type", default=Fields.NUMBER_FIELD.value, frozen=True
     )
 
 
@@ -67,13 +70,35 @@ class NestedField(Field):
 
     fields: List[Type[Field]]
     type: Literal[Fields.NESTED_FIELD] = pydantic.Field(
-        alias="$type", default=Fields.NESTED_FIELD.value
+        alias="$type", default=Fields.NESTED_FIELD.value, frozen=True
     )
 
 
 AnyField = Union[
     TokensField, GraphField, StringField, DateField, NumberField, NestedField
 ]
+
+class Metadata:
+    """Utility methods for contructing metadata"""
+    @staticmethod
+    def from_dict(d) -> List[AnyField]:
+        fields = []
+        for fname, v in d.items():
+            if isinstance(v, str):
+                # try parsing as date
+                try:
+                    _ = dateutil.parser.parse(v)
+                    fields.append(DateField(name=fname, date=v))
+                except:
+                    fields.append(StringField(name=fname, string=v))
+            elif isinstance(v, float) or isinstance(v, int):
+                fields.append(NumberField(name=fname, value=float(v)))
+            elif isinstance(v, list):
+                # if all elems are str -> TokensField
+                pass
+            elif isinstance(v, dict):
+                # if contains "edges" and "roots" -> GraphField
+                pass
 
 
 class Sentence(BaseModel):
@@ -93,10 +118,14 @@ class Document(BaseModel):
     """ai.lum.odinson.Document"""
 
     id: Text
-    # FIXME: figure out how to just use List[Type[Field]]
-    # metadata: List[AnyField] = []
     metadata: List[AnyField]
     sentences: List[Sentence]
+
+    def metadata_by_name(self, name: str) -> List[AnyField]:
+       return [m for m in self.metadata if m.name == name]
+
+    def metadata_by_type(self, mtype: AnyField) -> List[AnyField]:
+       return [m for m in self.metadata if m.type == mtype]
 
     def model_dump(self, by_alias=True, **kwargs):
       return super().model_dump(by_alias=by_alias, **kwargs)

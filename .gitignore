@@ -15,3 +15,5 @@ Makefile
 .vscode/
 **/target/**
 .metals/
+
+docs/api/**

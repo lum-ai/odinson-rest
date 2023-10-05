@@ -8,10 +8,12 @@ import json
 import requests
 
 
-__all__ = ["CorpusInfo", "ScoreDoc", "Statistic", "Results"]
+__all__ = ["CorpusInfo", "OdinsonErrors", "ScoreDoc", "Statistic", "Results"]
 
 # OdinsonMatch = Union["NamedCapture", "GraphTraversalMatch"]
 
+class OdinsonErrors(BaseModel):
+    errors: List[str]
 class CorpusInfo(BaseModel):
     num_docs: int = pydantic.Field(alias="numDocs")
     corpus: str
