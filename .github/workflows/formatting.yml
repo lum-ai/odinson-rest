@@ -24,6 +24,7 @@ jobs:
     ##################################
     - name: Lint check via scalafmt
       run: |
+        sbt compile
         sbt scalafmtCheckAll
     ##################################
     # Python
