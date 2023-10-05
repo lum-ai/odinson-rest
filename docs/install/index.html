@@ -53,8 +53,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#rest-api">REST API</a>
 <ul>
-<li class="toctree-l3"><a class="reference internal" href="#releases">Releases</a>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="#build">Build</a>
 <ul>
 <li class="toctree-l4"><a class="reference internal" href="#docker">Docker</a>
@@ -76,22 +74,16 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/documentation/">Documentation</a>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/developing/">Developing</a>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/test/">Testing</a>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/annotations/">Annotations</a>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/howitworks/">How it Works</a>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../dev/faq/">FAQ</a>
 </li>
 </ul>
 <p class="caption"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api/python/lum/odinson/rest/">python</a>
+<li class="toctree-l1"><a class="reference internal" href="../api/python/lum/odinson/rest/"><code>python</code></a>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../api/odinson-rest/">odinson-rest</a>
+<li class="toctree-l1"><a class="reference internal" href="../api/odinson-rest/"><code>odinson-rest</code></a>
 </li>
 </ul>
 <ul>
@@ -128,16 +120,16 @@
 <li><a href="https://docs.docker.com/get-docker/">docker</a></li>
 <li>
 <blockquote>
-<p>= 8G of RAM</p>
+<p>= G of RAM</p>
 </blockquote>
 </li>
 </ul>
 <h2 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Permanent link"></a></h2>
-<h3 id="releases">Releases<a class="headerlink" href="#releases" title="Permanent link"></a></h3>
-<p>We publish releases in the form of docker images:</p>
-<ul>
-<li>??</li>
-</ul>
+<!-- ### Releases
+
+We publish releases in the form of docker images:
+
+- ?? -->
 <h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link"></a></h3>
 <p>The project can be built using either docker or sbt; however, the recommended method is to use docker.</p>
 <h4 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link"></a></h4>
@@ -147,8 +139,8 @@
 <p>For information on additional tasks (generating Dockerfiles, publishing images, etc.), see <a href="https://www.scala-sbt.org/sbt-native-packager/formats/docker.html#tasks">this section of the <code>native-packager</code> documentation</a>.</p>
 <h5 id="building-docker-images-for-other-architectures">Building docker images for other architectures<a class="headerlink" href="#building-docker-images-for-other-architectures" title="Permanent link"></a></h5>
 <pre><code class="language-bash">sbt ";clean; docker:stage"
-cd rest/target/docker/stage/
-docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/cgiar-reader-rest-api:amd64" .
+cd target/docker/stage
+docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/odinson-rest-api:amd64" .
 </code></pre>
 <h4 id="sbt-scala"><code>sbt</code> (Scala)<a class="headerlink" href="#sbt-scala" title="Permanent link"></a></h4>
 <p>The REST API server can be launched directly using SBT:</p>

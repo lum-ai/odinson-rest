@@ -21,27 +21,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://lum.ai/odinson-rest/docs/dev/annotations/</loc>
-         <lastmod>2023-10-05</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://lum.ai/odinson-rest/docs/dev/developing/</loc>
-         <lastmod>2023-10-05</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://lum.ai/odinson-rest/docs/dev/documentation/</loc>
          <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://lum.ai/odinson-rest/docs/dev/faq/</loc>
-         <lastmod>2023-10-05</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://lum.ai/odinson-rest/docs/dev/howitworks/</loc>
          <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>

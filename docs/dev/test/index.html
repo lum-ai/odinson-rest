@@ -58,26 +58,18 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../documentation/">Documentation</a>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../developing/">Developing</a>
-</li>
 <li class="toctree-l1 current"><a class="reference internal current" href="./">Testing</a>
 <ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="#developing-tests">Developing Tests</a>
-</li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../annotations/">Annotations</a>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../howitworks/">How it Works</a>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
 </li>
 </ul>
 <p class="caption"><span class="caption-text">API Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/">python</a>
+<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/"><code>python</code></a>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/">odinson-rest</a>
+<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/"><code>odinson-rest</code></a>
 </li>
 </ul>
 <ul>
@@ -108,139 +100,17 @@
 <div role="main">
 <div class="section">
 <h1 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link"></a></h1>
-<p>Tests should be developed before rules. When developing rules, tests can be run using the command:</p>
-<pre><code class="language-bash">sbt cleanTest
+<p>Tests can be run using the command:</p>
+<pre><code class="language-bash">sbt test
 </code></pre>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This command first copies the grammars to the <code>src</code> files before running the tests. To run the tests without updating the rules use the command <code>sbt test</code>.</p>
-</div>
-<h2 id="developing-tests">Developing Tests<a class="headerlink" href="#developing-tests" title="Permanent link"></a></h2>
-<p>Testing is performed through two files:</p>
-<p><code>TestEntities.scala</code>  (reader/src/test/scala/ai/lum/mr/cgiar/entities/TestEntities.scala)
-and <code>TestEvents.scala</code> (reader/src/test/scala/ai/lum/mr/cgiar/events/TestEvents.scala),
-that utilize the testing functions defined in <code>TestUtils.scala</code> (reader/src/test/scala/ai/lum/mr/TestUtils.scala).</p>
-<p>Both <code>TestEntities.scala</code> and <code>TestEvents.scala</code> call the same boolean function, <code>checkMention()</code>.
-<code>checkMention</code> operates on two inputs: a sequence of Mentions (extracted by the <code>MachineReadingSystem</code> using the Odin rules in cgiar-reader), and a <code>MentionTestCase</code>.
-<code>MentionTestCase</code> is split into two cases: <code>ExistsMentionTestCase</code>, and <code>ForAllMentionTestCase</code>. The names of the two cases indicate the quantifier applying to evaluation of the sequence of Mentions, i.e. find at least one Mention such that..., or insure that for all Mentions ... .
-This different quantification is directly reflected in the evaluation procedure at the level of <code>checkMention</code>:</p>
-<ul>
-<li><code>ExistsMentionTestCase</code>:</li>
-</ul>
-<pre><code class="language-scala">// At least one mention must meet the criteria
-mentions.exists { m =&gt; em.check(m) }
-</code></pre>
-<ul>
-<li><code>ForAllMentionTestCase</code>:</li>
-</ul>
-<pre><code class="language-scala">// Every mention must meet the criteria
-mentions.forall { m =&gt; em.check(m) }
-</code></pre>
-<p>All functions called by <code>checkMention</code> have their own <code>check()</code> boolean function.
-<code>MentionTestCase</code> (either variety)'s <code>check</code> function calls the <code>check</code> functions of its <code>TextTestCase</code> and <code>LabelTestCase(s)</code> obligatorily, and calls <code>check</code> from <code>ArgTestCase</code> if present.
-<code>ArgTestCase</code>, in turn, through its <code>check</code> function, evaluates the <code>check</code> functions of its own <code>TextTestCase</code>, <code>LabelTestCase</code>(s), and <code>RoleTestCase</code>(s).</p>
-<p>The bottom-level functions <code>TextTestCase</code>, <code>LabelTestCase</code>, <code>RoleTestCase</code> each have two varieties indicated by prefix: <code>Positive-</code>/<code>Negative-</code>. As the names suggest, a <code>PositiveTextTestCase</code> returns true if its string argument matches the <code>text</code> value of the Mention submitted to its <code>check</code> function. A <code>NegativeTextTestCase</code> returns true if its string argument does NOT match the Mention's <code>text</code> field.</p>
-<p>Entity and Event tests differ in that Entity tests cannot contain <code>ArgTestCase</code> or <code>RoleTestCase</code>, only <code>TextTestCase</code> and <code>LabelTestCase</code> checks.</p>
-<p>The typical use of testing involves positive subtests embedded in an <code>ExistsMentionTestCase</code>, as in this example:</p>
-<pre><code class="language-scala">ExistsMentionTestCase( 
-    labels = Seq(PositiveLabelTestCase("Vessel")),
-    mentionSpan = PositiveTextTestCase("LNG Finima"),
-    text = "LNG Finima"
-)
-</code></pre>
-<p>To illustrate the potential utility of negative testing: the entity rules include patterns for dates, such as "12 Jun 2000". However, a possible confusion arises from the format of time-of-day expressions in military documents, where we might see "12 Jun 2000 hours." (i.e., 8 P.M. on June 12). Of course, the entity rules themselves have a variety of means available to enforce this restriction: negative lookahead in the date rule, higher-priority military-time rules, etc. But to test proper functioning, we can write tests that might either seek to verify that at least one Mention found in some piece of text has such-and-such properties, or deny that any Mentions have some undesirable configuration of properties.</p>
-<p>Complexities arise because <code>MentionTestCase</code> and <code>ArgTestsCase</code> contain multiple subtests (<code>TextTestCase</code>, <code>LabelTestCase</code>, <code>RoleTestCase</code>). What combinations of polarities among subtests (e.g. all positive, all negative, or a mixture of positive and negative) fall within the expected range of use?
-Consider first the simplest case, corresponding to Entity tests: <code>MentionTestCase</code> not containing any <code>ArgTestCase</code>.
-Use for a mix of positive and negative tests:
-(<code>PositiveLabelTestCase</code>, <code>NegativetextTestCase</code>),- make sure the given label is picked up but doesn't correspond to this string;
-(<code>NegativeLabelTestCase</code>, <code>PositiveTextTestCase</code>)&lt;--make sure this string is not read as...
-Running with the above example, suppose the parent MentionTestCase has text "12 Jun 2000 hours". The <code>MentionTestCase</code> can either be <code>ExistsMentionTestCase</code>, or <code>ForAllMentionTestCase</code>.</p>
-<p>Combinations of positive and negative subtests under <code>ForAllMentionTestCase</code> seem of little use. For this reason, and to avoid possible confusion, we have written into the function definitions the requirement that <code>ForAllMentionTestCase</code> scopes over all-negative immediate subtests. Below is a typical example of the proper use of all-negative subtests for <code>ForAllMentionTestCase</code>:</p>
-<pre><code class="language-scala">ForAllMentionTestCase(
-    labels = Seq(NegativeLabelTestCase("WhatQuery")), 
-    mentionSpan = NegativeTextTestCase("of ostrich feathers"), 
-    text = "TEUs of ostrich feathers"
-)
-</code></pre>
-<p>Combinations of positive and negative subtests under <code>ExistsMentionTestCase</code> are potentially useful. in keeping with the flexibility outlined for some <code>ArgTestCase</code>s below, we allow <code>ExistsMentionTestCase</code> to freely embed either polarity of <code>LabelTestCase</code> and <code>TextTestCase</code>. Example:</p>
-<pre><code class="language-scala">ExistsMentionTestCase( 
-    labels = Seq(NegativeLabelTestCase("Date")), // wrong label
-    mentionSpan = PositiveTextTestCase("LNG Finima"),
-    text = "LNG Finima"
-)
-ExistsMentionTestCase( 
-    labels = Seq(PositiveLabelTestCase("Vessel")),
-    mentionSpan = NegativeTextTestCase("Finima"), // mentionSpan doesn't match text
-    text = "LNG Finima"
-)
-</code></pre>
-<p><code>ArgTestCase</code> polarity adds a further layer of potential complexity. To simplify use, we restrict the polarity of <code>ArgTestCase</code> itself to be strictly Negative under <code>ForAllMentionTestCase</code>, just like all its immediate subtests.: <code>ForAllMentionTestCase</code>(<code>NegativeLabelTestCase</code>, <code>NegativeTextTestCase</code>, <code>NegativeArgTestCase</code>(...)). In this configuration, we restrict <code>NegativeArgTestCase</code> to embed strictly positive subtests: <code>PositiveTextTestCase</code>, <code>PositiveLabelTestCase</code>, and <code>PositiveRoleTestCase</code> . Allowing <code>NegativeArgTestCase</code> to embed negative subtests, or a mix of positive and negative subtests, adds unwanted complexity unrewarded by clear use cases. The example below illustrates the intended use:</p>
-<pre><code class="language-scala">ForAllMentionTestCase(
-    labels = Seq(NegativeLabelTestCase("CargoQuery"), NegativeLabelTestCase("QuantityQuery")),
-    text = "Some zebras are galloping to Scotland from Zimbabwe",
-    mentionSpan = NegativeTextTestCase("Some zebras are heading to Scotland from Zimbabwe"),
-    args = List( 
-        NegativeArgTestCase(
-            role = PositiveRoleTestCase("need"),
-            labels = Seq(PositiveLabelTestCase("QuantifiedCargo")),
-            text = PositiveTextTestCase("zebras")
-        )
-    )
-)
-</code></pre>
-<p><code>ExistsMentionTestCase</code> may embed <code>PositiveArgTestCase</code> and/or <code>NegativeArgTestCase</code>:</p>
-<pre><code class="language-scala">ExistsMentionTestCase(
-    labels = Seq(PositiveLabelTestCase("Transport")),
-    mentionSpan = PositiveTextTestCase("Frozen food that arrived before September 21st 2020 but after September 28th 2020"),
-    text = "Frozen food that arrived before September 21st 2020 but after September 28th 2020.",
-    args = List(
-        NegativeArgTestCase(
-            role = PositiveRoleTestCase("need"),
-            labels = Seq(PositiveLabelTestCase("BeforeTime"), PositiveLabelTestCase("TimeExpression")),
-            text = PositiveTextTestCase("before September 21st 2020")
-        ),
-        PositiveArgTestCase(
-            role = PositiveRoleTestCase("time"),
-            labels = Seq(PositiveLabelTestCase("AfterTime"), PositiveLabelTestCase("TimeExpression")),
-            text = PositiveTextTestCase("after September 28th 2020")
-        )
-    ),
-),
-</code></pre>
-<p>To allow desired flexibility with easily-understood uses, we allow the subtests within <code>PositiveArgTestCase</code> (only) to be positive or negative, independently of other subtests within the same <code>PositiveArgTestCase</code>. The example below illustrates:</p>
-<pre><code class="language-scala">// Negative Label test; positive Text, Role tests.
-ExistsMentionTestCase(
-    labels = Seq(PositiveLabelTestCase("Transport")),
-    mentionSpan = PositiveTextTestCase("Frozen food that arrived before September 21st 2020 but after September 28th 2020"),
-    text = "Frozen food that arrived before September 21st 2020 but after September 28th 2020.",
-    args = List(
-        PositiveArgTestCase(
-            role = PositiveRoleTestCase("time"),
-            labels = Seq(NegativeLabelTestCase("AfterTime")),
-            text = PositiveTextTestCase("before September 21st 2020")
-        ),
-    )
-),
-// Negative Text test; positive Label, Role tests.
-ExistsMentionTestCase(
-    labels = Seq(PositiveLabelTestCase("Transport")),
-    mentionSpan = PositiveTextTestCase("Frozen food that arrived before September 21st 2020 but after September 28th 2020"),
-    text = "Frozen food that arrived before September 21st 2020 but after September 28th 2020.",
-    args = List(
-        PositiveArgTestCase(
-            role = PositiveRoleTestCase("time"),
-            labels = Seq(PositiveLabelTestCase("BeforeTime")),
-            text = NegativeTextTestCase("after September 21st 2020")
-        ),
-    )
-)
-</code></pre>
+<!-- !!! note
+    blarg. -->
 </div>
 </div>
 <footer>
 <div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
-<a class="btn btn-neutral float-right" href="../annotations/" title="Annotations">Next <span class="icon icon-circle-arrow-right"></span></a>
-<a class="btn btn-neutral" href="../developing/" title="Developing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+<a class="btn btn-neutral float-right" href="../faq/" title="FAQ">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../documentation/" title="Documentation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
 </div>
 <hr/>
 <div role="contentinfo">
@@ -259,8 +129,8 @@ ExistsMentionTestCase(
 <span>
 <a class="fa fa-github" href="https://github.com/lum-ai/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
 </span>
-<span><a href="../developing/" style="color: #fcfcfc">« Previous</a></span>
-<span><a href="../annotations/" style="color: #fcfcfc">Next »</a></span>
+<span><a href="../documentation/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../faq/" style="color: #fcfcfc">Next »</a></span>
 </span>
 </div>
 <script>var base_url = '../..';</script>
