@@ -60,12 +60,12 @@ jobs:
         sbt documentize
 
     # code coverage (Scala)
-    - name: "Code coverage reports for Scala components"
-      working-directory: .
-      run: |
-        sbt clean coverage test
-        sbt coverageReport
-        sbt coverageAggregate
+    # - name: "Code coverage reports for Scala components"
+    #   working-directory: .
+    #   run: |
+    #     sbt clean;coverage;test
+    #     sbt coverageReport
+    #     sbt coverageAggregate
 
     # code coverage (Python)
     - name: "Code coverage reports for Python components"
