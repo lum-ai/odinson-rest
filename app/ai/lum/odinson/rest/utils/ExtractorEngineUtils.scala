@@ -10,7 +10,7 @@ import java.io.File
 
 object ExtractorEngineUtils {
 
-  /** Additional convenience methods for an [[ai.lum.odinson.ExtractorEngine]].
+  /** Additional convenience methods for an [[https://github.com/lum-ai/odinson/blob/master/core/src/main/scala/ai/lum/odinson/ExtractorEngine.scala ai.lum.odinson.ExtractorEngine]].
     */
   implicit class EngineOps(engine: ExtractorEngine) {
 
@@ -19,7 +19,7 @@ object ExtractorEngineUtils {
       try {
         doc.getValues(OdinsonIndexWriter.DOC_ID_FIELD).head
       } catch {
-        case e: Throwable => throw OdinsonException(
+        case _: Throwable => throw OdinsonException(
             s"Lucene document for sentence did not have stored field '${OdinsonIndexWriter.DOC_ID_FIELD}'"
           )
       }
@@ -31,7 +31,7 @@ object ExtractorEngineUtils {
         val doc = engine.doc(luceneDocId)
         doc.getValues(OdinsonIndexWriter.SENT_ID_FIELD).head.toInt
       } catch {
-        case e: Throwable => throw OdinsonException(
+        case _: Throwable => throw OdinsonException(
             s"Lucene doc ${luceneDocId} has no field '{OdinsonIndexWriter.SENT_ID_FIELD}'"
           )
       }
@@ -45,7 +45,7 @@ object ExtractorEngineUtils {
         val fname = parentDoc.getField(parentDocFileName).stringValue
         new File(docsDir, fname)
       } catch {
-        case e: Throwable =>
+        case _: Throwable =>
           throw OdinsonException(
             s"'${parentDocFileName}' field missing from Odinson Document Metadata for ${odinsonDocId}"
           )

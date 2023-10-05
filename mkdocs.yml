@@ -33,14 +33,11 @@ nav:
     - Development:
         - Install: dev/install.md
         - Documentation: dev/documentation.md
-        - Developing: dev/developing.md
         - Testing: dev/test.md
-        - Annotations: dev/annotations.md
-        - How it Works: dev/howitworks.md
         - FAQ: dev/faq.md
     - API Documentation:
-        - "python": api/python/lum/odinson/rest/index.html
-        - "odinson-rest": api/odinson-rest/index.html
+        - "<code>python</code>": api/python/lum/odinson/rest/index.html
+        - "<code>odinson-rest</code>": api/odinson-rest/index.html
     - Contributors: authors.md
 
 extra_css:

@@ -135,7 +135,7 @@ package object json {
           "end" -> ngram.end
           // avoid including empty namedCaptures
         )
-      case other =>
+      case other@_ =>
         Json.obj(
           "start" -> m.start,
           "end" -> m.end,

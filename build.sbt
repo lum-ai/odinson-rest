@@ -8,6 +8,7 @@ import com.typesafe.sbt.packager.docker.{ DockerChmodType }
 // git.uncommittedSignifier := Some("DIRTY") // with uncommitted changes?
 // git.baseVersion := "0.1.0-SNAPSHOT"
 
+// see https://tpolecat.github.io/2017/04/25/scalac-flags.html
 lazy val commonScalacOptions = Seq(
   "-feature",
   "-unchecked",
@@ -15,7 +16,11 @@ lazy val commonScalacOptions = Seq(
   "-Xlint",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
-  "-Ywarn-unused",
+  "-Ywarn-inaccessible", // Warn about inaccessible types in method signatures.
+  "-Ywarn-infer-any", // Warn when a type argument is inferred to be `Any`.
+  // some of the "unused" imports *are* used
+  //"-Ywarn-unused",
+  "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-encoding", "utf8"
 )
 
@@ -28,12 +33,11 @@ ThisBuild / homepage := Some(url("https://github.com/lum-ai/odinson-rest"))
 
 lazy val commonSettings = Seq(
   organization := "ai.lum",
-  scalaVersion := "2.12.10",
-  // we want to use -Ywarn-unused-import most of the time
-  scalacOptions ++= commonScalacOptions,
-  scalacOptions += "-Ywarn-unused-import",
-  // -Ywarn-unused-import is annoying in the console
-  Compile / console / scalacOptions := commonScalacOptions,
+  scalaVersion := "2.12.17",
+  scalacOptions := commonScalacOptions,
+  //scalacOptions ++= commonScalacOptions,
+  // TODO: anything to filter out here?
+  Compile / console / scalacOptions := commonScalacOptions, //--= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
   // show test duration
   Test / testOptions += Tests.Argument("-oD"),
   // avoid dep. conflict in assembly task for webapp
@@ -41,25 +45,22 @@ lazy val commonSettings = Seq(
   Test / parallelExecution := false
 )
 
-// example specifying credentials using ENV variables:
-// AWS_ACCESS_KEY_ID="XXXXXX" AWS_SECRET_KEY="XXXXXX"
-
 lazy val sharedDeps = {
   libraryDependencies ++= {
     val odinsonVersion  = "0.6.1"
-    val json4sVersion   = "3.2.11" // "3.5.2"
+    val json4sVersion   = "4.0.6" //"3.2.11" // "3.5.2"
     val luceneVersion   = "6.6.0"
     Seq(
       guice,
       jdbc,
       caffeine,
-      "org.scalatest" %% "scalatest" % "3.0.5",
-      "com.typesafe.scala-logging" %%  "scala-logging" % "3.5.0",
-      "ch.qos.logback" %  "logback-classic" % "1.1.7",
+      "org.scalatest" %% "scalatest" % "3.2.8", //3.2.17",
+      "com.typesafe.scala-logging" %%  "scala-logging" % "3.9.5",
+      // "ch.qos.logback" %  "logback-classic" % "1.4.11",
       "org.json4s" %% "json4s-core" % json4sVersion,
       "ai.lum"        %% "common"               % "0.1.5",
       "ai.lum"        %% "odinson-core"         % odinsonVersion,
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     )
   }
 }
@@ -131,7 +132,7 @@ lazy val packagerSettings = {
       //"play.server.akka.terminationTimeout=10s",
       //"-Dplay.server.http.idleTimeout=2400s"
     ),
-    Docker / dockerEnvVars ++= Map(
+    dockerEnvVars ++= Map(
       "APP_VERSION" -> scala.util.Properties.envOrElse("APP_VERSION", "???"),
       "APPLICATION_SECRET" -> "this-is-not-a-secure-key-please-change-me",
       // NOTE: bind mount odison dir to /data/odinson

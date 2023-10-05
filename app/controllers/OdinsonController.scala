@@ -6,24 +6,25 @@ import ai.lum.odinson.digraph.Vocabulary
 import ai.lum.odinson.lucene._
 import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc }
 import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
-import ai.lum.odinson.lucene.index.OdinsonIndexWriter
+//import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.requests._
 import ai.lum.odinson.rest.responses._
-import org.apache.lucene.document.{ Document => LuceneDocument }
+//import org.apache.lucene.document.{ Document => LuceneDocument }
 import org.apache.lucene.store.FSDirectory
-import play.api.Configuration
+//import play.api.Configuration
 import play.api.http.ContentTypes
 import play.api.libs.json._
 import play.api.mvc._
 
 import java.io.File
-import java.nio.file.{ Files, Path }
+import java.nio.file.Path
+//import java.nio.file.{ Files, Path }
 import java.nio.charset.StandardCharsets
 import javax.inject._
 import scala.collection.JavaConverters._
-import scala.concurrent.duration._
+//import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
@@ -94,7 +95,7 @@ class OdinsonController @Inject() (
   def validateOdinsonDocumentRelaxedMode(): Action[AnyContent] = Action { request =>
     try {
       val json = request.body.asJson.get
-      val validated = json match {
+      val _ = json match {
         case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
         // case jsArray: JsArray
         case _ => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
@@ -110,7 +111,7 @@ class OdinsonController @Inject() (
   def validateOdinsonDocumentStrictMode(): Action[AnyContent] = Action { request =>
     try {
       val json = request.body.asJson.get
-      val validated = json match {
+      val _ = json match {
         case jsObject: JsObject => validateOdinsonDocument(jsObject, false)
         // case jsArray: JsArray
         case _ => BadRequest("Malformed JSON.  Send a single OdinsonDocument.")
@@ -180,7 +181,7 @@ class OdinsonController @Inject() (
             try {
               val oldDocFile = engine.getDocJsonFile(doc.id, tempConfig)
               oldDocFile.delete()
-            } catch { case e: Throwable => { () } }
+            } catch { case _: Throwable => { () } }
             // Update index & write JSON file
             engine.index.updateOdinsonDoc(doc)
             doc.writeDoc(config)
@@ -221,8 +222,8 @@ class OdinsonController @Inject() (
         val depsVocabSize = {
           loadVocabulary.terms.toSet.size
         }
-        val fields = engine.index.listFields()
-        val fieldNames = fields.iterator.asScala.toList
+        //val fields = engine.index.listFields()
+        //val fieldNames = fields.iterator.asScala.toList
         val storedFields =
           if (engine.numDocs < 1) {
             Nil
@@ -316,7 +317,7 @@ class OdinsonController @Inject() (
       val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
       Some(contents)
     } catch {
-      case e: Throwable =>
+      case _: Throwable =>
         None
     }
 
@@ -351,7 +352,7 @@ class OdinsonController @Inject() (
         case Some(grammar) =>
           ExtractorEngine.usingEngine(config) { engine =>
             // validation here
-            val res = engine.compileRuleString(rules = grammar)
+            val _ = engine.compileRuleString(rules = grammar)
             // println(f"grammar:")
             // res.foreach(ex => println(f"   extractor => ${ex}"))
             // println()

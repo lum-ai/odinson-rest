@@ -395,7 +395,7 @@ class FrequencyController @Inject() (
         // empty list can't be counted
         case Nil => Nil
         // the last item in the list -- all remaining data fall into the last bin
-        case head @ _ :: Nil => data.size :: result
+        case _ :: Nil => data.size :: result
         // shave off the unallocated datapoints that fall under this boundary cutoff and count them
         case head :: tail =>
           val (leftward, rightward) = data.partition(_ < head)
@@ -567,7 +567,7 @@ class FrequencyController @Inject() (
           // filter the rules by name, if a filter was passed
           // .filter{ case (ruleName, ms) => isMatch(ruleName, filter) }
           // count how many matches for each rule
-          .map { case (k, v) => v.length.toDouble }
+          .map { case (k@_, v) => v.length.toDouble }
           .toList
 
         val jsonObjs = processCounts(frequencies, bins, equalProbability, xLogScale)

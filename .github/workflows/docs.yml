@@ -63,12 +63,13 @@ jobs:
     # - name: "Code coverage reports for Scala components"
     #   working-directory: .
     #   run: |
-    #     sbt clean;coverage;test
+    #     sbt clean coverage test
     #     sbt coverageReport
     #     sbt coverageAggregate
 
     # code coverage (Python)
-    - name: "Code coverage reports for Python components"
+    - name: "Code coverage reports (Python)"
+      working-directory: ./python
       run: |
         pytest
 

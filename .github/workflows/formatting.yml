@@ -23,7 +23,8 @@ jobs:
     # Scala
     ##################################
     - name: Lint check via scalafmt
-      run: sbt scalafmtCheckAll
+      run: |
+        sbt scalafmtCheckAll
     ##################################
     # Python
     ##################################

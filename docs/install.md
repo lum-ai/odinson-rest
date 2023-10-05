@@ -4,15 +4,15 @@
 
 - [sbt](https://www.scala-sbt.org/)
 - [docker](https://docs.docker.com/get-docker/)
-- >= 8G of RAM
+- >= G of RAM
 
 ## REST API
 
-### Releases
+<!-- ### Releases
 
 We publish releases in the form of docker images:
 
-- ??
+- ?? -->
 
 ### Build
 
@@ -32,8 +32,8 @@ For information on additional tasks (generating Dockerfiles, publishing images, 
 
 ```bash
 sbt ";clean; docker:stage"
-cd rest/target/docker/stage/
-docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/cgiar-reader-rest-api:amd64" .
+cd target/docker/stage
+docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/odinson-rest-api:amd64" .
 ```
 
 #### `sbt` (Scala)
