@@ -47,8 +47,7 @@ class OdinsonController @Inject() (
   // format: on
 
   /** Initializes index directory structure if the app is started with an empty index.
-   *
-   */
+    */
   def initializeIndex(): Unit = {
     // def setPermissions(f: File): Unit = {
     //   f.setReadable(true, false)
@@ -66,9 +65,10 @@ class OdinsonController @Inject() (
     // Files.setPosixFilePermissions(docsDir.toPath(), permissions)
     // Files.setPosixFilePermissions(indexDir.toPath(), permissions)
     ExtractorEngine.usingEngine(config) { engine =>
-    // initialize empty index
+      // initialize empty index
     }
   }
+
   initializeIndex()
 
   /** Inspects JSON to see if it is valid OdinsonDocument, and throws an exception for any error
@@ -170,14 +170,17 @@ class OdinsonController @Inject() (
           }
 
           val maxTokensPerSentence: Int = maxTokens.max(defaultMaxTokens)
-          val tempConfig = config.withValue("odinson.index.maxNumberOfTokensPerSentence", ConfigValueFactory.fromAnyRef(maxTokensPerSentence))
+          val tempConfig = config.withValue(
+            "odinson.index.maxNumberOfTokensPerSentence",
+            ConfigValueFactory.fromAnyRef(maxTokensPerSentence)
+          )
           println(s"maxTokensPerSentence: ${maxTokensPerSentence}")
           ExtractorEngine.usingEngine(tempConfig) { engine =>
             // Delete old JSON file (if exists)
             try {
               val oldDocFile = engine.getDocJsonFile(doc.id, tempConfig)
               oldDocFile.delete()
-            } catch {case e: Throwable => { () } }
+            } catch { case e: Throwable => { () } }
             // Update index & write JSON file
             engine.index.updateOdinsonDoc(doc)
             doc.writeDoc(config)
@@ -307,25 +310,27 @@ class OdinsonController @Inject() (
   }
 
   /** Parses body as raw string
-   */
-  def bodyToString(body: AnyContent): Option[String] = try {
+    */
+  def bodyToString(body: AnyContent): Option[String] =
+    try {
       val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
       Some(contents)
-  } catch {
-    case e: Throwable =>
-      None
-  }
+    } catch {
+      case e: Throwable =>
+        None
+    }
 
   /** Validates an Odinson rule.
     */
-  def validateOdinsonRule(): Action[AnyContent] = Action { request => try {
+  def validateOdinsonRule(): Action[AnyContent] = Action { request =>
+    try {
       bodyToString(request.body) match {
         case Some(rule) =>
           ExtractorEngine.usingEngine(config) { engine =>
             // validation here
-            //println(f"rule:\t${rule}")
+            // println(f"rule:\t${rule}")
             engine.mkQuery(rule)
-          } 
+          }
         case None =>
           BadRequest("Malformed body.  Send a single rule.")
       }
@@ -340,7 +345,8 @@ class OdinsonController @Inject() (
 
   /** Validates an Odinson grammar.
     */
-  def validateOdinsonGrammar(): Action[AnyContent] = Action { request => try {
+  def validateOdinsonGrammar(): Action[AnyContent] = Action { request =>
+    try {
       bodyToString(request.body) match {
         case Some(grammar) =>
           ExtractorEngine.usingEngine(config) { engine =>
@@ -349,7 +355,7 @@ class OdinsonController @Inject() (
             // println(f"grammar:")
             // res.foreach(ex => println(f"   extractor => ${ex}"))
             // println()
-          } 
+          }
         case None =>
           BadRequest("Malformed body.  Send a single grammar (YAML).")
       }
@@ -461,7 +467,8 @@ class OdinsonController @Inject() (
 
         val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
 
-        val json = Json.toJson(engine.mkMentionsJson(None, duration, allowTriggerOverlaps, mentions))
+        val json =
+          Json.toJson(engine.mkMentionsJson(None, duration, allowTriggerOverlaps, mentions))
         json.format(pretty)
       } catch handleNonFatal
     }

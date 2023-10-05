@@ -15,4 +15,5 @@ object OdinsonErrors {
     val errors = Seq(error.getMessage)
     OdinsonErrors(errors = errors)
   }
+
 }

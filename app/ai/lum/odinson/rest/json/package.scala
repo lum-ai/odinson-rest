@@ -10,7 +10,7 @@ import ai.lum.odinson.{
   Mention,
   NamedCapture,
   NGramMatch,
-  OdinsonMatch,
+  OdinsonMatch
 }
 import ai.lum.odinson.rest.utils.ExtractorEngineUtils
 import com.typesafe.config.Config
@@ -126,13 +126,13 @@ package object json {
           "end" -> em.trigger.end,
           // FIXME: should we simplify this?
           "trigger" -> mkJsonForMatch(em),
-          "namedCaptures" -> Json.arr(em.namedCaptures.map(mkJsonForNamedCapture): _*),
+          "namedCaptures" -> Json.arr(em.namedCaptures.map(mkJsonForNamedCapture): _*)
           // ignore argumentMetadata
         )
       case ngram: NGramMatch =>
         Json.obj(
           "start" -> ngram.start,
-          "end" -> ngram.end,
+          "end" -> ngram.end
           // avoid including empty namedCaptures
         )
       case other =>
