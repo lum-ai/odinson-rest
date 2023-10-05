@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gus Hahn-Powell" name="author"/>
+<link href="https://docs.parsertongue.org/odinson-rest/dev/annotations/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>Annotations - odinson-rest</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" rel="stylesheet">
+<link href="../../css/theme.css" rel="stylesheet">
+<link href="../../css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" rel="stylesheet"/>
+<link href="../../css/extra.css" rel="stylesheet"/>
+<script>
+    // Current page data
+    var mkdocs_page_name = "Annotations";
+    var mkdocs_page_input_path = "dev/annotations.md";
+    var mkdocs_page_url = "/odinson-rest/dev/annotations/";
+  </script>
+<script defer="" src="../../js/jquery-2.1.1.min.js"></script>
+<script defer="" src="../../js/modernizr-2.8.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/scala.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</link></link></head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href="../.."> odinson-rest</a>
+<div role="search">
+<form action="../../search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">Installation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/">Usage</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation/">Documentation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developing/">Developing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../test/">Testing</a>
+</li>
+<li class="toctree-l1 current"><a class="reference internal current" href="./">Annotations</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#processors">Processors</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#customprocessor">CustomProcessor</a>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cluprocessor">CluProcessor</a>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#proxiedprocessor">ProxiedProcessor</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#lexicon-ner">Lexicon NER</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../howitworks/">How it Works</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/">python</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/">odinson-rest</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../authors/">Contributors</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="../..">odinson-rest</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a href="../..">Docs</a> »</li>
+<li>Development »</li>
+<li>Annotations</li>
+<li class="wy-breadcrumbs-aside">
+<a class="icon icon-github" href="https://github.com/clu-ling/odinson-rest/blob/main/docs/dev/annotations.md"> Edit on GitHub</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div role="main">
+<div class="section">
+<h1 id="annotations">Annotations<a class="headerlink" href="#annotations" title="Permanent link"></a></h1>
+<p>The rules defined in the <code>cgiar-reader</code> grammars are run over annotated text, which is generated by a <a href="https://github.com/clulab/processors/blob/master/main/src/main/scala/org/clulab/processors/Processor.scala"><code>Processor</code></a> to produce an annotated <a href="https://github.com/clulab/processors/blob/master/main/src/main/scala/org/clulab/processors/Document.scala"><code>Document</code></a> instance that can be serialized to JSON. Example JSON output for the text "How many TEUs of Frozen Meat are heading to Hamburg?" can be found in <a href="https://gist.github.com/zwellington/21688441b3d8a62f8e2f2051e1792a63">this Github Gist</a>.</p>
+<h2 id="processors">Processors<a class="headerlink" href="#processors" title="Permanent link"></a></h2>
+<p>Currently there are three processors avalaible to the REST API: <code>Custom</code>, <code>CluProcessor</code>, and <code>ProxiedProcessor</code>. </p>
+<h3 id="customprocessor"><code>CustomProcessor</code><a class="headerlink" href="#customprocessor" title="Permanent link"></a></h3>
+<p>The <code>Custom</code> processor uses a mixture of components from the <a href="https://github.com/lum-ai/cgiar-reader/blob/master/reader/src/main/scala/ai/lum/mr/cgiar/processors/CustomProcessor.scala"><code>clulab/processors</code></a> library with custom pre- and post-processing hooks.  </p>
+<h3 id="cluprocessor"><code>CluProcessor</code><a class="headerlink" href="#cluprocessor" title="Permanent link"></a></h3>
+<p><code>CluProcessor</code> comes directly from <a href="https://github.com/clulab/processors/blob/master/main/src/main/resources/cluprocessor.conf"><code>clulab/processors</code></a>. </p>
+<h3 id="proxiedprocessor"><code>ProxiedProcessor</code><a class="headerlink" href="#proxiedprocessor" title="Permanent link"></a></h3>
+<p>The <code>ProxiedProcessor</code> performs annotation via REST calls and allowing the user to easily mix components written in different programming languages.  The <code>ProxiedProcessor</code> is defined in <a href="https://github.com/lum-ai/cgiar-reader/blob/master/reader/src/main/scala/ai/lum/mr/processors/ProxiedProcessor.scala"><code>reader/src/main/scala/ai/lum/mr/processors</code></a>. One can use <a href="https://spacy.io/">SpaCy</a> for annotation via the <a href="https://github.com/clu-ling/clu-spacy"><code>clu-spacy</code> library</a>).</p>
+<h2 id="lexicon-ner">Lexicon NER<a class="headerlink" href="#lexicon-ner" title="Permanent link"></a></h2>
+<p>The Lexicon NER allows you to specify many strings that should be given a certain Named Entity label which can help downstream processes recognize entities. To add new strings (or edit existing ones), follow these steps.</p>
+<ol>
+<li>Create a new file or edit the strings in the TSVs under the <a href="https://github.com/lum-ai/cgiar-reader/blob/master/reader/src/main/resources/ai/lum/kb/raw"><code>reader/src/main/resources/ai/lum/kb/raw/</code></a> folder. The TSVs are of the format <string match="" to=""> TAB <grounded entity="">. </grounded></string></li>
+<li>If you add a new file, update the <a href="https://github.com/lum-ai/cgiar-reader/blob/lexiconNer/reader/src/main/resources/ai/lum/kb/cgiar.tsv"><code>cgiar.tsv</code></a> record to reflect what NE label the strings beneath should be assigned. Update <code>ai.lum.mr.ner.kbs</code> in <a href="https://github.com/lum-ai/cgiar-reader/blob/lexiconNer/reader/src/main/resources/reference.conf"><code>reference.conf</code></a> with the path where the new KB will be.  </li>
+<li>Run <code>sbt "reader/runMain ai.lum.mr.cgiar.ner.CustomKbGenerator"</code> to bundle the TSVs into a format the LexiconNER can use.</li>
+<li>Create rules that make reference to the <code>entity</code> field (e.g. using <code>[entity=/Crop/]</code> and assign an appropriate taxonomy label (being sure to update taxonomy.yml).</li>
+</ol>
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="../howitworks/" title="How it Works">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../test/" title="Testing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>Copyright © 2023 <a href="https://parsertongue.org">parsertongue.org</a>.</p>
+</div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a class="fa fa-github" href="https://github.com/clu-ling/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
+</span>
+<span><a href="../test/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../howitworks/" style="color: #fcfcfc">Next »</a></span>
+</span>
+</div>
+<script>var base_url = '../..';</script>
+<script defer="" src="../../js/theme_extra.js"></script>
+<script defer="" src="../../js/theme.js"></script>
+<script defer="" src="../../search/main.js"></script>
+<script defer="">
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+</body>
+</html>

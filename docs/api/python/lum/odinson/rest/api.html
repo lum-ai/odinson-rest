@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>lum.odinson.rest.api API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML" integrity="sha256-kZafAc6mZvK3W3v1pHOcUix30OHQN6pU/NO2oFkqZVw=" crossorigin></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>lum.odinson.rest.api</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from __future__ import annotations
+from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
+from lum.odinson.doc import AnyField, Document, Sentence
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, Statistic, Results
+from pydantic import BaseModel
+from dataclasses import dataclass
+import pydantic
+import json
+import requests
+import urllib.parse
+
+__all__ = [&#34;OdinsonBaseAPI&#34;]
+
+# __all__ = [&#34;Results&#34;, &#34;Result&#34;, &#34;Match&#34;, &#34;Interval&#34;]
+
+
+class OdinsonBaseAPI:
+    def __init__(self, address: Text):
+        self.address = address
+
+    @staticmethod
+    def status_code_to_bool(code: int) -&gt; bool:
+        return True if code == requests.codes.ok else False
+
+    def __len__(self) -&gt; int:
+        return self.numdocs
+
+    @property
+    def numdocs(self) -&gt; int:
+        &#34;&#34;&#34;Total number of documents (num. docs = num. sentences) in the corpus.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/numdocs&#34;
+        return requests.get(endpoint).json()
+
+    @property
+    def tags_vocabulary(self) -&gt; List[str]:
+        &#34;&#34;&#34;Retrieves vocabulary of part-of-speech tags for the current index.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/tags-vocabulary&#34;
+        return requests.get(endpoint).json()
+
+    @property
+    def edge_vocabulary(self) -&gt; List[str]:
+        &#34;&#34;&#34;Retrieves vocabulary of dependencies for the current index.&#34;&#34;&#34;
+        # FIXME: change this to edge-vocabulary
+        endpoint = f&#34;{self.address}/api/dependencies-vocabulary&#34;
+        return requests.get(endpoint).json()
+
+    def corpus(self) -&gt; CorpusInfo:
+        &#34;&#34;&#34;&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/corpus&#34;
+        # return requests.get(endpoint).json()
+        return CorpusInfo(**requests.get(endpoint).json())
+
+    # api/config
+    def buildinfo(self) -&gt; Dict[str, Union[str, List[str], bool]]:
+        &#34;&#34;&#34;Provides detailed build information about the currently running app.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/buildinfo&#34;
+        return requests.get(endpoint).json()
+
+    # api/config
+    def _config(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Provides detailed build information about the currently running app.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/config&#34;
+        return requests.get(endpoint).json()
+
+    def term_freq(self) -&gt; List[Statistic]:
+        pass
+
+    def rule_freq(
+        self,
+        # An Odinson grammar.
+        grammar: str,
+        # Whether or not event arguments are permitted to overlap with the event&#39;s trigger. Defaults to false.
+        allow_trigger_overlaps: bool = False,
+        # The order in which to return results: &#34;freq&#34; (frequency order, default) or &#34;alpha&#34; (alphanumeric order).
+        order: Literal[&#34;freq&#34;, &#34;alpha&#34;] = &#34;freq&#34;,
+        # The smallest rank to return, with 0 (default) being the highest ranked.
+        min: int = 0,
+        # The highest rank to return, e.g. 9 (default).
+        max: int = 0,
+        # Scaling to apply to frequency counts. Choices are &#34;count&#34; (default), &#34;log10&#34;, and &#34;percent&#34;.
+        scale: Literal[&#34;count&#34;, &#34;log10&#34;, &#34;percent&#34;] = &#34;count&#34;,
+        # Whether to reverse the rank order, to select the 10 lease frequent results, for example.
+        reverse: bool = False,
+    ) -&gt; List[Statistic]:
+        payload = {
+            &#34;grammar&#34;: grammar,
+            &#34;allowTriggerOverlaps&#34;: allow_trigger_overlaps,
+            &#34;order&#34;: order,
+            &#34;min&#34;: min,
+            &#34;max&#34;: max,
+            &#34;scale&#34;: scale,
+            &#34;reverse&#34;: reverse,
+            &#34;pretty&#34;: False,
+        }
+        endpoint = f&#34;{self.address}/api/rule-freq&#34;
+        return requests.post(endpoint, json=payload).json()
+
+    def _post_doc(
+        self, endpoint: str, doc: Document, headers: Optional[Dict[str, str]] = None
+    ) -&gt; requests.Response:
+        return requests.post(
+            endpoint,
+            json=doc.dict(),
+            # NOTE: data takes str &amp; .json() returns json str
+            # strange as it seems, this round trip is seems necessary for at least some files
+            # data=json.dumps(json.loads(doc.json())),
+            headers=headers,
+        )
+
+    def _post_text(
+        self, endpoint: str, text: str, headers: Optional[Dict[str, str]] = None
+    ) -&gt; requests.Response:
+        return requests.post(
+            endpoint,
+            json=text,
+            # NOTE: data takes str &amp; .json() returns json str
+            # strange as it seems, this round trip is seems necessary for at least some files
+            # data=json.dumps(json.loads(doc.json())),
+            headers=headers,
+        )
+
+    def validate_document(self, doc: Document, strict: bool = True) -&gt; bool:
+        &#34;&#34;&#34;Inspects and validates an OdinsonDocument&#34;&#34;&#34;
+        endpoint = (
+            f&#34;{self.address}/api/validate/document/strict&#34;
+            if strict
+            else f&#34;{self.address}/api/validate/document/relaxed&#34;
+        )
+        res = self._post_doc(endpoint=endpoint, doc=doc)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def validate_rule(
+        self, rule: str, verbose: bool = False
+    ) -&gt; Union[bool, OdinsonErrors]:
+        &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/validate/rule&#34;
+        res = self._post_text(endpoint=endpoint, contents=rule)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
+
+    def validate_grammar(
+        self, grammar: str, verbose: bool = False
+    ) -&gt; Union[bool, OdinsonErrors]:
+        &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/validate/grammar&#34;
+        res = self._post_text(endpoint=endpoint, contents=grammar)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
+
+    def index(self, doc: Document, max_tokens: int = -1) -&gt; bool:
+        &#34;&#34;&#34;Indexes a single Document&#34;&#34;&#34;
+        # endpoint = f&#34;{self.address}/api/index/document&#34;
+        endpoint = (
+            f&#34;{self.address}/api/index/document/maxTokensPerSentence/{max_tokens}&#34;
+        )
+        # NOTE: data takes str &amp; .json() returns json str
+        headers = {&#34;Content-type&#34;: &#34;application/json&#34;, &#34;Accept&#34;: &#34;text/plain&#34;}
+        res = self._post_doc(endpoint=endpoint, doc=doc, headers=headers)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
+        &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+        endpoint = (
+            f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+            if not max_tokens
+            else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
+        )
+        res = self._post_doc(endpoint=endpoint, doc=doc)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
+        &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
+        doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
+        endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+        res = requests.delete(endpoint)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def sentence(self, sentence_id: int) -&gt; Sentence:
+        &#34;&#34;&#34;Retrieves an Odinson Sentence from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/sentence/{sentence_id}&#34;
+        res = requests.get(endpoint)
+        return Sentence.model_validate(res.json())
+
+    def document(self, document_id: str) -&gt; Document:
+        &#34;&#34;&#34;Retrieves an Odinson Document from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/document/{document_id}&#34;
+        res = requests.get(endpoint)
+        return Document.model_validate(res.json())
+
+    def metadata_for_sentence(self, sentence_id: str) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate(
+            {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+        )
+        return doc.metadata
+
+    def metadata_for_document(self, document_id: str) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate(
+            {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+        )
+        return doc.metadata
+
+    def metadata(self, id: Union[str, int]) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        if isinstance(id, str):
+            return self.metadata_for_document(id)
+        elif isinstance(id, int):
+            return self.metadata_for_sentence(id)
+
+    # /api/parent/sentence/:sentenceId
+    # /api/metadata/document/:odinsonDocId
+    # /api/metadata/sentence/:sentenceId
+
+    def _search(
+        self,
+        # An Odinson pattern.
+        # Example: [lemma=pie] []
+        odinson_query: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains &#39;Special Agent&#39;
+        label: Optional[str] = None,
+        # Whether or not the results of this query should be committed to the State.
+        commit: bool = False,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None,
+    ) -&gt; Results:  # -&gt; Iterator[S]:
+        endpoint = f&#34;{self.address}/api/execute/pattern&#34;
+        params = {
+            &#34;odinsonQuery&#34;: odinson_query,
+            &#34;metadataQuery&#34;: metadata_query,
+            &#34;label&#34;: label,
+            &#34;commit&#34;: commit,
+            &#34;prevDoc&#34;: prev_doc,
+            &#34;prevScore&#34;: prev_score,
+        }
+        params = {k: v for (k, v) in params.items() if v}
+        # print(params)
+        res = requests.get(endpoint, params=params).json()
+        # print(res)
+        return Results(**res)
+
+    def search(
+        self,
+        # An Odinson pattern.
+        # Example: [lemma=pie] []
+        odinson_query: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains &#39;Special Agent&#39;
+        label: Optional[str] = None,
+        # Whether or not the results of this query should be committed to the State.
+        commit: bool = False,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None,
+    ) -&gt; Results:  # -&gt; Iterator[S]:
+        endpoint = f&#34;{self.address}/api/execute/pattern&#34;
+        params = {
+            &#34;odinsonQuery&#34;: odinson_query,
+            &#34;metadataQuery&#34;: metadata_query,
+            &#34;label&#34;: label,
+            &#34;commit&#34;: commit,
+            &#34;prevDoc&#34;: prev_doc,
+            &#34;prevScore&#34;: prev_score,
+        }
+        seen = 0
+        results: Results = self._search(
+            odinson_query=odinson_query,
+            metadata_query=metadata_query,
+            label=label,
+            commit=commit,
+            prev_doc=prev_doc,
+        )
+        total = results.total_hits
+        last = results.score_docs[-1]
+        while seen &lt; total:
+            for sd in results.score_docs:
+                seen += 1
+                last = sd
+                # print(f&#34;{seen-1}/{total}&#34;)
+                # print(f&#34;sd.document_id:\t{sd.document_id}&#34;)
+                # print(f&#34;sd.sentence_id:\t{sd.sentence_id}\n&#34;)
+                # FIXME: should this be a Results() with a single doc?
+                yield sd
+            # paginate
+            results: Results = self._search(
+                odinson_query=odinson_query,
+                metadata_query=metadata_query,
+                label=label,
+                commit=commit,
+                prev_doc=last.sentence_id,
+            )
+            # print(f&#34;total_hits:\t{results.total_hits}&#34;)
+
+    # TODO: add method to retrieve doc for id
+    # TODO: add rewrite method
+    # for any token that matches the pattern, replace its entry in field &lt;field&gt; with &lt;label&gt;
+    # ex [word=&#34;Table&#34; &amp; tag=/NNP.*/] -&gt; {scratch: &#34;CAPTION&#34;}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI"><code class="flex name class">
+<span>class <span class="ident">OdinsonBaseAPI</span></span>
+<span>(</span><span>address: Text)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OdinsonBaseAPI:
+    def __init__(self, address: Text):
+        self.address = address
+
+    @staticmethod
+    def status_code_to_bool(code: int) -&gt; bool:
+        return True if code == requests.codes.ok else False
+
+    def __len__(self) -&gt; int:
+        return self.numdocs
+
+    @property
+    def numdocs(self) -&gt; int:
+        &#34;&#34;&#34;Total number of documents (num. docs = num. sentences) in the corpus.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/numdocs&#34;
+        return requests.get(endpoint).json()
+
+    @property
+    def tags_vocabulary(self) -&gt; List[str]:
+        &#34;&#34;&#34;Retrieves vocabulary of part-of-speech tags for the current index.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/tags-vocabulary&#34;
+        return requests.get(endpoint).json()
+
+    @property
+    def edge_vocabulary(self) -&gt; List[str]:
+        &#34;&#34;&#34;Retrieves vocabulary of dependencies for the current index.&#34;&#34;&#34;
+        # FIXME: change this to edge-vocabulary
+        endpoint = f&#34;{self.address}/api/dependencies-vocabulary&#34;
+        return requests.get(endpoint).json()
+
+    def corpus(self) -&gt; CorpusInfo:
+        &#34;&#34;&#34;&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/corpus&#34;
+        # return requests.get(endpoint).json()
+        return CorpusInfo(**requests.get(endpoint).json())
+
+    # api/config
+    def buildinfo(self) -&gt; Dict[str, Union[str, List[str], bool]]:
+        &#34;&#34;&#34;Provides detailed build information about the currently running app.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/buildinfo&#34;
+        return requests.get(endpoint).json()
+
+    # api/config
+    def _config(self) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Provides detailed build information about the currently running app.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/config&#34;
+        return requests.get(endpoint).json()
+
+    def term_freq(self) -&gt; List[Statistic]:
+        pass
+
+    def rule_freq(
+        self,
+        # An Odinson grammar.
+        grammar: str,
+        # Whether or not event arguments are permitted to overlap with the event&#39;s trigger. Defaults to false.
+        allow_trigger_overlaps: bool = False,
+        # The order in which to return results: &#34;freq&#34; (frequency order, default) or &#34;alpha&#34; (alphanumeric order).
+        order: Literal[&#34;freq&#34;, &#34;alpha&#34;] = &#34;freq&#34;,
+        # The smallest rank to return, with 0 (default) being the highest ranked.
+        min: int = 0,
+        # The highest rank to return, e.g. 9 (default).
+        max: int = 0,
+        # Scaling to apply to frequency counts. Choices are &#34;count&#34; (default), &#34;log10&#34;, and &#34;percent&#34;.
+        scale: Literal[&#34;count&#34;, &#34;log10&#34;, &#34;percent&#34;] = &#34;count&#34;,
+        # Whether to reverse the rank order, to select the 10 lease frequent results, for example.
+        reverse: bool = False,
+    ) -&gt; List[Statistic]:
+        payload = {
+            &#34;grammar&#34;: grammar,
+            &#34;allowTriggerOverlaps&#34;: allow_trigger_overlaps,
+            &#34;order&#34;: order,
+            &#34;min&#34;: min,
+            &#34;max&#34;: max,
+            &#34;scale&#34;: scale,
+            &#34;reverse&#34;: reverse,
+            &#34;pretty&#34;: False,
+        }
+        endpoint = f&#34;{self.address}/api/rule-freq&#34;
+        return requests.post(endpoint, json=payload).json()
+
+    def _post_doc(
+        self, endpoint: str, doc: Document, headers: Optional[Dict[str, str]] = None
+    ) -&gt; requests.Response:
+        return requests.post(
+            endpoint,
+            json=doc.dict(),
+            # NOTE: data takes str &amp; .json() returns json str
+            # strange as it seems, this round trip is seems necessary for at least some files
+            # data=json.dumps(json.loads(doc.json())),
+            headers=headers,
+        )
+
+    def _post_text(
+        self, endpoint: str, text: str, headers: Optional[Dict[str, str]] = None
+    ) -&gt; requests.Response:
+        return requests.post(
+            endpoint,
+            json=text,
+            # NOTE: data takes str &amp; .json() returns json str
+            # strange as it seems, this round trip is seems necessary for at least some files
+            # data=json.dumps(json.loads(doc.json())),
+            headers=headers,
+        )
+
+    def validate_document(self, doc: Document, strict: bool = True) -&gt; bool:
+        &#34;&#34;&#34;Inspects and validates an OdinsonDocument&#34;&#34;&#34;
+        endpoint = (
+            f&#34;{self.address}/api/validate/document/strict&#34;
+            if strict
+            else f&#34;{self.address}/api/validate/document/relaxed&#34;
+        )
+        res = self._post_doc(endpoint=endpoint, doc=doc)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def validate_rule(
+        self, rule: str, verbose: bool = False
+    ) -&gt; Union[bool, OdinsonErrors]:
+        &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/validate/rule&#34;
+        res = self._post_text(endpoint=endpoint, contents=rule)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
+
+    def validate_grammar(
+        self, grammar: str, verbose: bool = False
+    ) -&gt; Union[bool, OdinsonErrors]:
+        &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/validate/grammar&#34;
+        res = self._post_text(endpoint=endpoint, contents=grammar)
+        if res.status_code == 200:
+            return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+        else:
+            return False if not verbose else OdinsonErrors.model_validate(res.json())
+
+    def index(self, doc: Document, max_tokens: int = -1) -&gt; bool:
+        &#34;&#34;&#34;Indexes a single Document&#34;&#34;&#34;
+        # endpoint = f&#34;{self.address}/api/index/document&#34;
+        endpoint = (
+            f&#34;{self.address}/api/index/document/maxTokensPerSentence/{max_tokens}&#34;
+        )
+        # NOTE: data takes str &amp; .json() returns json str
+        headers = {&#34;Content-type&#34;: &#34;application/json&#34;, &#34;Accept&#34;: &#34;text/plain&#34;}
+        res = self._post_doc(endpoint=endpoint, doc=doc, headers=headers)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
+        &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+        endpoint = (
+            f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+            if not max_tokens
+            else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
+        )
+        res = self._post_doc(endpoint=endpoint, doc=doc)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
+        &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
+        doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
+        endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+        res = requests.delete(endpoint)
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+
+    def sentence(self, sentence_id: int) -&gt; Sentence:
+        &#34;&#34;&#34;Retrieves an Odinson Sentence from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/sentence/{sentence_id}&#34;
+        res = requests.get(endpoint)
+        return Sentence.model_validate(res.json())
+
+    def document(self, document_id: str) -&gt; Document:
+        &#34;&#34;&#34;Retrieves an Odinson Document from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/document/{document_id}&#34;
+        res = requests.get(endpoint)
+        return Document.model_validate(res.json())
+
+    def metadata_for_sentence(self, sentence_id: str) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate(
+            {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+        )
+        return doc.metadata
+
+    def metadata_for_document(self, document_id: str) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
+        res = requests.get(endpoint)
+        print(res.json())
+        doc = Document.model_validate(
+            {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+        )
+        return doc.metadata
+
+    def metadata(self, id: Union[str, int]) -&gt; List[AnyField]:
+        &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+        if isinstance(id, str):
+            return self.metadata_for_document(id)
+        elif isinstance(id, int):
+            return self.metadata_for_sentence(id)
+
+    # /api/parent/sentence/:sentenceId
+    # /api/metadata/document/:odinsonDocId
+    # /api/metadata/sentence/:sentenceId
+
+    def _search(
+        self,
+        # An Odinson pattern.
+        # Example: [lemma=pie] []
+        odinson_query: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains &#39;Special Agent&#39;
+        label: Optional[str] = None,
+        # Whether or not the results of this query should be committed to the State.
+        commit: bool = False,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None,
+    ) -&gt; Results:  # -&gt; Iterator[S]:
+        endpoint = f&#34;{self.address}/api/execute/pattern&#34;
+        params = {
+            &#34;odinsonQuery&#34;: odinson_query,
+            &#34;metadataQuery&#34;: metadata_query,
+            &#34;label&#34;: label,
+            &#34;commit&#34;: commit,
+            &#34;prevDoc&#34;: prev_doc,
+            &#34;prevScore&#34;: prev_score,
+        }
+        params = {k: v for (k, v) in params.items() if v}
+        # print(params)
+        res = requests.get(endpoint, params=params).json()
+        # print(res)
+        return Results(**res)
+
+    def search(
+        self,
+        # An Odinson pattern.
+        # Example: [lemma=pie] []
+        odinson_query: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains &#39;Special Agent&#39;
+        label: Optional[str] = None,
+        # Whether or not the results of this query should be committed to the State.
+        commit: bool = False,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None,
+    ) -&gt; Results:  # -&gt; Iterator[S]:
+        endpoint = f&#34;{self.address}/api/execute/pattern&#34;
+        params = {
+            &#34;odinsonQuery&#34;: odinson_query,
+            &#34;metadataQuery&#34;: metadata_query,
+            &#34;label&#34;: label,
+            &#34;commit&#34;: commit,
+            &#34;prevDoc&#34;: prev_doc,
+            &#34;prevScore&#34;: prev_score,
+        }
+        seen = 0
+        results: Results = self._search(
+            odinson_query=odinson_query,
+            metadata_query=metadata_query,
+            label=label,
+            commit=commit,
+            prev_doc=prev_doc,
+        )
+        total = results.total_hits
+        last = results.score_docs[-1]
+        while seen &lt; total:
+            for sd in results.score_docs:
+                seen += 1
+                last = sd
+                # print(f&#34;{seen-1}/{total}&#34;)
+                # print(f&#34;sd.document_id:\t{sd.document_id}&#34;)
+                # print(f&#34;sd.sentence_id:\t{sd.sentence_id}\n&#34;)
+                # FIXME: should this be a Results() with a single doc?
+                yield sd
+            # paginate
+            results: Results = self._search(
+                odinson_query=odinson_query,
+                metadata_query=metadata_query,
+                label=label,
+                commit=commit,
+                prev_doc=last.sentence_id,
+            )
+            # print(f&#34;total_hits:\t{results.total_hits}&#34;)
+
+    # TODO: add method to retrieve doc for id
+    # TODO: add rewrite method
+    # for any token that matches the pattern, replace its entry in field &lt;field&gt; with &lt;label&gt;
+    # ex [word=&#34;Table&#34; &amp; tag=/NNP.*/] -&gt; {scratch: &#34;CAPTION&#34;}</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI" href="docker.html#lum.odinson.rest.docker.DockerBasedOdinsonAPI">DockerBasedOdinsonAPI</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.status_code_to_bool"><code class="name flex">
+<span>def <span class="ident">status_code_to_bool</span></span>(<span>code: int) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def status_code_to_bool(code: int) -&gt; bool:
+    return True if code == requests.codes.ok else False</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary"><code class="name">var <span class="ident">edge_vocabulary</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>Retrieves vocabulary of dependencies for the current index.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def edge_vocabulary(self) -&gt; List[str]:
+    &#34;&#34;&#34;Retrieves vocabulary of dependencies for the current index.&#34;&#34;&#34;
+    # FIXME: change this to edge-vocabulary
+    endpoint = f&#34;{self.address}/api/dependencies-vocabulary&#34;
+    return requests.get(endpoint).json()</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.numdocs"><code class="name">var <span class="ident">numdocs</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Total number of documents (num. docs = num. sentences) in the corpus.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def numdocs(self) -&gt; int:
+    &#34;&#34;&#34;Total number of documents (num. docs = num. sentences) in the corpus.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/numdocs&#34;
+    return requests.get(endpoint).json()</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.tags_vocabulary"><code class="name">var <span class="ident">tags_vocabulary</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>Retrieves vocabulary of part-of-speech tags for the current index.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def tags_vocabulary(self) -&gt; List[str]:
+    &#34;&#34;&#34;Retrieves vocabulary of part-of-speech tags for the current index.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/tags-vocabulary&#34;
+    return requests.get(endpoint).json()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.buildinfo"><code class="name flex">
+<span>def <span class="ident">buildinfo</span></span>(<span>self) ‑> Dict[str, Union[str, List[str], bool]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides detailed build information about the currently running app.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def buildinfo(self) -&gt; Dict[str, Union[str, List[str], bool]]:
+    &#34;&#34;&#34;Provides detailed build information about the currently running app.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/buildinfo&#34;
+    return requests.get(endpoint).json()</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.corpus"><code class="name flex">
+<span>def <span class="ident">corpus</span></span>(<span>self) ‑> <a title="lum.odinson.rest.responses.CorpusInfo" href="responses.html#lum.odinson.rest.responses.CorpusInfo">CorpusInfo</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def corpus(self) -&gt; CorpusInfo:
+    &#34;&#34;&#34;&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/corpus&#34;
+    # return requests.get(endpoint).json()
+    return CorpusInfo(**requests.get(endpoint).json())</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, doc_or_id: Union[Document, Text]) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Removes an OdinsonDocument from the index.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
+    &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
+    doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
+    endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+    res = requests.delete(endpoint)
+    return OdinsonBaseAPI.status_code_to_bool(res.status_code)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.document"><code class="name flex">
+<span>def <span class="ident">document</span></span>(<span>self, document_id: str) ‑> <a title="lum.odinson.doc.Document" href="../doc.html#lum.odinson.doc.Document">Document</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves an Odinson Document from the doc store.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def document(self, document_id: str) -&gt; Document:
+    &#34;&#34;&#34;Retrieves an Odinson Document from the doc store.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/document/{document_id}&#34;
+    res = requests.get(endpoint)
+    return Document.model_validate(res.json())</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.index"><code class="name flex">
+<span>def <span class="ident">index</span></span>(<span>self, doc: Document, max_tokens: int = -1) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Indexes a single Document</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def index(self, doc: Document, max_tokens: int = -1) -&gt; bool:
+    &#34;&#34;&#34;Indexes a single Document&#34;&#34;&#34;
+    # endpoint = f&#34;{self.address}/api/index/document&#34;
+    endpoint = (
+        f&#34;{self.address}/api/index/document/maxTokensPerSentence/{max_tokens}&#34;
+    )
+    # NOTE: data takes str &amp; .json() returns json str
+    headers = {&#34;Content-type&#34;: &#34;application/json&#34;, &#34;Accept&#34;: &#34;text/plain&#34;}
+    res = self._post_doc(endpoint=endpoint, doc=doc, headers=headers)
+    return OdinsonBaseAPI.status_code_to_bool(res.status_code)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.metadata"><code class="name flex">
+<span>def <span class="ident">metadata</span></span>(<span>self, id: Union[str, int]) ‑> List[Union[lum.odinson.doc.TokensField, lum.odinson.doc.GraphField, lum.odinson.doc.StringField, lum.odinson.doc.DateField, lum.odinson.doc.NumberField, lum.odinson.doc.NestedField]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves Odinson Document Metadata from the doc store.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def metadata(self, id: Union[str, int]) -&gt; List[AnyField]:
+    &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+    if isinstance(id, str):
+        return self.metadata_for_document(id)
+    elif isinstance(id, int):
+        return self.metadata_for_sentence(id)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_document"><code class="name flex">
+<span>def <span class="ident">metadata_for_document</span></span>(<span>self, document_id: str) ‑> List[Union[lum.odinson.doc.TokensField, lum.odinson.doc.GraphField, lum.odinson.doc.StringField, lum.odinson.doc.DateField, lum.odinson.doc.NumberField, lum.odinson.doc.NestedField]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves Odinson Document Metadata from the doc store.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def metadata_for_document(self, document_id: str) -&gt; List[AnyField]:
+    &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
+    res = requests.get(endpoint)
+    print(res.json())
+    doc = Document.model_validate(
+        {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+    )
+    return doc.metadata</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_sentence"><code class="name flex">
+<span>def <span class="ident">metadata_for_sentence</span></span>(<span>self, sentence_id: str) ‑> List[Union[lum.odinson.doc.TokensField, lum.odinson.doc.GraphField, lum.odinson.doc.StringField, lum.odinson.doc.DateField, lum.odinson.doc.NumberField, lum.odinson.doc.NestedField]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves Odinson Document Metadata from the doc store.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def metadata_for_sentence(self, sentence_id: str) -&gt; List[AnyField]:
+    &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
+    res = requests.get(endpoint)
+    print(res.json())
+    doc = Document.model_validate(
+        {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
+    )
+    return doc.metadata</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.rule_freq"><code class="name flex">
+<span>def <span class="ident">rule_freq</span></span>(<span>self, grammar: str, allow_trigger_overlaps: bool = False, order: "Literal['freq', 'alpha']" = 'freq', min: int = 0, max: int = 0, scale: "Literal['count', 'log10', 'percent']" = 'count', reverse: bool = False) ‑> List[<a title="lum.odinson.rest.responses.Statistic" href="responses.html#lum.odinson.rest.responses.Statistic">Statistic</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rule_freq(
+    self,
+    # An Odinson grammar.
+    grammar: str,
+    # Whether or not event arguments are permitted to overlap with the event&#39;s trigger. Defaults to false.
+    allow_trigger_overlaps: bool = False,
+    # The order in which to return results: &#34;freq&#34; (frequency order, default) or &#34;alpha&#34; (alphanumeric order).
+    order: Literal[&#34;freq&#34;, &#34;alpha&#34;] = &#34;freq&#34;,
+    # The smallest rank to return, with 0 (default) being the highest ranked.
+    min: int = 0,
+    # The highest rank to return, e.g. 9 (default).
+    max: int = 0,
+    # Scaling to apply to frequency counts. Choices are &#34;count&#34; (default), &#34;log10&#34;, and &#34;percent&#34;.
+    scale: Literal[&#34;count&#34;, &#34;log10&#34;, &#34;percent&#34;] = &#34;count&#34;,
+    # Whether to reverse the rank order, to select the 10 lease frequent results, for example.
+    reverse: bool = False,
+) -&gt; List[Statistic]:
+    payload = {
+        &#34;grammar&#34;: grammar,
+        &#34;allowTriggerOverlaps&#34;: allow_trigger_overlaps,
+        &#34;order&#34;: order,
+        &#34;min&#34;: min,
+        &#34;max&#34;: max,
+        &#34;scale&#34;: scale,
+        &#34;reverse&#34;: reverse,
+        &#34;pretty&#34;: False,
+    }
+    endpoint = f&#34;{self.address}/api/rule-freq&#34;
+    return requests.post(endpoint, json=payload).json()</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.search"><code class="name flex">
+<span>def <span class="ident">search</span></span>(<span>self, odinson_query: str, metadata_query: Optional[str] = None, label: Optional[str] = None, commit: bool = False, prev_doc: Optional[int] = None, prev_score: Optional[float] = None) ‑> <a title="lum.odinson.rest.responses.Results" href="responses.html#lum.odinson.rest.responses.Results">Results</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def search(
+    self,
+    # An Odinson pattern.
+    # Example: [lemma=pie] []
+    odinson_query: str,
+    # A query to filter Documents by their metadata before applying an Odinson pattern.
+    metadata_query: Optional[str] = None,
+    # The label to use when committing mentions to the State.
+    # Example: character contains &#39;Special Agent&#39;
+    label: Optional[str] = None,
+    # Whether or not the results of this query should be committed to the State.
+    commit: bool = False,
+    # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+    prev_doc: Optional[int] = None,
+    # The score for the last result seen in the previous page of results.
+    prev_score: Optional[float] = None,
+) -&gt; Results:  # -&gt; Iterator[S]:
+    endpoint = f&#34;{self.address}/api/execute/pattern&#34;
+    params = {
+        &#34;odinsonQuery&#34;: odinson_query,
+        &#34;metadataQuery&#34;: metadata_query,
+        &#34;label&#34;: label,
+        &#34;commit&#34;: commit,
+        &#34;prevDoc&#34;: prev_doc,
+        &#34;prevScore&#34;: prev_score,
+    }
+    seen = 0
+    results: Results = self._search(
+        odinson_query=odinson_query,
+        metadata_query=metadata_query,
+        label=label,
+        commit=commit,
+        prev_doc=prev_doc,
+    )
+    total = results.total_hits
+    last = results.score_docs[-1]
+    while seen &lt; total:
+        for sd in results.score_docs:
+            seen += 1
+            last = sd
+            # print(f&#34;{seen-1}/{total}&#34;)
+            # print(f&#34;sd.document_id:\t{sd.document_id}&#34;)
+            # print(f&#34;sd.sentence_id:\t{sd.sentence_id}\n&#34;)
+            # FIXME: should this be a Results() with a single doc?
+            yield sd
+        # paginate
+        results: Results = self._search(
+            odinson_query=odinson_query,
+            metadata_query=metadata_query,
+            label=label,
+            commit=commit,
+            prev_doc=last.sentence_id,
+        )
+        # print(f&#34;total_hits:\t{results.total_hits}&#34;)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.sentence"><code class="name flex">
+<span>def <span class="ident">sentence</span></span>(<span>self, sentence_id: int) ‑> lum.odinson.doc.Sentence</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves an Odinson Sentence from the doc store.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sentence(self, sentence_id: int) -&gt; Sentence:
+    &#34;&#34;&#34;Retrieves an Odinson Sentence from the doc store.&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/sentence/{sentence_id}&#34;
+    res = requests.get(endpoint)
+    return Sentence.model_validate(res.json())</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.term_freq"><code class="name flex">
+<span>def <span class="ident">term_freq</span></span>(<span>self) ‑> List[<a title="lum.odinson.rest.responses.Statistic" href="responses.html#lum.odinson.rest.responses.Statistic">Statistic</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def term_freq(self) -&gt; List[Statistic]:
+    pass</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, doc: Document, max_tokens: Optional[int] = None) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
+    &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+    endpoint = (
+        f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+        if not max_tokens
+        else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
+    )
+    res = self._post_doc(endpoint=endpoint, doc=doc)
+    return OdinsonBaseAPI.status_code_to_bool(res.status_code)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.validate_document"><code class="name flex">
+<span>def <span class="ident">validate_document</span></span>(<span>self, doc: Document, strict: bool = True) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Inspects and validates an OdinsonDocument</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_document(self, doc: Document, strict: bool = True) -&gt; bool:
+    &#34;&#34;&#34;Inspects and validates an OdinsonDocument&#34;&#34;&#34;
+    endpoint = (
+        f&#34;{self.address}/api/validate/document/strict&#34;
+        if strict
+        else f&#34;{self.address}/api/validate/document/relaxed&#34;
+    )
+    res = self._post_doc(endpoint=endpoint, doc=doc)
+    return OdinsonBaseAPI.status_code_to_bool(res.status_code)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.validate_grammar"><code class="name flex">
+<span>def <span class="ident">validate_grammar</span></span>(<span>self, grammar: str, verbose: bool = False) ‑> Union[bool, <a title="lum.odinson.rest.responses.OdinsonErrors" href="responses.html#lum.odinson.rest.responses.OdinsonErrors">OdinsonErrors</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Inspects and validates an Odinson grammar</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_grammar(
+    self, grammar: str, verbose: bool = False
+) -&gt; Union[bool, OdinsonErrors]:
+    &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/validate/grammar&#34;
+    res = self._post_text(endpoint=endpoint, contents=grammar)
+    if res.status_code == 200:
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+    else:
+        return False if not verbose else OdinsonErrors.model_validate(res.json())</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.validate_rule"><code class="name flex">
+<span>def <span class="ident">validate_rule</span></span>(<span>self, rule: str, verbose: bool = False) ‑> Union[bool, <a title="lum.odinson.rest.responses.OdinsonErrors" href="responses.html#lum.odinson.rest.responses.OdinsonErrors">OdinsonErrors</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Inspects and validates an Odinson rule</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_rule(
+    self, rule: str, verbose: bool = False
+) -&gt; Union[bool, OdinsonErrors]:
+    &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
+    endpoint = f&#34;{self.address}/api/validate/rule&#34;
+    res = self._post_text(endpoint=endpoint, contents=rule)
+    if res.status_code == 200:
+        return OdinsonBaseAPI.status_code_to_bool(res.status_code)
+    else:
+        return False if not verbose else OdinsonErrors.model_validate(res.json())</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="lum.odinson.rest" href="index.html">lum.odinson.rest</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="lum.odinson.rest.api.OdinsonBaseAPI" href="#lum.odinson.rest.api.OdinsonBaseAPI">OdinsonBaseAPI</a></code></h4>
+<ul class="">
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.buildinfo" href="#lum.odinson.rest.api.OdinsonBaseAPI.buildinfo">buildinfo</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.corpus" href="#lum.odinson.rest.api.OdinsonBaseAPI.corpus">corpus</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.delete" href="#lum.odinson.rest.api.OdinsonBaseAPI.delete">delete</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.document" href="#lum.odinson.rest.api.OdinsonBaseAPI.document">document</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary" href="#lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary">edge_vocabulary</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.index" href="#lum.odinson.rest.api.OdinsonBaseAPI.index">index</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.metadata" href="#lum.odinson.rest.api.OdinsonBaseAPI.metadata">metadata</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_document" href="#lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_document">metadata_for_document</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_sentence" href="#lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_sentence">metadata_for_sentence</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.numdocs" href="#lum.odinson.rest.api.OdinsonBaseAPI.numdocs">numdocs</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.rule_freq" href="#lum.odinson.rest.api.OdinsonBaseAPI.rule_freq">rule_freq</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.search" href="#lum.odinson.rest.api.OdinsonBaseAPI.search">search</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.sentence" href="#lum.odinson.rest.api.OdinsonBaseAPI.sentence">sentence</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.status_code_to_bool" href="#lum.odinson.rest.api.OdinsonBaseAPI.status_code_to_bool">status_code_to_bool</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.tags_vocabulary" href="#lum.odinson.rest.api.OdinsonBaseAPI.tags_vocabulary">tags_vocabulary</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.term_freq" href="#lum.odinson.rest.api.OdinsonBaseAPI.term_freq">term_freq</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.update" href="#lum.odinson.rest.api.OdinsonBaseAPI.update">update</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.validate_document" href="#lum.odinson.rest.api.OdinsonBaseAPI.validate_document">validate_document</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.validate_grammar" href="#lum.odinson.rest.api.OdinsonBaseAPI.validate_grammar">validate_grammar</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.validate_rule" href="#lum.odinson.rest.api.OdinsonBaseAPI.validate_rule">validate_rule</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+<meta charset="utf-8"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Gus Hahn-Powell" name="author"/>
+<link href="https://docs.parsertongue.org/odinson-rest/dev/howitworks/" rel="canonical"/>
+<link href="../../img/favicon.ico" rel="shortcut icon"/>
+<title>How it Works - odinson-rest</title>
+<link href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" rel="stylesheet">
+<link href="../../css/theme.css" rel="stylesheet">
+<link href="../../css/theme_extra.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" rel="stylesheet"/>
+<link href="../../css/extra.css" rel="stylesheet"/>
+<script>
+    // Current page data
+    var mkdocs_page_name = "How it Works";
+    var mkdocs_page_input_path = "dev/howitworks.md";
+    var mkdocs_page_url = "/odinson-rest/dev/howitworks/";
+  </script>
+<script defer="" src="../../js/jquery-2.1.1.min.js"></script>
+<script defer="" src="../../js/modernizr-2.8.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/scala.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</link></link></head>
+<body class="wy-body-for-nav" role="document">
+<div class="wy-grid-for-nav">
+<nav class="wy-nav-side stickynav" data-toggle="wy-nav-shift">
+<div class="wy-side-scroll">
+<div class="wy-side-nav-search">
+<a class="icon icon-home" href="../.."> odinson-rest</a>
+<div role="search">
+<form action="../../search.html" class="wy-form" id="rtd-search-form" method="get">
+<input name="q" placeholder="Search docs" title="Type search term here" type="text"/>
+</form>
+</div>
+</div>
+<div aria-label="main navigation" class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">Installation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial/">Usage</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install/">Install</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../documentation/">Documentation</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../developing/">Developing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../test/">Testing</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../annotations/">Annotations</a>
+</li>
+<li class="toctree-l1 current"><a class="reference internal current" href="./">How it Works</a>
+<ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="#rules">Rules</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#taxonomy">Taxonomy</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#actions">Actions</a>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api-workflows">API Workflows</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/">FAQ</a>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/python/lum/odinson/rest/">python</a>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/odinson-rest/">odinson-rest</a>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../authors/">Contributors</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<section class="wy-nav-content-wrap" data-toggle="wy-nav-shift">
+<nav aria-label="top navigation" class="wy-nav-top" role="navigation">
+<i class="fa fa-bars" data-toggle="wy-nav-top"></i>
+<a href="../..">odinson-rest</a>
+</nav>
+<div class="wy-nav-content">
+<div class="rst-content">
+<div aria-label="breadcrumbs navigation" role="navigation">
+<ul class="wy-breadcrumbs">
+<li><a href="../..">Docs</a> »</li>
+<li>Development »</li>
+<li>How it Works</li>
+<li class="wy-breadcrumbs-aside">
+<a class="icon icon-github" href="https://github.com/clu-ling/odinson-rest/blob/main/docs/dev/howitworks.md"> Edit on GitHub</a>
+</li>
+</ul>
+<hr/>
+</div>
+<div role="main">
+<div class="section">
+<h1 id="how-it-works">How it Works<a class="headerlink" href="#how-it-works" title="Permanent link"></a></h1>
+<p>The <code>/api/extract</code> endpoint will be used as a running example of the cgiar reader workflow. The api endpoints are defined in <code>rest.app.controllers.ApiController.scala</code>.</p>
+<p>The following components of the cgiar reader can be developed following the <a href="https://arxiv.org/pdf/1509.07513.pdf">Odin manual</a>.</p>
+<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link"></a></h2>
+<p>Rules (and the taxonomy) are written in <a href="https://yaml.org/">YAML</a>. To develop, rules should be added to the entities and events grammars in <code>reader.grammars.cgiar</code>, NOT <code>reader.src.main.resources.ai.lum.reader.grammars.cgiar</code>. When the api is launched, the <code>reader.grammars.cgiar</code> directory is used to update the congruent directory in <code>reader.src</code>, which is used in defining the <code>MachineReadingSystem</code> over which the api endpoints are run.</p>
+<p>Rules should be developed in a test oriented manner. That is, tests should be written before the rules. Tests should capture what the expected output of the new rules should be, based on example inputs and the intended purpose.</p>
+<p>The rules are split into separate <code>entities</code> and <code>events</code> grammars. This is due to the workflow of the <code>MachineReadingSystem</code> which makes entity mentions available to the <code>EventFinder</code> (which runs the events grammar over the entity mentions). Both the entities and events grammars include a <code>master.yml</code> and auxiliary grammars. These auxiliary grammars are imported into master, and thus only master is used in defining in the <code>EntityFinder</code> and <code>EventFinder</code>.</p>
+<h2 id="taxonomy">Taxonomy<a class="headerlink" href="#taxonomy" title="Permanent link"></a></h2>
+<p>The taxonomy should be developed alongside the rules in the same manner. Always add to the taxonomy under <code>reader.grammars.cgiar</code> and NOT the corresponding directory under <code>reader.src</code>.</p>
+<p>The taxonomy represents the hiearchical structure of the entities and events being extracted. For example, if a rule produces the label <code>Date</code>, the resultant mention in the json file will be displayed with the labels <code>Constraint, TimeConstraint, TimeExpression, Date</code>, representing the hypernymic relationship of the rule's label.</p>
+<h2 id="actions">Actions<a class="headerlink" href="#actions" title="Permanent link"></a></h2>
+<p>Actions dictate how text is annotated, how rules are applied to annotated text, and the final structure of the resultant mentions.</p>
+<p>The <code>MachineReadingSystem</code> stipulates that the <code>EntityFinder</code> and <code>EventFinder</code> have three types of actions: actions, globalAction, and finalAction. The location of these actions is found in the config file used to initialize the MachineReadingSystem. For the running example this is <code>reference.conf</code>, which sets the actions for both the Entity and Event Finder as <code>CustomActions.scala</code>, which can be found under <code>reader.src.main.resources.ai.lum.mr.cgiar.odin</code>. The global and final actions differ for the <code>EntityFinder</code> and <code>EventFinder</code>, as is expected given the flow of extraction. Global actions can be found in <code>OdinActions.scala</code>, under <code>reader.src.main.resources.scala.ai.lum.mr.actions</code>. Under the running config, the EntityFinder's globalAction is <code>identityAction</code> and the EventFinder's globalAction is <code>cleanupEvents</code>. The final actions are <code>cleanupEntities</code> and <code>finalSweep</code>. These globalActions and finalActions are in line with the cgiar Reader workflow, in which the annotated text is first run through the EntityFinder and then the EventFinder, which is run over the "cleaned up" entity mentions, followed by a "clean up" of the event mentions and a "final sweep" of all resultant mentions.</p>
+<h2 id="api-workflows">API Workflows<a class="headerlink" href="#api-workflows" title="Permanent link"></a></h2>
+<p>When the REST API is launced an instance of a <code>MachineReadingSystem</code> object is created with the values specified in the config.yml file. The <code>MachineReadingSystem</code> in turn creates an instance of a <code>Processor</code> object, a <code>EntityFinder</code> object, and a <code>EventFinder</code> object. The latter are instanced based on the currently defined entities and events grammars. Text which is run through the <code>/api/extract</code> endpoint is passed to the <code>MachineReadingSystem</code> via its <code>extract()</code> method. This method first runs the text through the <code>Processor</code> object creating <code>Annotated Text</code>, which is then passed to the <code>EntityFinder</code> which finds all entity mentions, runs global actions, then runs the final action (in this case a "clean up" action). The entity mentions are then passed to the <code>EventFinder</code> which finds all event mentions and performs final "clean up" actions. Thus, a final JSON of all mentions is created for the input text.</p>
+<div class="mermaid">graph LR
+    subgraph API
+    extract(/api/extract)
+        subgraph MachineReadingSystem
+        proc[Processor];
+        entf[EntityFinder];
+        evf[EventFinder];
+        end
+    end
+    mentions{Mentions}
+    Text--extract--&gt;proc;
+    proc--processors.Document--&gt;entf;
+    entf--EntityMentions--&gt;evf;
+    evf--&gt;mentions;
+</div>
+</div>
+</div>
+<footer>
+<div aria-label="footer navigation" class="rst-footer-buttons" role="navigation">
+<a class="btn btn-neutral float-right" href="../faq/" title="FAQ">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral" href="../annotations/" title="Annotations"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+</div>
+<hr/>
+<div role="contentinfo">
+<!-- Copyright etc -->
+<p>Copyright © 2023 <a href="https://parsertongue.org">parsertongue.org</a>.</p>
+</div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+</div>
+</div>
+</section>
+</div>
+<div aria-label="versions" class="rst-versions" role="note">
+<span class="rst-current-version" data-toggle="rst-current-version">
+<span>
+<a class="fa fa-github" href="https://github.com/clu-ling/odinson-rest/" style="color: #fcfcfc"> GitHub</a>
+</span>
+<span><a href="../annotations/" style="color: #fcfcfc">« Previous</a></span>
+<span><a href="../faq/" style="color: #fcfcfc">Next »</a></span>
+</span>
+</div>
+<script>var base_url = '../..';</script>
+<script defer="" src="../../js/theme_extra.js"></script>
+<script defer="" src="../../js/theme.js"></script>
+<script defer="" src="../../search/main.js"></script>
+<script defer="">
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+<script src="https://unpkg.com/mermaid@8.8.0/dist/mermaid.min.js"></script><script>mermaid.initialize({});</script></body>
+</html>
