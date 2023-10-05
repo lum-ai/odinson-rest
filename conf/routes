@@ -55,9 +55,11 @@ POST    /api/update/document             controllers.OdinsonController.updateOdi
 POST    /api/update/document/maxTokensPerSentence/:maxTokens controllers.OdinsonController.updateOdinsonDoc(maxTokens: Int)
 
 # validate
-POST   /api/validate                    controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
-POST   /api/validate/relaxed            controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
-POST   /api/validate/strict             controllers.OdinsonController.validateOdinsonDocumentStrictMode()
+POST   /api/validate/document                    controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
+POST   /api/validate/document/relaxed            controllers.OdinsonController.validateOdinsonDocumentRelaxedMode()
+POST   /api/validate/document/strict             controllers.OdinsonController.validateOdinsonDocumentStrictMode()
+POST   /api/validate/rule                    controllers.OdinsonController.validateOdinsonRule()
+POST   /api/validate/grammar                    controllers.OdinsonController.validateOdinsonGrammar()
 
 # corpus info and statistics
 GET     /api/corpus                     controllers.OdinsonController.corpusInfo(pretty: Option[Boolean])

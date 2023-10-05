@@ -147,7 +147,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryError'
 
-  /api/validate:
+  /api/validate/document:
     post:
       tags:
         - validate
@@ -173,7 +173,7 @@ paths:
           description: |
             Validation error encountered.
 
-  /api/validate/strict:
+  /api/validate/document/strict:
     post:
       tags:
         - validate
@@ -199,7 +199,7 @@ paths:
           description: |
             Validation error encountered.
 
-  /api/validate/relaxed:
+  /api/validate/document/relaxed:
     post:
       tags:
         - validate
@@ -224,6 +224,99 @@ paths:
         '400':
           description: |
             Validation error encountered.
+
+  /api/validate/rule:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates an Odinson rule.
+      description: |
+        Inspects and validates an Odinson rule.
+      operationId: validate-rule
+
+      requestBody:
+        description: |
+          An Odinson rule.
+        required: true
+        content:
+          "plain/text":
+            schema:
+              type: string
+              example: |
+                [word=howdy]
+
+      responses:
+        '200':
+          description: JSON is a valid Odinson rule.
+        '400':
+          description: Request was malformed
+        '500':
+          description: |
+            Validation error encountered.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: error at position x
+                  description: A detailed error 
+
+  /api/validate/grammar:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates an Odinson grammar.
+      description: |
+        Inspects and validates an Odinson grammar.
+      operationId: validate-grammar
+
+      requestBody:
+        description: |
+          An Odinson grammar.
+        required: true
+        content:
+          "plain/text":
+            schema:
+              type: string
+              example: |
+                vars:
+                  chunk: "([tag=/J.*/]{,3} [tag=/N.*/]+ (of [tag=DT]? [tag=/J.*/]{,3} [tag=/N.*/]+)?)"
+
+                rules:
+                  - name: example-basic-rule
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      (?<hypernym> ${chunk}) >nmod_such_as (?<hyponym> ${chunk})
+
+                  - name: example-event-rule
+                    type: event
+                    priority: 1
+                    pattern: |
+                      trigger = cause|increase|decrease|affect
+                      cause = >nsubj ${chunk}
+                      effect = >dobj ${chunk}
+                
+
+      responses:
+        '200':
+          description: JSON is a valid Odinson grammar.
+        '400':
+          description: Request was malformed
+        '500':
+          description: |
+            Validation error encountered.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: error at position x
+                  description: A detailed error 
 
   /api/index/document:
     post:

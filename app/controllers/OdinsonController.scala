@@ -10,6 +10,7 @@ import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.requests._
+import ai.lum.odinson.rest.responses._
 import org.apache.lucene.document.{ Document => LuceneDocument }
 import org.apache.lucene.store.FSDirectory
 import play.api.Configuration
@@ -19,6 +20,7 @@ import play.api.mvc._
 
 import java.io.File
 import java.nio.file.{ Files, Path }
+import java.nio.charset.StandardCharsets
 import javax.inject._
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -140,6 +142,7 @@ class OdinsonController @Inject() (
   def deleteOdinsonDoc(odinsonDocId: String) = Action.async {
     Future {
       try {
+        // this must be blocking
         ExtractorEngine.usingEngine(config) { engine =>
           // Delete doc's JSON file
           val oldDocFile = engine.getDocJsonFile(odinsonDocId, config)
@@ -303,6 +306,62 @@ class OdinsonController @Inject() (
     }
   }
 
+  /** Parses body as raw string
+   */
+  def bodyToString(body: AnyContent): Option[String] = try {
+      val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
+      Some(contents)
+  } catch {
+    case e: Throwable =>
+      None
+  }
+
+  /** Validates an Odinson rule.
+    */
+  def validateOdinsonRule(): Action[AnyContent] = Action { request => try {
+      bodyToString(request.body) match {
+        case Some(rule) =>
+          ExtractorEngine.usingEngine(config) { engine =>
+            // validation here
+            //println(f"rule:\t${rule}")
+            engine.mkQuery(rule)
+          } 
+        case None =>
+          BadRequest("Malformed body.  Send a single rule.")
+      }
+      Status(OK)
+    } catch {
+      case error: Throwable =>
+        Status(500)(
+          Json.toJson(OdinsonErrors.fromException(error))
+        )
+    }
+  }
+
+  /** Validates an Odinson grammar.
+    */
+  def validateOdinsonGrammar(): Action[AnyContent] = Action { request => try {
+      bodyToString(request.body) match {
+        case Some(grammar) =>
+          ExtractorEngine.usingEngine(config) { engine =>
+            // validation here
+            val res = engine.compileRuleString(rules = grammar)
+            // println(f"grammar:")
+            // res.foreach(ex => println(f"   extractor => ${ex}"))
+            // println()
+          } 
+        case None =>
+          BadRequest("Malformed body.  Send a single grammar (YAML).")
+      }
+      Status(OK)
+    } catch {
+      case error: Throwable =>
+        Status(500)(
+          Json.toJson(OdinsonErrors.fromException(error))
+        )
+    }
+  }
+
   /** Stores query results in state.
     *
     * @param engine
@@ -370,6 +429,7 @@ class OdinsonController @Inject() (
     *   JSON of matches
     */
   def executeGrammar() = Action { request =>
+    // FIXME: do this in a non-blocking way
     ExtractorEngine.usingEngine(config) { engine =>
       // FIXME: replace .get with validation check
       val gr = request.body.asJson.get.as[GrammarRequest]
@@ -433,6 +493,7 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
+      // FIXME: do this in a non-blocking way
       ExtractorEngine.usingEngine(config) { engine =>
         try {
           val oq = metadataQuery match {
@@ -475,6 +536,7 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
+      // FIXME: do this in a non-blocking way
       ExtractorEngine.usingEngine(config) { engine =>
         try {
           val doc: OdinsonDocument =
@@ -498,6 +560,7 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
+      // FIXME: do this in a non-blocking way
       ExtractorEngine.usingEngine(config) { engine =>
         try {
           val odinsonDocId = engine.getOdinsonDocId(sentenceId)
@@ -522,6 +585,7 @@ class OdinsonController @Inject() (
     pretty: Option[Boolean]
   ) = Action.async {
     Future {
+      // FIXME: do this in a non-blocking way
       ExtractorEngine.usingEngine(config) { engine =>
         try {
           val odinsonDocId = engine.getOdinsonDocId(sentenceId)
