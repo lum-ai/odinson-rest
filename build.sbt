@@ -125,12 +125,20 @@ lazy val packagerSettings = {
       //"-Dlogger.resource=logback.xml"
       "-Dplay.secret.key=odinson-rest-api-is-not-production-ready",
       // NOTE: bind mount odison dir to /data/odinson
-      "-Dodinson.dataDir=/app/data/odinson",
+      //"-Dodinson.dataDir=/app/data/odinson",
       // timeouts
       "-Dplay.server.akka.requestTimeout=infinite",
       //"play.server.akka.terminationTimeout=10s",
       //"-Dplay.server.http.idleTimeout=2400s"
     ),
+    Docker / dockerEnvVars ++= Map(
+      "APP_VERSION" -> scala.util.Properties.envOrElse("APP_VERSION", "???"),
+      "APPLICATION_SECRET" -> "this-is-not-a-secure-key-please-change-me",
+      // NOTE: bind mount odison dir to /data/odinson
+      "ODINSON_DATA_DIR" -> "/app/data/odinson",
+      // NOTE: the expected min. RAM requirements
+      "_JAVA_OPTIONS" -> "-Xmx2g -Dfile.encoding=UTF-8 -Dplay.server.pidfile.path=/dev/null"
+    )
   )
 }
 
