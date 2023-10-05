@@ -57,9 +57,7 @@ jobs:
     - name: "Create documentation for Scala components (API docs)"
       working-directory: .
       run: |
-        sbt doc
-        mkdir -p $GITHUB_WORKSPACE/docs/api/scala
-        mv target/doc/* $GITHUB_WORKSPACE/docs/api/scala/
+        sbt documentize
 
     # code coverage (Scala)
     - name: "Code coverage reports for Scala components"
@@ -79,12 +77,14 @@ jobs:
       run: |
         docker run -i -v "$GITHUB_WORKSPACE:/app" parsertongue/mkdocs:latest mkdocs build -c
     - name: Deploy docs
-      if: github.ref == 'refs/heads/main'
+      # FIXME: re-enable later
+      #if: github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3
       with:
         # see https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site
+        destination_dir: "odinson-rest"
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         commit_message: ${{ github.event.head_commit.message }}

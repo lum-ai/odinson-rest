@@ -107,6 +107,8 @@ jobs:
         context: ./target/docker/stage
         platforms: linux/amd64,linux/arm64
         provenance: false
-        push: ${{ github.event_name != 'pull_request' }}
+        push: true
+        # FIXME: re-enable the option below when ready for PR
+        #push: ${{ github.event_name != 'pull_request' }}
         # references `tags` step in steps for current job
         tags: ${{ steps.tags.outputs.tags }}

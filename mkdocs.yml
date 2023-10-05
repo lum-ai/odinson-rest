@@ -39,7 +39,8 @@ nav:
         - How it Works: dev/howitworks.md
         - FAQ: dev/faq.md
     - API Documentation:
-        - "rest": api/python/lum/odinson/rest/index.html
+        - "python": api/python/lum/odinson/rest/index.html
+        - "odinson-rest": api/odinson-rest/index.html
     - Contributors: authors.md
 
 extra_css:
