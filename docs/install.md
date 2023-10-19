@@ -24,5 +24,7 @@ We publish releases in the form of docker images:
 ```bash
 # NOTE: replace <local/path/to/data> with the absolute path
 # to the location you want data to be written to on your machine
-docker run -it -p "8000:8000" -v "<local/path/to/data>:/app/data" "lumai/odinson-rest:latest"
+# ensure its permissions allow writing by the docker service
+# i.e., chmod 777 <local/path/to/data>
+docker run -it -p "9000:9000" -v "<local/path/to/data>:/app/data" "lumai/odinson-rest:latest"
 ```
