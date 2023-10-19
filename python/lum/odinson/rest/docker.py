@@ -3,34 +3,46 @@ from contextlib import closing
 from typing import Optional
 import socket
 import docker
+import tempfile
+import uuid
 
 __all__ = ["DockerBasedOdinsonAPI"]
 
 
 class DockerBasedOdinsonAPI(OdinsonBaseAPI):
-    DEFAULT_IMAGE: str = "lumai/odinson-rest-api:experimental"
+    DEFAULT_IMAGE: str = "lumai/odinson-rest-api:latest"
+    ODINSON_INTERNAL_PORT: int = 9000
+    ODINSON_INTERNAL_DATA_PATH: str = "/app/data"
 
     def __init__(
         self,
-        local_path: str,
+        local_path: Optional[str] = None,
         image_name: str = DEFAULT_IMAGE,
+        container_name: Optional[str] = f"odinson-{uuid.uuid4()}",
         local_port: Optional[int] = None,
         keep_alive: bool = False,
     ):
         self.client = docker.from_env()
-        self.local_path = local_path
-        self.image_name = image_name
-        self.local_port = local_port or DockerBasedOdinsonAPI.get_unused_port()
-        self.keep_alive = keep_alive
-        self.container = self.client.containers.run(
-            self.image_name,
-            name="odinson",
-            # strangely: container -> host
-            ports={9000: self.local_port},
-            auto_remove=True,
-            detach=True,
-            volumes={self.local_path: {"bind": "/app/data", "mode": "rw"}},
-        )
+        self.local_path: Optional[str] = local_path or tempfile.TemporaryDirectory().name
+        self.image_name: str = image_name
+        self.local_port: int = local_port or DockerBasedOdinsonAPI.get_unused_port()
+        self.keep_alive: bool = keep_alive
+        self.container_name: str = container_name
+        if self.is_running():
+            self.container = self.client.containers.get(self.container_name)
+            self.local_path: str = self.container.volumes.get(DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH, dict()).get("bind", None)
+            self.image_name: str = self.container.image
+            self.local_port: int = self.client.api.port(self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT)
+        else:
+            self.container = self.client.containers.run(
+                self.image_name,
+                name=self.container_name,
+                # NOTE: strangely: container -> host
+                ports={DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT: self.local_port},
+                auto_remove=True,
+                detach=True,
+                volumes={self.local_path: {"bind": DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH, "mode": "rw"}},
+            )
         super().__init__(address=f"http://127.0.0.1:{self.local_port}")
 
     @staticmethod
@@ -43,21 +55,16 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
 
-    @property
-    def container_id(self) -> str:
-        """Retrieves container ID for odinson REST API service"""
-        return self.container.id
-
     def is_running(self):
         """Checks if docker container for odinson REST API service is running"""
-        container_id = self.container_id
+        container_name = self.container_name
         try:
-            self.client.containers.get(container_id)
+            self.client.containers.get(container_name)
             return True
         except Exception as e:
             return False
 
-    def _close(self) -> bool:
+    def close(self) -> bool:
         """Terminates docker container for odinson REST API service"""
         container_id = self.container_id
         if self.is_running():
@@ -72,5 +79,5 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
                 return False
 
     def __del__(self):
-        if not self.keep_alive and self.is_running():
-            self._close()
+        if self.is_running() and not self.keep_alive:
+            self.close()

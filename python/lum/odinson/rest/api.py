@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
-from lum.odinson.doc import AnyField, Document, Sentence
+from lum.odinson.doc import AnyField, Document, Sentence, ScoreDoc
 from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, Statistic, Results
 from pydantic import BaseModel
 from dataclasses import dataclass
@@ -250,9 +250,9 @@ class OdinsonBaseAPI:
         }
         params = {k: v for (k, v) in params.items() if v}
         # print(params)
-        res = requests.get(endpoint, params=params).json()
+        res = requests.get(endpoint, params=params)
         # print(res)
-        return Results(**res)
+        return Results.empty() if res.status_code != 200 else Results(**res.json())
 
     def search(
         self,
@@ -270,7 +270,7 @@ class OdinsonBaseAPI:
         prev_doc: Optional[int] = None,
         # The score for the last result seen in the previous page of results.
         prev_score: Optional[float] = None,
-    ) -> Results:  # -> Iterator[S]:
+    ) -> Iterator[ScoreDoc]:
         endpoint = f"{self.address}/api/execute/pattern"
         params = {
             "odinsonQuery": odinson_query,
@@ -289,6 +289,8 @@ class OdinsonBaseAPI:
             prev_doc=prev_doc,
         )
         total = results.total_hits
+        if total == 0:
+            return iter(())
         last = results.score_docs[-1]
         while seen < total:
             for sd in results.score_docs:
