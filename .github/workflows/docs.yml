@@ -2,7 +2,7 @@ name: Project documentation
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
     tags:
       - "**"
   pull_request:

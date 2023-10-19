@@ -1,9 +1,9 @@
 # dockerless action
-name: Project CI (Python)
+name: Tests (Python)
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     branches: [main]
 

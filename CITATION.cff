@@ -6,9 +6,6 @@ authors:
 - family-names: "Hahn-Powell"
   given-names: "Gus"
   orcid: "https://orcid.org/0000-0002-7957-3586"
-- family-names: "Bell"
-  given-names: "Dane"
-  orcid: "https://orcid.org/0000-0002-7462-0208"
 - name: "Lum AI"
 version: 0.0.1
 date-released: 2022-01-26
