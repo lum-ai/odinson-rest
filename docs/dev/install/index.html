@@ -60,7 +60,25 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#install">Install</a>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#running">Running</a>
+<li class="toctree-l2"><a class="reference internal" href="#python-library">Python library</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#build">Build</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rest-api-scala">REST API (Scala)</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#build_1">Build</a>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#docker">Docker</a>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#sbt">sbt</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#running">Running</a>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -115,7 +133,29 @@
 </ul>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link"></a></h2>
 <p>Clone the <a href="https://github.com/lum-ai/odinson-rest">odinson-rest</a> repository.</p>
-<h2 id="running">Running<a class="headerlink" href="#running" title="Permanent link"></a></h2>
+<h2 id="python-library">Python library<a class="headerlink" href="#python-library" title="Permanent link"></a></h2>
+<h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link"></a></h3>
+<pre><code class="language-bash">cd python
+pip install -e ".[all]"
+</code></pre>
+<h2 id="rest-api-scala">REST API (Scala)<a class="headerlink" href="#rest-api-scala" title="Permanent link"></a></h2>
+<h3 id="build_1">Build<a class="headerlink" href="#build_1" title="Permanent link"></a></h3>
+<p>The project that defines the REST API can be built using either docker or sbt; however, the recommended method is to use docker.</p>
+<h4 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link"></a></h4>
+<p>We construct our docker images using the sbt <a href="https://www.scala-sbt.org/sbt-native-packager/formats/docker.html">native-packager</a> plugin:</p>
+<pre><code class="language-scala">sbt dockerize
+</code></pre>
+<p>For information on additional tasks (generating Dockerfiles, publishing images, etc.), see <a href="https://www.scala-sbt.org/sbt-native-packager/formats/docker.html#tasks">this section of the <code>native-packager</code> documentation</a>.</p>
+<h5 id="building-docker-images-for-other-architectures">Building docker images for other architectures<a class="headerlink" href="#building-docker-images-for-other-architectures" title="Permanent link"></a></h5>
+<pre><code class="language-bash">sbt ";clean; docker:stage"
+cd target/docker/stage
+docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/odinson-rest-api:amd64" .
+</code></pre>
+<h4 id="sbt"><code>sbt</code><a class="headerlink" href="#sbt" title="Permanent link"></a></h4>
+<p>The REST API server can be launched directly using SBT:</p>
+<pre><code class="language-scala">sbt web
+</code></pre>
+<h3 id="running">Running<a class="headerlink" href="#running" title="Permanent link"></a></h3>
 <p>To run the Odinson REST API in development mode, run the following command:</p>
 <pre><code class="language-bash">sbt web
 </code></pre>

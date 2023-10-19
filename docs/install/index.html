@@ -51,17 +51,13 @@
 <ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#python-library">Python library</a>
+<ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-from-github">install from GitHub</a>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#rest-api">REST API</a>
-<ul>
-<li class="toctree-l3"><a class="reference internal" href="#build">Build</a>
-<ul>
-<li class="toctree-l4"><a class="reference internal" href="#docker">Docker</a>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#sbt-scala">sbt (Scala)</a>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 </ul>
 </li>
@@ -118,33 +114,21 @@
 <ul>
 <li><a href="https://www.scala-sbt.org/">sbt</a></li>
 <li><a href="https://docs.docker.com/get-docker/">docker</a></li>
-<li>
-<blockquote>
-<p>= G of RAM</p>
-</blockquote>
-</li>
+<li>$\ge$ 2G of RAM</li>
 </ul>
+<h2 id="python-library">Python library<a class="headerlink" href="#python-library" title="Permanent link"></a></h2>
+<h3 id="install-from-github">install from GitHub<a class="headerlink" href="#install-from-github" title="Permanent link"></a></h3>
+<pre><code class="language-bash">pip install -U "odinson-rest[all] @ git+https://github.com/lum-ai/odinson-rest@main#subdirectory=python"
+</code></pre>
 <h2 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Permanent link"></a></h2>
 <!-- ### Releases
 
 We publish releases in the form of docker images:
 
 - ?? -->
-<h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link"></a></h3>
-<p>The project can be built using either docker or sbt; however, the recommended method is to use docker.</p>
-<h4 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link"></a></h4>
-<p>We construct our docker images using the sbt <a href="https://www.scala-sbt.org/sbt-native-packager/formats/docker.html">native-packager</a> plugin:</p>
-<pre><code class="language-scala">sbt dockerize
-</code></pre>
-<p>For information on additional tasks (generating Dockerfiles, publishing images, etc.), see <a href="https://www.scala-sbt.org/sbt-native-packager/formats/docker.html#tasks">this section of the <code>native-packager</code> documentation</a>.</p>
-<h5 id="building-docker-images-for-other-architectures">Building docker images for other architectures<a class="headerlink" href="#building-docker-images-for-other-architectures" title="Permanent link"></a></h5>
-<pre><code class="language-bash">sbt ";clean; docker:stage"
-cd target/docker/stage
-docker buildx build --platform=linux/amd64 -o type=docker -t "lumai/odinson-rest-api:amd64" .
-</code></pre>
-<h4 id="sbt-scala"><code>sbt</code> (Scala)<a class="headerlink" href="#sbt-scala" title="Permanent link"></a></h4>
-<p>The REST API server can be launched directly using SBT:</p>
-<pre><code class="language-scala">sbt web
+<pre><code class="language-bash"># NOTE: replace &lt;local/path/to/data&gt; with the absolute path
+# to the location you want data to be written to on your machine
+docker run -it -p "8000:8000" -v "&lt;local/path/to/data&gt;:/app/data" "lumai/odinson-rest:latest"
 </code></pre>
 </div>
 </div>
