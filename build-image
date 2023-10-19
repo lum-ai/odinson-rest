@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+ARCH=$1
+
+if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ] ; then
+    echo "$ARCH is not a valid platform."
+    echo "Platform for must either be amd64 or arm64"
+    exit 1
+fi
+
+ORG=lumai
+IMAGE=odinson-rest-api
+TAG=latest
+
+( sbt dockerfile && cd target/docker/stage && docker buildx build --output=type=docker --platform=linux/$ARCH -f Dockerfile -t "$ORG/$IMAGE:$TAG" . )

@@ -1,0 +1,51 @@
+name: Formatting and type hints
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup java
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v4
+    ##################################
+    # Scala
+    ##################################
+    - name: Lint check via scalafmt
+      continue-on-error: true
+      run: |
+        sbt compile
+        sbt scalafmtCheckAll
+    ##################################
+    # Python
+    ##################################
+    - name: "Install library (Python)"
+      working-directory: ./python
+      run: |
+        pip install ".[all]"
+    # Type checks
+    - name: "Type checks (Python)"
+      working-directory: ./python
+      continue-on-error: true
+      run: |
+        mypy --install-types --non-interactive --ignore-missing-imports --follow-imports=skip --strict-optional --no-site-packages --exclude "^(build|misc)/$" .
+    # code formatting and linting
+    - name: "Code formatting & linting (Python)"
+      working-directory: ./python
+      continue-on-error: true
+      run: |
+        black --check .

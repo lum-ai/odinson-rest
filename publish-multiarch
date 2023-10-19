@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+ORG=lumai
+IMAGE=odinson-rest-api
+TAG=experimental
+
+( sbt dockerfile && cd target/docker/stage && docker buildx build --push --platform=linux/amd64,linux/arm64 -f Dockerfile -t "$ORG/$IMAGE:$TAG" . )

@@ -1,0 +1,114 @@
+[project]
+name = "odinson-rest"
+authors = [
+    { name="Gus Hahn-Powell", email="gus@parsertongue.org" },
+]
+description = "Python bindings for the Odinson REST API"
+version = "0.1.0"
+dependencies=[
+    "pydantic~=2.0.0",
+    #"typing_extensions", # see https://github.com/pydantic/pydantic/issues/5821#issuecomment-1559196859
+    "requests",
+]
+
+#green -vvv --run-coverage /app
+
+# type checks
+#mypy --ignore-missing-imports --follow-imports=skip --strict-optional /app
+
+#documentation = "https://docs.parsertongue.org/odinson-rest/"
+
+keywords = ["odinson", "REST", "information extraction", "nlp"]
+
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dynamic = ["readme"]
+
+[project.optional-dependencies]
+# Dev dependencies.
+# - pytest: for running tests
+# - black: Autoformatting
+# - pygraphviz: for creating function network visualizations for debugging.
+#   Pygraphviz is often tricky to install, so we reserve it for the dev extras
+#   list.
+# - six: Required by auto-generated Swagger models
+dev = ["pytest", "pytest-cov", "pytest-xdist", "httpx", "black", "mypy", "green>=2.5.0", "coverage"]
+
+demo = ["jupyter==1.0.0"]
+
+
+docker = ["docker"]
+
+# project documentation generation
+doc = ["mkdocs==1.2.3", "pdoc3==0.10.0", "mkdocs-git-snippet==0.1.1", "mkdocs-git-revision-date-localized-plugin==0.11.1", "mkdocs-git-authors-plugin==0.6.3",
+"mkdocs-mermaid2-plugin",
+"mkdocs-render-swagger-plugin",
+"mkdocs-rtd-dropdown==1.0.2", "jinja2<3.1.0"]
+
+core = ["odinson-rest[docker]"]
+
+# all extras
+all = ["odinson-rest[core]", "odinson-rest[dev]", "odinson-rest[doc]", "odinson-rest[demo]"]
+
+[tool.setuptools.packages.find]
+where = ["."] 
+# lum.odinson
+# [tool.setuptools.package-dir]
+# "lum.odinson" = "lum/odinson"
+#"lum.odinson.data" = "lum/odinson/data"
+
+# [tool.setuptools.packages]
+# find = {}  # Scan the project directory with the default parameters
+
+[tool.setuptools.package-data]
+# needed to ensure models are included in package/discoverable
+"*" = ["*.json"]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"], content-type = "text/markdown"}
+# runnables
+[project.scripts]
+#odinson_index_docs = "lum.odinson.apps:main"
+
+# Minimum requirements for the build system to execute.
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# pytest
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --capture=tee-sys --cov=./ --cov-report html:../docs/coverage/python"
+testpaths = [
+    "lum/odinson/tests",
+]
+
+# https://packaging.python.org/tutorials/packaging-projects/#creating-pyproject-toml
+# https://www.python.org/dev/peps/pep-0621/
+
+[bdist_wheel]
+universal = 1
+
+# Example configuration for Black.
+
+# NOTE: you have to use single-quoted strings in TOML for regular expressions.
+# It's the equivalent of r-strings in Python.  Multiline strings are treated as
+# verbose regular expressions by Black.  Use [ ] to denote a significant space
+# character.
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''

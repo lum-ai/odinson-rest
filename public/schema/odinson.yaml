@@ -1,0 +1,1833 @@
+openapi: 3.0.3
+info:
+  version: "1.0.0"
+  title: odinson-rest
+  description: RESTful API exposing core functionality of Odinson.
+  contact:
+    email: ghp@lum.ai
+# https://swagger.io/docs/specification/api-host-and-base-path/
+#servers:
+#  - url: api/v1
+#  #- url: https://influence-dev.lum.ai/api/v1
+#    description: |
+#      Development server (read only; uses live data)
+#  #- url: http://localhost:9000/api/v1
+tags:
+  - name: "search"
+    description: |
+      Operations related to Odinson patterns.
+  - name: "index"
+    description: |
+      Operations related to adding and removing documents from the Odinson index.
+  - name: "documents"
+    description: |
+      Operations related to retrieving documents.
+  - name: "metadata"
+    description: |
+      Operations related to retrieving document and corpus metadata.
+  # - name: "similarity"
+  #   description: |
+  #     Operations related to embeddings-based similarity.
+  - name: "statistics"
+    description: |
+      Operations related to corpus statistics.
+  # - name: "export"
+  #   description: |
+  #     Operations related to results export.
+
+paths:
+  /api/execute/pattern:
+    get:
+      tags:
+        - search
+      summary: |
+        Performs an Odinson query against the corpus.
+      description: |
+        Applies an Odinson pattern to the corpus.  Optionally include a doc-level Lucene query to identify a subset of documents to which the query should be applied.
+      operationId: execute-pattern
+      parameters:
+        - name: odinsonQuery
+          in: query
+          required: true
+          description: |
+            An Odinson pattern.
+          schema:
+            type: string
+          example: "[lemma=pie] []"
+        - name: metadataQuery
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            A query to filter Documents by their metadata before applying an Odinson pattern.
+          example: "character contains 'Special Agent'"
+        - name: label
+          in: query
+          description: |
+            The label to use when committing mentions to the State.
+          schema:
+            type: string
+        - name: commit
+          in: query
+          description: |
+            Whether or not the results of this query should be committed to the State.
+          schema:
+            type: boolean
+        - name: prevDoc
+          in: query
+          description: |
+            The ID (`sentenceId`) for the last document (sentence) seen in the previous page of results.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            # minimum: 1
+            # exclusiveMinimum: false
+            # maximum: 3
+            # exclusiveMaximum: false
+          #example: 1
+        - name: prevScore
+          in: query
+          description: |
+            The score for the last result seen in the previous page of results.
+          required: false
+          schema:
+            type: number
+            format: float
+          #example: 0.424
+      responses:
+        '200':
+          description: Paginated matches for the query.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BasicResults'
+        '400':
+          description: Syntax error in query.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/QueryError'
+
+  /api/execute/grammar:
+    post:
+      tags:
+        - search
+      summary: |
+        Executes an Odinson grammar against a corpus.
+      description: |
+        Executes an Odinson grammar against a corpus.  Optionally include a doc-level Lucene query to identify a subset of documents to which the grammar should be applied.  Results include sentence details (token attributes, graphs, etc.) for use in query refinement.
+      operationId: execute-grammar
+
+      requestBody:
+        description: |
+          An Odinson grammar.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonGrammarRequest'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: Mentions matched by the grammar.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonGrammarResults'
+        '400':
+          description: Syntax error in query.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/QueryError'
+
+  /api/validate/document:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      operationId: validate-doc
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
+  /api/validate/document/strict:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (strict mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (strict mode).
+      operationId: validate-doc-strict
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
+  /api/validate/document/relaxed:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      description: |
+        Inspects and validates OdinsonDocument JSON (relaxed mode).
+      operationId: validate-doc-relaxed
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+
+      responses:
+        '200':
+          description: JSON is a valid OdinsonDocument.
+        '400':
+          description: |
+            Validation error encountered.
+
+  /api/validate/rule:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates an Odinson rule.
+      description: |
+        Inspects and validates an Odinson rule.
+      operationId: validate-rule
+
+      requestBody:
+        description: |
+          An Odinson rule.
+        required: true
+        content:
+          "plain/text":
+            schema:
+              type: string
+              example: |
+                [word=howdy]
+
+      responses:
+        '200':
+          description: JSON is a valid Odinson rule.
+        '400':
+          description: Request was malformed
+        '500':
+          description: |
+            Validation error encountered.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: error at position x
+                  description: A detailed error 
+
+  /api/validate/grammar:
+    post:
+      tags:
+        - validate
+      summary: |
+        Inspects and validates an Odinson grammar.
+      description: |
+        Inspects and validates an Odinson grammar.
+      operationId: validate-grammar
+
+      requestBody:
+        description: |
+          An Odinson grammar.
+        required: true
+        content:
+          "plain/text":
+            schema:
+              type: string
+              example: |
+                vars:
+                  chunk: "([tag=/J.*/]{,3} [tag=/N.*/]+ (of [tag=DT]? [tag=/J.*/]{,3} [tag=/N.*/]+)?)"
+
+                rules:
+                  - name: example-basic-rule
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      (?<hypernym> ${chunk}) >nmod_such_as (?<hyponym> ${chunk})
+
+                  - name: example-event-rule
+                    type: event
+                    priority: 1
+                    pattern: |
+                      trigger = cause|increase|decrease|affect
+                      cause = >nsubj ${chunk}
+                      effect = >dobj ${chunk}
+                
+
+      responses:
+        '200':
+          description: JSON is a valid Odinson grammar.
+        '400':
+          description: Request was malformed
+        '500':
+          description: |
+            Validation error encountered.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: error at position x
+                  description: A detailed error 
+
+  /api/index/document:
+    post:
+      tags:
+        - index
+      summary: |
+        Add an OdinsonDocument to the index.
+      description: |
+        Add an OdinsonDocument to the index.
+      operationId: index-document
+
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
+
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully indexed.
+
+  /api/index/document/maxTokensPerSentence/{maxTokens}:
+    post:
+      tags:
+        - index
+      summary: |
+        Add an OdinsonDocument to the index, allowing for a specified maximum number of tokens per sentence.
+      description: |
+        Add an OdinsonDocument to the index, allowing for a specified maximum number of tokens per sentence.
+      operationId: index-document-max-tokens
+      parameters:
+        - name: maxTokens
+          in: path
+          description: |
+            The maximum number of tokens to allow per sentence.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully indexed.
+
+  /api/delete/document/{documentId}:
+    delete:
+      tags:
+        - index
+      summary: |
+        Removes an OdinsonDocument from the index.
+      description: |
+        Removes an OdinsonDocument from the index.
+      operationId: delete-document
+      parameters:
+        - name: documentId
+          in: path
+          description: |
+            The document ID associated with some indexed OdinsonDocument.
+          required: true
+          schema:
+            type: string
+          example: "tp-pies"
+      responses:
+        '200':
+          description: |
+            Successfully deleted the document.
+        '400':
+          description: |
+            An error message.
+
+  /api/update/document/{documentId}:
+    post:
+      tags:
+        - index
+      summary: |
+        Updates an OdinsonDocument in the index.
+      description: |
+        Updates an OdinsonDocument in the index.
+      operationId: update-document
+      parameters:
+        - name: documentId
+          in: path
+          description: |
+            The document ID associated with some indexed OdinsonDocument.
+          required: true
+          schema:
+            type: string
+          example: "tp-pies"
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+            examples:
+              tpPies:
+                $ref: '#components/examples/odinsonDocPies'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully updated/re-indexed.
+        '400':
+          description: |
+            An error message.
+
+  /api/update/document/maxTokensPerSentence/{maxTokens}:
+    post:
+      tags:
+        - index
+      summary: |
+        Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.
+      description: |
+        Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.
+      operationId: update-document-max-tokens
+
+      parameters:
+        - name: maxTokens
+          in: path
+          description: |
+            The maximum number of tokens to allow per sentence.
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: |
+          An OdinsonDocument.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/OdinsonDocument'
+#      consumes:
+#        - application/json
+
+      responses:
+        '200':
+          description: |
+            Document was successfully updated/re-indexed.
+        '400':
+          description: |
+            An error message.
+
+  /api/document/{documentId}:
+    get:
+      tags:
+        - documents
+      summary: |
+        Retrieves an OdinsonDocument by its ID.
+      description: |
+        Retrieves an OdinsonDocument by its ID.
+      operationId: document
+      parameters:
+        - name: documentId
+          in: path
+          description: |
+            The document ID associated with some indexed OdinsonDocument.
+          required: true
+          schema:
+            type: string
+          example: "tp-pies"
+      responses:
+        '200':
+          description: |
+            Successfully indexed the document.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonDocument'
+        '400':
+          description: |
+            An error message.
+
+  /api/sentence/{sentenceId}:
+    get:
+      tags:
+        - documents
+      summary: |
+        Retrieves annotation details for a sentence.
+      description: |
+        Retrieves annotation details (tokens, parses, etc.)  for the sentence corresponding to the provided sentenceId.
+      operationId: sentence
+      parameters:
+        - name: sentenceId
+          in: path
+          description: |
+            The sentence ID for which annotation details are being requested.
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 0
+      responses:
+        '200':
+          description: |
+            `JSON` describing the `org.clulab.processors.Sentence`.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonSentence'
+        '400':
+          description: |
+            An error message.
+
+  /api/parent/sentence/{sentenceId}:
+    get:
+      tags:
+        - documents
+      summary: |
+        Retrieves the OdinsonDocument corresponding to the provided `sentenceId`.
+      operationId: sentence-to-parent
+      parameters:
+        - name: sentenceId
+          in: path
+          required: true
+          description: |
+            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: An OdinsonDocument.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonDocument'
+        '400':
+          description: |
+            An error message.
+
+  /api/metadata/document/{documentId}:
+    get:
+      tags:
+        - metadata
+      summary: |
+        Retrieves the OdinsonMetadata corresponding to the provided `documentId`.
+      operationId: doc-to-metadata
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: |
+            The `documentId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: string
+          example: "tp-pies"
+      responses:
+        '200':
+          description: OdinsonMetadata.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonMetadata'
+        '400':
+          description: |
+            An error message.
+
+  /api/metadata/sentence/{sentenceId}:
+    get:
+      tags:
+        - metadata
+      summary: |
+        Retrieves the OdinsonMetadata corresponding to the provided `sentenceId`.
+      operationId: sentence-to-metadata
+      parameters:
+        - name: sentenceId
+          in: path
+          required: true
+          description: |
+            The `sentenceId` as returned by /api/execute/grammar or /api/execute/pattern.
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: OdinsonMetadata.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/OdinsonMetadata'
+        '400':
+          description: |
+            An error message.
+
+  /api/numdocs:
+    get:
+      tags:
+        - statistics
+      summary: |
+        Retrieves the total number of documents (num. docs = num. sentences) in the corpus.
+      description: |
+        Retrieves the total number of documents (num. docs = num. sentences) in the corpus.
+      operationId: numdocs
+      responses:
+        '200':
+          description: Total number of documents (num. docs = num. sentences) in the corpus.
+          content:
+            "application/json":
+              schema:
+                type: integer
+                format: int32
+                example: 10000
+
+  /api/term-freq:
+    get:
+      tags:
+        - statistics
+      summary: |
+        Retrieves the frequencies of token annotations such as word and lemma counts.
+      description: |
+        Retrieves the frequencies of token annotations such as word and lemma counts.
+      operationId: term-freq
+      parameters:
+        - name: field
+          in: query
+          description: |
+            The token field (e.g., lemma) whose frequencies are to be counted.
+          required: true
+          schema:
+            type: string
+            example: lemma
+        - name: group
+          in: query
+          description: |
+            A conditioning variable by which to group each term's counts.
+          required: false
+          schema:
+            type: string
+            example: tag
+        - name: filter
+          in: query
+          description: |
+            A regular expression to filter the terms in `field` before counting.
+          required: false
+          schema:
+            type: string
+            example: "ate$"
+        - name: order
+          in: query
+          description: |
+            The order in which to return results: "alpha" or "freq" (default).
+          required: false
+          schema:
+            type: string
+            example: freq
+        - name: min
+          in: query
+          description: |
+            The smallest rank to return, with 0 (default) being the highest ranked.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 0
+        - name: max
+          in: query
+          description: |
+            The highest rank to return, e.g. 9 (default).
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 9
+        - name: scale
+          in: query
+          description: |
+            Scaling to apply to frequency counts. Choices are "count" (default), "log10", and "percent".
+          required: false
+          schema:
+            type: string
+            example: count
+        - name: reverse
+          in: query
+          description: |
+            Whether to reverse the rank order, to select the 10 lease frequent results, for example.
+          required: false
+          schema:
+            type: boolean
+        - name: pretty
+          in: query
+          description: |
+            Whether or not to pretty print the response.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Frequencies of token annotations such as word and lemma counts.
+          content:
+             "application/json":
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/FrequencyTable'
+
+  /api/rule-freq:
+    post:
+      tags:
+        - statistics
+      summary: |
+        Count how many times each rule matches from the given grammar on the active dataset.
+      description: |
+        Count how many times each rule matches from the given grammar on the active dataset.
+      operationId: rule-freq
+      requestBody:
+        description: |
+          An Odinson grammar.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/RuleFreqRequest'
+      responses:
+        '200':
+          description: Frequencies of extraction matches by rule name.
+          content:
+             "application/json":
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/FrequencyTable'
+
+  /api/term-hist:
+    get:
+      tags:
+        - statistics
+      summary: |
+        Binned frequencies of token annotations such as word and lemma counts.
+      description: |
+        Binned frequencies of token annotations such as word and lemma counts.
+        Bins are defined by left-closed (right-open) intervals.
+      operationId: term-hist
+      parameters:
+        - name: field
+          in: query
+          description: |
+            The token field (e.g., lemma) whose frequencies are to be counted.
+          required: true
+          schema:
+            type: string
+            example: lemma
+        - name: bins
+          in: query
+          description: |
+            How many bins to cut the data into.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            example: 120
+        - name: equalProbability
+          in: query
+          description: |
+            Whether to determine bin widths by quantile (instead of even bins).
+            Y values will be probability density estimates rather than counts.
+          required: false
+          schema:
+            type: boolean
+        - name: xLogScale
+          in: query
+          description: |
+            Whether to apply log10 scaling to token frequency counts or not (default).
+          required: false
+          schema:
+            type: boolean
+        - name: pretty
+          in: query
+          description: |
+            Whether or not to pretty print the response.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Binned frequencies of token annotations such as word and lemma counts.
+          content:
+             "application/json":
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/Bin'
+
+  /api/rule-hist:
+    post:
+      tags:
+        - statistics
+      summary: |
+        Binned counts of how many times each rule matches from the active grammar on the active dataset.
+      description: |
+        Binned counts of how many times each rule matches from the active grammar on the active dataset.
+        Bins are defined by left-closed (right-open) intervals.
+      operationId: rule-hist
+      requestBody:
+        description: |
+          An Odinson grammar.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/RuleHistRequest'
+      responses:
+        '200':
+          description: Binned frequencies of rule match counts.
+          content:
+             "application/json":
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/Bin'
+
+  # /api/most-common:
+  #   get:
+  #     tags:
+  #       - statistics
+  #     summary: |
+  #       Determines the most frequent matching spans for the provided pattern.
+  #     description: |
+  #       Determines the most frequent matching spans for the provided pattern.  Counts ignore case. Optionally request counts for only one argument.
+  #     operationId: most-common
+  #     parameters:
+  #       - $ref: '#/components/schemas/OdinsonPattern'
+  #       - $ref: '#/components/schemas/MetadataQuery'
+  #       - name: k
+  #         in: query
+  #         description: |
+  #           The top k most-frequent patterns.
+  #         required: true
+  #         schema:
+  #           type: integer
+  #           format: int32
+  #           minimum: 1
+  #           exclusiveMinimum: false
+  #         example: 3
+  #       - name: arg
+  #         in: query
+  #         description: |
+  #           (Optional) name of the argument to define frequency by.
+  #         required: false
+  #         type: string
+  #         example: "cause"
+  #     responses:
+  #       '200':
+  #         description: Top k most common matches (ignores case). Optionally specify the argument to define frequency on.
+  #         content:
+  #           "application/json":
+  #             schema:
+  #               type: array
+  #               items:
+  #                 $ref: '#/components/schemas/MatchFrequency'
+
+  /api/dependencies-vocabulary:
+    get:
+      tags:
+        - details
+      summary: The set of dependencies present in index.
+      description: Retrieves vocabulary of dependencies for the current index.
+      operationId: dependencies-vocabulary
+      responses:
+        '200':
+          description: "An array of unique dependencies."
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: nsubj
+                  description: A dependency relation.
+
+  /api/tags-vocabulary:
+    get:
+      tags:
+        - details
+      summary: The set of part-of-speech tags present in index.
+      description: Retrieves vocabulary of part-of-speech tags for the current index.
+      operationId: tags-vocabulary
+      responses:
+        '200':
+          description: "An array of unique POS tags."
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: NNPS
+                  description: A part-of-speech tag.
+
+  # /api/export:
+  #   get:
+  #     tags:
+  #       - export
+  #     summary: Match an Odinson pattern and export results to a TSV file.
+  #     description: Match an Odinson pattern and export results to a TSV file (includes header).
+  #     operationId: export-results
+  #     parameters:
+  #       - $ref: '#/components/schemas/OdinsonPattern'
+  #       - $ref: '#/components/schemas/MetadataQuery'
+  #     responses:
+  #       '200':
+  #         description: "A TSV file of matches. START and END are character spans relative to the beginning of the sentence."
+  #         content:
+  #           application/octet-stream:
+  #             schema:
+  #               type: string
+  #               format: binary
+
+  /api/corpus:
+    get:
+      tags:
+        - corpus
+        - metadata
+      summary: Information about the current corpus.
+      description: Provides information about the current corpus.
+      operationId: corpus
+      parameters:
+        - name: pretty
+          in: query
+          description: |
+            Whether or not to pretty print the response.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: "A JSON object containing corpus information."
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/CorpusInfo'
+
+  /api/buildinfo:
+    get:
+      tags:
+        - developers
+      summary: Information about the current version of this app.
+      description: Provides detailed build information about the currently running app.
+      operationId: buildinfo
+      parameters:
+        - name: pretty
+          in: query
+          description: |
+            Whether or not to pretty print the response.
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: "A JSON object containing build information."
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/BuildInfo'
+
+  # /api/config:
+  #   get:
+  #     tags:
+  #       - info
+  #     summary: Project config.
+  #     description: Retrieve project config as json.
+  #     operationId: config
+  #     parameters:
+  #       - name: pretty
+  #         in: query
+  #         description: |
+  #           Whether or not to pretty print the response.
+  #         required: false
+  #         schema:
+  #           type: boolean
+  #     responses:
+  #       '200':
+  #         description: "A JSON object containing config information."
+  #         content:
+  #           "application/json":
+  #             schema:
+  #               type: object
+
+components:
+  examples:
+    odinsonDocPies:
+      summary: A simple example of an Odinson Document with metadata.
+      value:
+        id: "tp-pies"
+        metadata:
+          - $type: "ai.lum.odinson.TokensField"
+            name: "show"
+            tokens: ["Twin", "Peaks"]
+          - $type: "ai.lum.odinson.TokensField"
+            name: "actor"
+            tokens: ["Kyle", "MacLachlan"]
+          - $type: "ai.lum.odinson.TokensField"
+            name: "character"
+            tokens: ["Special", "Agent", "Dale", "Cooper"]
+        sentences:
+          - numTokens: 10
+            fields:
+              - $type: "ai.lum.odinson.TokensField"
+                name: "raw"
+                tokens: [ "This", "must", "be", "where", "pies", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "word"
+                tokens: [ "This", "must", "be", "where", "pies", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "tag"
+                tokens: [ "DT", "MD", "VB", "WRB", "NNS", "VBP", "WRB", "PRP", "VBP", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "lemma"
+                tokens: [ "This", "must", "be", "where", "pie", "go", "when", "they", "die", "." ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "entity"
+                tokens: [ "O", "O", "O", "O", "O", "O", "O", "O", "O", "O" ]
+              - $type: "ai.lum.odinson.TokensField"
+                name: "chunk"
+                tokens: [ "B-NP", "B-VP", "I-VP", "B-ADVP", "B-NP", "B-VP", "B-ADVP", "B-NP", "B-VP", "O" ]
+              - $type: "ai.lum.odinson.GraphField"
+                name: "dependencies"
+                edges:
+                  - [ 2, 1, "aux"]
+                  - [ 2, 0, "nsubj" ]
+                  - [ 2, 9, "punct" ]
+                  - [ 2, 5, "advcl" ]
+                  - [ 5, 4, "nsubj" ]
+                  - [ 5, 3, "advmod" ]
+                  - [ 5, 8, "advcl" ]
+                  - [ 8, 6, "advmod" ]
+                  - [ 8, 7, "nsubj" ]
+                roots: [ 2 ]
+
+  schemas:
+
+    OdinsonGrammarRequest:
+      type: object
+      required:
+        - rules
+      properties:
+        grammar:
+          type: string
+          description: |
+            An Odinson grammar.
+          example: |
+             # an example grammar
+             rules:
+              - name: "example"
+                label: GrammaticalSubject
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  subject  = >nsubj []
+        pageSize:
+          type: integer
+          format: int32
+          description: |
+            The maximum number of sentences to execute the rules against.
+          example: 10
+        allowTriggerOverlaps:
+          type: boolean
+          description: |
+            Whether or not event arguments are permitted to overlap with the event's trigger. Defaults to false.
+          example: false
+
+    RuleFreqRequest:
+      type: object
+      required:
+        - rules
+      properties:
+        grammar:
+          type: string
+          description: |
+            An Odinson grammar.
+          example: |
+             # an example grammar
+             rules:
+              - name: "example1"
+                label: Agent
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  agent   = >nsubj []
+              - name: "example2"
+                label: Patient
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  patient = >dobj []
+              - name: "example3"
+                label: Patient
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  patient = >nsubjpass []
+              - name: "example4"
+                label: Agent
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  agent   = >nmod_by []
+        allowTriggerOverlaps:
+          type: boolean
+          description: |
+            Whether or not event arguments are permitted to overlap with the event's trigger. Defaults to false.
+          example: false
+#        group:
+#          type: string
+#          description: |
+#            A conditioning variable by which to group each rule's counts.
+#          example: ruleType
+#        filter:
+#          type: string
+#          description: |
+#            A regular expression to filter the rule names before counting.
+#          example: "passive"
+        order:
+          type: string
+          description: |
+            The order in which to return results: "freq" (frequency order, default) or "alpha" (alphanumeric order).
+          example: freq
+        min:
+          type: integer
+          format: int32
+          description: |
+            The smallest rank to return, with 0 (default) being the highest ranked.
+          example: 0
+        max:
+          type: integer
+          format: int32
+          description: |
+            The highest rank to return, e.g. 9 (default).
+          example: 9
+        scale:
+          type: string
+          description: |
+            Scaling to apply to frequency counts. Choices are "count" (default), "log10", and "percent".
+          example: count
+        reverse:
+          type: boolean
+          description: |
+            Whether to reverse the rank order, to select the 10 lease frequent results, for example.
+        pretty:
+          type: boolean
+          description: |
+            Whether or not to pretty print the response.
+
+    RuleHistRequest:
+      type: object
+      required:
+        - rules
+      properties:
+        grammar:
+          type: string
+          description: |
+            An Odinson grammar.
+          example: |
+             # an example grammar
+             rules:
+              - name: "example1"
+                label: Agent
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  subject  = >nsubj []
+              - name: "example2"
+                label: Patient
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  object  = >dobj []
+              - name: "example3"
+                label: Patient
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  subject  = >nsubjpass []
+              - name: "example4"
+                label: Agent
+                type: event
+                pattern: |
+                  trigger = [lemma=have]
+                  subject  = >nmod_by []
+        allowTriggerOverlaps:
+          type: boolean
+          description: |
+            Whether or not event arguments are permitted to overlap with the event's trigger. Defaults to false.
+          example: false
+        bins:
+          type: integer
+          format: int32
+          description: |
+            How many bins to cut the data into.
+          example: 3
+        equalProbability:
+          type: boolean
+          description: |
+            Whether to determine bin widths by quantile (instead of even bins).
+            Y values will be probability density estimates rather than counts.
+        xLogScale:
+          type: boolean
+          description: |
+            Whether to apply log10 scaling to token frequency counts or not (default).
+        pretty:
+          type: boolean
+          description: |
+            Whether or not to pretty print the response.
+
+    OdinsonGrammarResults:
+      type: object
+      required:
+        - sentenceId
+        - documentId
+        - sentenceIndex
+        - words
+        - foundBy
+        - match
+      properties:
+        sentenceId:
+          $ref: '#/components/schemas/sentenceId'
+        documentId:
+          $ref: '#/components/schemas/documentId'
+        sentenceIndex:
+          $ref: '#/components/schemas/sentenceIndex'
+        words:
+          $ref: '#/components/schemas/words'
+        label:
+          description: |
+            The label for this Mention.
+          type: string
+        foundBy:
+          description: |
+            The name of the rule which matched this Mention.
+          type: string
+        match:
+          $ref: '#/components/schemas/OdinsonMatch'
+
+    OdinsonMention:
+      type: object
+      required:
+        - test
+      # properties:
+      #   sentenceId:
+      #     type: mention.luceneDocId
+      # // "score"         -> odinsonScoreDoc.ssearch,
+      # "label"         -> mention.label,
+      # "documentId"    -> getDocId(mention.luceneDocId),
+      # "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
+      # "words"         -> JsArray(tokens.map(JsString)),
+      # "foundBy"       -> mention.foundBy,
+      # "match"       -> Json.arr(mkJson(mention.odinsonMatch))
+
+    OdinsonGrammar:
+      type: string
+      description: An Odinson pattern.
+      example: |
+        rules:
+          - name: "example"
+            label: Death
+            type: event
+            pattern: |
+              trigger = [lemma=die]
+              date: ^Date  = >nmod_on
+
+    OdinsonPattern:
+      type: string
+      description: An Odinson pattern.
+      example: "[lemma=phosphorylate] []"
+
+    MetadataQuery:
+      type: string
+      description: |
+        A query to filter Documents by their metadata before applying an Odinson pattern. See https://gh.lum.ai/odinson/metadata for details.
+      example: "year == 1973"
+
+    ScoredTerm:
+      type: object
+      required:
+        - term
+        - similarity
+      properties:
+        term:
+          type: string
+          description: A matching term in the vocabulary.
+          example: ubiquitination
+        similarity:
+          type: number
+          format: float
+          description: The similarity score for the returned term.
+          example: 0.673
+
+    FrequencyTable:
+      type: object
+      required:
+        - term
+        - frequency
+      properties:
+        term:
+          type: string
+          description: A term such as a token field or rule name.
+          example: achieve
+        group:
+          type: string
+          description: A grouping term from a second token field (e.g., tag).
+          example: VBD
+        frequency:
+          type: number
+          format: float
+          description: The number of occurrences of the term (potentially scaled).
+          example: 104291.0
+
+    Bin:
+      type: object
+      required:
+        - w
+        - x
+        - y
+      properties:
+        w:
+          type: number
+          format: float
+          description: The width of the bin.
+          example: 0.673
+        x:
+          type: number
+          format: float
+          description: The lower bound of the bin (inclusive).
+          example: 6.0
+        y:
+          type: number
+          format: float
+          description: The count or density of the bin.
+          example: 18203
+
+    # MatchFrequency:
+    #   type: object
+    #   required:
+    #     - match
+    #     - count
+    #   properties:
+    #     match:
+    #       type: string
+    #       description: Matched span of text after case folding.
+    #       example: phosphorylated protein
+    #     similarity:
+    #       type: integer
+    #       format: int32
+    #       description: The raw frequency of the match.
+    #       example: 60
+
+    OdinsonSpan:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: integer
+          format: int32
+          description: "Inclusive token index which denotes the start of this match's span."
+        end:
+          type: integer
+          format: int32
+          description: "Exclusive token index which denotes the end of this match's span."
+
+    OdinsonMatch:
+      type: object
+      required:
+        - span
+        - captures
+      properties:
+        span:
+          $ref: '#/components/schemas/OdinsonSpan'
+        captures:
+          type: array
+          items:
+            $ref: '#/components/schemas/OdinsonSpan'
+          description: "Named captures for this match."
+
+    QueryError:
+      type: string
+      description: The stack trace corresponding to the malformed query.
+
+    BasicResults:
+      type: object
+      required:
+        - odinsonQuery
+        - metadataQuery
+        - duration
+        - totalHits
+        - scoreDocs
+      properties:
+        odinsonQuery:
+          $ref: '#/components/schemas/OdinsonPattern'
+        metadataQuery:
+          $ref: '#/components/schemas/MetadataQuery'
+        duration:
+          type: number
+          format: float
+          description: The query's execution time (in seconds)
+        totalHits:
+          type: number
+          format: int64
+          description: The total number of hits (matches) for the query
+        scoreDocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocHit'
+
+    EnrichedResults:
+      type: object
+      required:
+        - odinsonQuery
+        - metadataQuery
+        - duration
+        - totalHits
+        - scoreDocs
+      properties:
+        odinsonQuery:
+          $ref: '#/components/schemas/OdinsonPattern'
+        metadataQuery:
+          $ref: '#/components/schemas/MetadataQuery'
+        duration:
+          type: number
+          format: float
+          description: The query's execution time (in seconds)
+        totalHits:
+          type: number
+          format: int64
+          description: The total number of hits (matches) for the query
+        scoreDocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrichedDocHit'
+
+    sentenceId:
+      type: integer
+      format: int64
+      description: The internal ID for this Odinson Document.
+
+    score:
+      type: number
+      format: float
+      description: The Lucene score for this Document.
+
+    documentId:
+      type: string
+      description: The parent document's ID as provided at index time (uses org.clulab.processors.Document.id).
+
+    sentenceIndex:
+      type: integer
+      format: int32
+      description: The index of this sentence in the parent document (0-based).
+
+    words:
+      type: array
+      description: Tokens for the document (sentence).
+      items:
+        type: string
+        description: A token.
+
+    matches:
+      type: array
+      items:
+        $ref: '#/components/schemas/OdinsonMatch'
+      description: The list of matching spans for this document.
+
+    DocHit:
+      type: object
+      required:
+        - sentenceId
+        - score
+        - documentId
+        - sentenceIndex
+        - words
+        - matches
+      properties:
+        sentenceId:
+          $ref: '#/components/schemas/sentenceId'
+        score:
+          $ref: '#/components/schemas/score'
+        documentId:
+          $ref: '#/components/schemas/documentId'
+        sentenceIndex:
+          $ref: '#/components/schemas/sentenceIndex'
+        words:
+          $ref: '#/components/schemas/words'
+        matches:
+          $ref: '#/components/schemas/matches'
+
+    EnrichedDocHit:
+      description: A `DocHit` that include sentence details.
+      type: object
+      required:
+        - sentenceId
+        - score
+        - documentId
+        - sentenceIndex
+        - sentence
+        - matches
+      properties:
+        sentenceId:
+          $ref: '#/components/schemas/sentenceId'
+        score:
+          $ref: '#/components/schemas/score'
+        documentId:
+          $ref: '#/components/schemas/documentId'
+        sentenceIndex:
+          $ref: '#/components/schemas/sentenceIndex'
+        matches:
+          $ref: '#/components/schemas/matches'
+        sentence:
+          $ref: '#/components/schemas/OdinsonSentence'
+          description: Token attributes and annotations for this sentence to aid in further refining queries.
+
+    OdinsonDocument:
+      type: object
+      required:
+        - id
+        - metadata
+        - sentences
+      properties:
+        id:
+          type: string
+          description: |
+            The ID for the document (ex. PMCXXXX).
+        metadata:
+          $ref: '#/components/schemas/OdinsonMetadata'
+        sentences:
+          type: array
+          description: |
+            All sentences in the OdinsonDocument.
+          items:
+            $ref: '#/components/schemas/OdinsonSentence'
+
+    OdinsonMetadata:
+      type: array
+      description: |
+        An array of document metadata properties
+      items:
+        anyOf:
+          - $ref: '#/components/schemas/OdinsonStringField'
+          - $ref: '#/components/schemas/OdinsonDateField'
+
+    OdinsonSentence:
+      type: object
+      required:
+        - numTokens
+        - fields
+      properties:
+        numTokens:
+          type: integer
+          format: int32
+          description: |
+            The number of tokens in the sentence.
+        fields:
+          type: array
+          description: |
+            An array of token and sentence-level attributes
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/OdinsonTokensField'
+              - $ref: '#/components/schemas/OdinsonGraphField'
+
+    OdinsonStringField:
+      type: object
+      description: |
+        Stores a property of type `String`.
+      required:
+        - $type
+        - name
+        - string
+        - store
+      properties:
+        $type:
+          type: string
+          description: |
+            ai.lum.odinson.StringField
+        name:
+          type: string
+          description: |
+            The name of the property (i.e., what information it denotes).
+          example: pmc
+        string:
+          type: string
+          description: |
+            The value corresponding to `name`
+          example: "6360082"
+        store:
+          type: boolean
+          description: |
+            Whether or not this Field should be stored in the Odinson index.
+
+    OdinsonDateField:
+      type: object
+      description: |
+        Stores date information (ex. a publication date).
+      required:
+        - $type
+        - name
+        - string
+        - store
+      properties:
+        $type:
+          type: string
+          description: |
+            ai.lum.odinson.DateField
+        name:
+          type: string
+          description: |
+            The name of the property (i.e., what information it denotes).
+          example: publicationDate
+        date:
+          type: string
+          description: |
+            The value corresponding to `name`.  A parseable date.
+          example: "2019-01-31"
+        store:
+          type: boolean
+          description: |
+            Whether or not this Field should be stored in the Odinson index.
+
+    OdinsonTokensField:
+      type: object
+      description: |
+        A type of token attribute.
+      properties:
+        $type:
+          type: string
+          description: |
+            ai.lum.odinson.TokensField
+        name:
+          type: string
+          description: |
+            The type of token attribute.
+          example: lemma
+        tokens:
+          type: array
+          description: |
+            The attribute of type `name` associated with each token.
+          items:
+            oneOf:
+              - type: string
+              - type: integer
+
+    OdinsonGraphField:
+      type: object
+      description: |
+        A type of directed graph.
+      properties:
+        $type:
+          type: string
+          description: |
+            ai.lum.odinson.GraphField
+        name:
+          type: string
+          description: |
+            The type of graph.
+          example: dependencies
+        edges:
+          type: array
+          description: |
+            Edges comprising this graph.
+          items:
+            $ref: '#/components/schemas/Edge'
+        roots:
+          type: array
+          description: |
+            The token indices corresponding to the root nodes for this directed graph.
+          items:
+            type: integer
+            format: int32
+
+    Edge:
+      type: array
+      items:
+        oneOf:
+          - type: string
+          - type: integer
+      minItems: 3
+      maxItems: 3
+      description: |
+        [token index for the source vertex, token index for the destination vertex, The relation to which this Edge corresponds]
+
+    BuildInfo:
+      type: object
+      required:
+        - name
+        - version
+        - scalaVersion
+        - sbtVersion
+        - libraryDependencies
+        - scalacOptions
+        - gitCurrentBranch
+        - gitHeadCommit
+        - gitHeadCommitDate
+        - gitUncommittedChanges
+        - builtAtString
+        - builtAtMillis
+      properties:
+        name:
+          type: string
+          description: "The name of the app."
+          example: "odinson"
+        version:
+          type: string
+          description: "Current version of the app."
+          example: "v0"
+        scalaVersion:
+          type: string
+          description: "The version of Scala used to build the app."
+          example: "2.12.4"
+        sbtVersion:
+          type: string
+          description: "The version of sbt used to build the app."
+          example: "0.13.15"
+        libraryDependencies:
+          type: array
+          items:
+            type: string
+            example: "org.apache.lucene:lucene-core:6.6.0"
+          description: "Project dependencies (versioned)."
+        scalacOptions:
+          type: array
+          items:
+            type: string
+            example: "utf8"
+          description: "Options used in current build."
+        gitCurrentBranch:
+          type: string
+          description: "The Git branch for the current build."
+          example: "some-branch-name"
+        gitHeadCommit:
+          type: string
+          description: "The Git commit has for the current build."
+          example: "b4c8c8b"
+        gitHeadCommitDate:
+          type: string
+          description: "The date of the most recent commit."
+          example: "2018-04-26T04:00:43-0700"
+        gitUncommittedChanges:
+          type: boolean
+          description: "Whether or not the current build includes uncommitted changes."
+          example: true
+        builtAtString:
+          type: string
+          description: "The date and time of the current build."
+          example: "2018-04-26T04:00:43-0700"
+        builtAtMillis:
+          type: string
+          description: "Date in milliseconds (since unix epoch)."
+          example: "1526875138573"
+
+    CorpusInfo:
+      type: object
+      required:
+        - numDocs
+        - corpus
+        - distinctDependencyRelations
+        - fields
+      properties:
+        numDocs:
+          type: integer
+          format: int32
+          description: "The total number of documents (num. docs = num. sentences) in the corpus."
+          example: 10000
+        corpus:
+          type: string
+          description: "The name of the parent directory of the current corpus."
+          example: "demo-index"
+        distinctDependencyRelations:
+          type: integer
+          format: int32
+          description: "The number of dependency relation types indexed in the corpus."
+          example: 134
+        tokenFields:
+          type: array
+          items:
+            type: string
+            description: "A token field available from the index."
+            example: word
+        docFields:
+          type: array
+          items:
+            type: string
+            description: "A document metadata field available from the index."
+            example: docId
