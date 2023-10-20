@@ -32,35 +32,67 @@ from contextlib import closing
 from typing import Optional
 import socket
 import docker
+import tempfile
+import shutil
+import uuid
+import time
 
 __all__ = [&#34;DockerBasedOdinsonAPI&#34;]
 
 
 class DockerBasedOdinsonAPI(OdinsonBaseAPI):
-    DEFAULT_IMAGE: str = &#34;lumai/odinson-rest-api:experimental&#34;
+    DEFAULT_IMAGE: str = &#34;lumai/odinson-rest-api:latest&#34;
+    ODINSON_INTERNAL_PORT: int = 9000
+    ODINSON_INTERNAL_DATA_PATH: str = &#34;/app/data&#34;
 
     def __init__(
         self,
-        local_path: str,
+        local_path: Optional[str] = None,
         image_name: str = DEFAULT_IMAGE,
+        container_name: Optional[str] = f&#34;odinson-{uuid.uuid4()}&#34;,
         local_port: Optional[int] = None,
         keep_alive: bool = False,
     ):
         self.client = docker.from_env()
-        self.local_path = local_path
-        self.image_name = image_name
-        self.local_port = local_port or DockerBasedOdinsonAPI.get_unused_port()
-        self.keep_alive = keep_alive
-        self.container = self.client.containers.run(
-            self.image_name,
-            name=&#34;odinson&#34;,
-            # strangely: container -&gt; host
-            ports={9000: self.local_port},
-            auto_remove=True,
-            detach=True,
-            volumes={self.local_path: {&#34;bind&#34;: &#34;/app/data&#34;, &#34;mode&#34;: &#34;rw&#34;}},
-        )
+        self.temp_dir = tempfile.mkdtemp()
+        self.local_path: Optional[str] = local_path or self.temp_dir
+        self.image_name: str = image_name
+        self.local_port: int = local_port or DockerBasedOdinsonAPI.get_unused_port()
+        self.keep_alive: bool = keep_alive
+        self.container_name: str = container_name
+        # if we&#39;re connecting to an existing service,
+        # we need to alter some of our attributes...
+        if self.is_running():
+            self.container = self.client.containers.get(self.container_name)
+            self.keep_alive = True
+            self.local_path: str = [entry.get(&#34;Source&#34;) for entry in self.container.attrs.get(&#34;Mounts&#34;, []) if entry.get(&#34;Destination&#34;, &#34;???&#34;) == DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH][0]
+            self.image_name: str = self.container.image.tags[0]
+            self.local_port: int = self.client.api.port(self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT)
+        else:
+            self.container = self.client.containers.run(
+                self.image_name,
+                name=self.container_name,
+                # NOTE: strangely: container -&gt; host
+                ports={DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT: self.local_port},
+                auto_remove=True,
+                detach=True,
+                volumes={self.local_path: {&#34;bind&#34;: DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH, &#34;mode&#34;: &#34;rw&#34;}},
+            )
         super().__init__(address=f&#34;http://127.0.0.1:{self.local_port}&#34;)
+
+    # def __enter__(self):
+    #     return self
+    
+    # def __exit__(self, exception_type, exception_value, exception_traceback):
+    #     # Exception handling here
+    #     # close index
+    #     # FIXME: using this produces a Connection Reset by Peer error
+    #     self.close()
+
+    @staticmethod
+    def using_container(container_name: str) -&gt; &#34;DockerBasedOdinsonAPI&#34;:
+        &#34;&#34;&#34;Connect to an existing containerized Odinson REST API service&#34;&#34;&#34;
+        return DockerBasedOdinsonAPI(container_name=container_name)
 
     @staticmethod
     def get_unused_port() -&gt; int:
@@ -72,37 +104,32 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
 
-    @property
-    def container_id(self) -&gt; str:
-        &#34;&#34;&#34;Retrieves container ID for odinson REST API service&#34;&#34;&#34;
-        return self.container.id
-
     def is_running(self):
         &#34;&#34;&#34;Checks if docker container for odinson REST API service is running&#34;&#34;&#34;
-        container_id = self.container_id
+        container_name = self.container_name
         try:
-            self.client.containers.get(container_id)
+            self.client.containers.get(container_name)
             return True
         except Exception as e:
             return False
 
-    def _close(self) -&gt; bool:
+    def close(self) -&gt; bool:
         &#34;&#34;&#34;Terminates docker container for odinson REST API service&#34;&#34;&#34;
-        container_id = self.container_id
         if self.is_running():
             try:
                 # print(f&#34;Killing docker container {container_id} for Odinson REST API&#34;)
                 self.container.kill()
                 # self.container.remove()
+                shutil.rmtree(self.temp_dir, ignore_errors=True)
                 return True
             except Exception as e:
-                print(f&#34;Failed to kill {container_id}&#34;)
-                print(e)
+                print(f&#34;Failed to kill {self.container_name}&#34;)
+                #print(e)
                 return False
 
     def __del__(self):
-        if not self.keep_alive and self.is_running():
-            self._close()</code></pre>
+        if self.is_running() and not self.keep_alive:
+            self.close()</code></pre>
 </details>
 </section>
 <section>
@@ -116,7 +143,7 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
 <dl>
 <dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI"><code class="flex name class">
 <span>class <span class="ident">DockerBasedOdinsonAPI</span></span>
-<span>(</span><span>local_path: str, image_name: str = 'lumai/odinson-rest-api:experimental', local_port: Optional[int] = None, keep_alive: bool = False)</span>
+<span>(</span><span>local_path: Optional[str] = None, image_name: str = 'lumai/odinson-rest-api:latest', container_name: Optional[str] = 'odinson-5f8fbfb0-71c0-47bf-a10c-9f40ae6e03c9', local_port: Optional[int] = None, keep_alive: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -125,30 +152,58 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class DockerBasedOdinsonAPI(OdinsonBaseAPI):
-    DEFAULT_IMAGE: str = &#34;lumai/odinson-rest-api:experimental&#34;
+    DEFAULT_IMAGE: str = &#34;lumai/odinson-rest-api:latest&#34;
+    ODINSON_INTERNAL_PORT: int = 9000
+    ODINSON_INTERNAL_DATA_PATH: str = &#34;/app/data&#34;
 
     def __init__(
         self,
-        local_path: str,
+        local_path: Optional[str] = None,
         image_name: str = DEFAULT_IMAGE,
+        container_name: Optional[str] = f&#34;odinson-{uuid.uuid4()}&#34;,
         local_port: Optional[int] = None,
         keep_alive: bool = False,
     ):
         self.client = docker.from_env()
-        self.local_path = local_path
-        self.image_name = image_name
-        self.local_port = local_port or DockerBasedOdinsonAPI.get_unused_port()
-        self.keep_alive = keep_alive
-        self.container = self.client.containers.run(
-            self.image_name,
-            name=&#34;odinson&#34;,
-            # strangely: container -&gt; host
-            ports={9000: self.local_port},
-            auto_remove=True,
-            detach=True,
-            volumes={self.local_path: {&#34;bind&#34;: &#34;/app/data&#34;, &#34;mode&#34;: &#34;rw&#34;}},
-        )
+        self.temp_dir = tempfile.mkdtemp()
+        self.local_path: Optional[str] = local_path or self.temp_dir
+        self.image_name: str = image_name
+        self.local_port: int = local_port or DockerBasedOdinsonAPI.get_unused_port()
+        self.keep_alive: bool = keep_alive
+        self.container_name: str = container_name
+        # if we&#39;re connecting to an existing service,
+        # we need to alter some of our attributes...
+        if self.is_running():
+            self.container = self.client.containers.get(self.container_name)
+            self.keep_alive = True
+            self.local_path: str = [entry.get(&#34;Source&#34;) for entry in self.container.attrs.get(&#34;Mounts&#34;, []) if entry.get(&#34;Destination&#34;, &#34;???&#34;) == DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH][0]
+            self.image_name: str = self.container.image.tags[0]
+            self.local_port: int = self.client.api.port(self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT)
+        else:
+            self.container = self.client.containers.run(
+                self.image_name,
+                name=self.container_name,
+                # NOTE: strangely: container -&gt; host
+                ports={DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT: self.local_port},
+                auto_remove=True,
+                detach=True,
+                volumes={self.local_path: {&#34;bind&#34;: DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH, &#34;mode&#34;: &#34;rw&#34;}},
+            )
         super().__init__(address=f&#34;http://127.0.0.1:{self.local_port}&#34;)
+
+    # def __enter__(self):
+    #     return self
+    
+    # def __exit__(self, exception_type, exception_value, exception_traceback):
+    #     # Exception handling here
+    #     # close index
+    #     # FIXME: using this produces a Connection Reset by Peer error
+    #     self.close()
+
+    @staticmethod
+    def using_container(container_name: str) -&gt; &#34;DockerBasedOdinsonAPI&#34;:
+        &#34;&#34;&#34;Connect to an existing containerized Odinson REST API service&#34;&#34;&#34;
+        return DockerBasedOdinsonAPI(container_name=container_name)
 
     @staticmethod
     def get_unused_port() -&gt; int:
@@ -160,37 +215,32 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
 
-    @property
-    def container_id(self) -&gt; str:
-        &#34;&#34;&#34;Retrieves container ID for odinson REST API service&#34;&#34;&#34;
-        return self.container.id
-
     def is_running(self):
         &#34;&#34;&#34;Checks if docker container for odinson REST API service is running&#34;&#34;&#34;
-        container_id = self.container_id
+        container_name = self.container_name
         try:
-            self.client.containers.get(container_id)
+            self.client.containers.get(container_name)
             return True
         except Exception as e:
             return False
 
-    def _close(self) -&gt; bool:
+    def close(self) -&gt; bool:
         &#34;&#34;&#34;Terminates docker container for odinson REST API service&#34;&#34;&#34;
-        container_id = self.container_id
         if self.is_running():
             try:
                 # print(f&#34;Killing docker container {container_id} for Odinson REST API&#34;)
                 self.container.kill()
                 # self.container.remove()
+                shutil.rmtree(self.temp_dir, ignore_errors=True)
                 return True
             except Exception as e:
-                print(f&#34;Failed to kill {container_id}&#34;)
-                print(e)
+                print(f&#34;Failed to kill {self.container_name}&#34;)
+                #print(e)
                 return False
 
     def __del__(self):
-        if not self.keep_alive and self.is_running():
-            self._close()</code></pre>
+        if self.is_running() and not self.keep_alive:
+            self.close()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -199,6 +249,14 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
 <h3>Class variables</h3>
 <dl>
 <dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.DEFAULT_IMAGE"><code class="name">var <span class="ident">DEFAULT_IMAGE</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH"><code class="name">var <span class="ident">ODINSON_INTERNAL_DATA_PATH</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT"><code class="name">var <span class="ident">ODINSON_INTERNAL_PORT</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -226,25 +284,48 @@ def get_unused_port() -&gt; int:
         return s.getsockname()[1]</code></pre>
 </details>
 </dd>
-</dl>
-<h3>Instance variables</h3>
-<dl>
-<dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.container_id"><code class="name">var <span class="ident">container_id</span> : str</code></dt>
+<dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.using_container"><code class="name flex">
+<span>def <span class="ident">using_container</span></span>(<span>container_name: str) ‑> <a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI">DockerBasedOdinsonAPI</a></span>
+</code></dt>
 <dd>
-<div class="desc"><p>Retrieves container ID for odinson REST API service</p></div>
+<div class="desc"><p>Connect to an existing containerized Odinson REST API service</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@property
-def container_id(self) -&gt; str:
-    &#34;&#34;&#34;Retrieves container ID for odinson REST API service&#34;&#34;&#34;
-    return self.container.id</code></pre>
+<pre><code class="python">@staticmethod
+def using_container(container_name: str) -&gt; &#34;DockerBasedOdinsonAPI&#34;:
+    &#34;&#34;&#34;Connect to an existing containerized Odinson REST API service&#34;&#34;&#34;
+    return DockerBasedOdinsonAPI(container_name=container_name)</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.close"><code class="name flex">
+<span>def <span class="ident">close</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Terminates docker container for odinson REST API service</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def close(self) -&gt; bool:
+    &#34;&#34;&#34;Terminates docker container for odinson REST API service&#34;&#34;&#34;
+    if self.is_running():
+        try:
+            # print(f&#34;Killing docker container {container_id} for Odinson REST API&#34;)
+            self.container.kill()
+            # self.container.remove()
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+            return True
+        except Exception as e:
+            print(f&#34;Failed to kill {self.container_name}&#34;)
+            #print(e)
+            return False</code></pre>
+</details>
+</dd>
 <dt id="lum.odinson.rest.docker.DockerBasedOdinsonAPI.is_running"><code class="name flex">
 <span>def <span class="ident">is_running</span></span>(<span>self)</span>
 </code></dt>
@@ -256,9 +337,9 @@ def container_id(self) -&gt; str:
 </summary>
 <pre><code class="python">def is_running(self):
     &#34;&#34;&#34;Checks if docker container for odinson REST API service is running&#34;&#34;&#34;
-    container_id = self.container_id
+    container_name = self.container_name
     try:
-        self.client.containers.get(container_id)
+        self.client.containers.get(container_name)
         return True
     except Exception as e:
         return False</code></pre>
@@ -270,6 +351,7 @@ def container_id(self) -&gt; str:
 <li><code><b><a title="lum.odinson.rest.api.OdinsonBaseAPI" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI">OdinsonBaseAPI</a></b></code>:
 <ul class="hlist">
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.buildinfo" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI.buildinfo">buildinfo</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.corpus" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI.corpus">corpus</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.delete" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI.delete">delete</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.document" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI.document">document</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary" href="api.html#lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary">edge_vocabulary</a></code></li>
@@ -308,9 +390,12 @@ def container_id(self) -&gt; str:
 <h4><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI">DockerBasedOdinsonAPI</a></code></h4>
 <ul class="">
 <li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.DEFAULT_IMAGE" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.DEFAULT_IMAGE">DEFAULT_IMAGE</a></code></li>
-<li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.container_id" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.container_id">container_id</a></code></li>
+<li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH">ODINSON_INTERNAL_DATA_PATH</a></code></li>
+<li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT">ODINSON_INTERNAL_PORT</a></code></li>
+<li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.close" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.close">close</a></code></li>
 <li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.get_unused_port" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.get_unused_port">get_unused_port</a></code></li>
 <li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.is_running" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.is_running">is_running</a></code></li>
+<li><code><a title="lum.odinson.rest.docker.DockerBasedOdinsonAPI.using_container" href="#lum.odinson.rest.docker.DockerBasedOdinsonAPI.using_container">using_container</a></code></li>
 </ul>
 </li>
 </ul>

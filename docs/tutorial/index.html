@@ -55,6 +55,8 @@
 <ul>
 <li class="toctree-l3"><a class="reference internal" href="#launching-and-interacting-with-a-service-using-docker">Launching and interacting with a service using docker</a>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#validating-a-rule">Validating a rule</a>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#common-workflows">Common Workflows</a>
@@ -140,6 +142,17 @@ engine.index(doc)
 for res in engine.search(odinson_query="[lemma=be]"):
   for span in res.spans():
     print(f"{res.document_id} ({res.sentence_index}):  {span}")
+</code></pre>
+<h3 id="validating-a-rule">Validating a rule<a class="headerlink" href="#validating-a-rule" title="Permanent link"></a></h3>
+<pre><code class="language-python">from lum.odinson.rest.docker import DockerBasedOdinsonAPI
+
+engine = DockerBasedOdinsonAPI()
+# will return False
+engine.validate_rule("[")
+# will return True
+engine.validate_rule("[word=Gonzo]")
+
+engine.close()
 </code></pre>
 <!-- ## API Endpoints and Examples
 

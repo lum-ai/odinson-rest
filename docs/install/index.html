@@ -128,7 +128,9 @@ We publish releases in the form of docker images:
 - ?? -->
 <pre><code class="language-bash"># NOTE: replace &lt;local/path/to/data&gt; with the absolute path
 # to the location you want data to be written to on your machine
-docker run -it -p "8000:8000" -v "&lt;local/path/to/data&gt;:/app/data" "lumai/odinson-rest:latest"
+# ensure its permissions allow writing by the docker service
+# i.e., chmod 777 &lt;local/path/to/data&gt;
+docker run -it -p "9000:9000" -v "&lt;local/path/to/data&gt;:/app/data" "lumai/odinson-rest:latest"
 </code></pre>
 </div>
 </div>

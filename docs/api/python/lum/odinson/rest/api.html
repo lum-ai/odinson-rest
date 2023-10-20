@@ -30,7 +30,7 @@
 <pre><code class="python">from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
 from lum.odinson.doc import AnyField, Document, Sentence
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, Statistic, Results
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, Results
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -74,7 +74,7 @@ class OdinsonBaseAPI:
         return requests.get(endpoint).json()
 
     def corpus(self) -&gt; CorpusInfo:
-        &#34;&#34;&#34;&#34;&#34;&#34;
+        &#34;&#34;&#34;Provides a summary of the current index&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/corpus&#34;
         # return requests.get(endpoint).json()
         return CorpusInfo(**requests.get(endpoint).json())
@@ -141,11 +141,10 @@ class OdinsonBaseAPI:
     ) -&gt; requests.Response:
         return requests.post(
             endpoint,
-            json=text,
             # NOTE: data takes str &amp; .json() returns json str
-            # strange as it seems, this round trip is seems necessary for at least some files
-            # data=json.dumps(json.loads(doc.json())),
-            headers=headers,
+            #json=text,
+            data=text,
+            headers=headers
         )
 
     def validate_document(self, doc: Document, strict: bool = True) -&gt; bool:
@@ -163,7 +162,7 @@ class OdinsonBaseAPI:
     ) -&gt; Union[bool, OdinsonErrors]:
         &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/validate/rule&#34;
-        res = self._post_text(endpoint=endpoint, contents=rule)
+        res = self._post_text(endpoint=endpoint, text=rule)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
@@ -279,9 +278,9 @@ class OdinsonBaseAPI:
         }
         params = {k: v for (k, v) in params.items() if v}
         # print(params)
-        res = requests.get(endpoint, params=params).json()
+        res = requests.get(endpoint, params=params)
         # print(res)
-        return Results(**res)
+        return Results.empty() if res.status_code != 200 else Results(**res.json())
 
     def search(
         self,
@@ -299,7 +298,7 @@ class OdinsonBaseAPI:
         prev_doc: Optional[int] = None,
         # The score for the last result seen in the previous page of results.
         prev_score: Optional[float] = None,
-    ) -&gt; Results:  # -&gt; Iterator[S]:
+    ) -&gt; Iterator[ScoreDoc]:
         endpoint = f&#34;{self.address}/api/execute/pattern&#34;
         params = {
             &#34;odinsonQuery&#34;: odinson_query,
@@ -318,6 +317,8 @@ class OdinsonBaseAPI:
             prev_doc=prev_doc,
         )
         total = results.total_hits
+        if total == 0:
+            return iter(())
         last = results.score_docs[-1]
         while seen &lt; total:
             for sd in results.score_docs:
@@ -394,7 +395,7 @@ class OdinsonBaseAPI:
         return requests.get(endpoint).json()
 
     def corpus(self) -&gt; CorpusInfo:
-        &#34;&#34;&#34;&#34;&#34;&#34;
+        &#34;&#34;&#34;Provides a summary of the current index&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/corpus&#34;
         # return requests.get(endpoint).json()
         return CorpusInfo(**requests.get(endpoint).json())
@@ -461,11 +462,10 @@ class OdinsonBaseAPI:
     ) -&gt; requests.Response:
         return requests.post(
             endpoint,
-            json=text,
             # NOTE: data takes str &amp; .json() returns json str
-            # strange as it seems, this round trip is seems necessary for at least some files
-            # data=json.dumps(json.loads(doc.json())),
-            headers=headers,
+            #json=text,
+            data=text,
+            headers=headers
         )
 
     def validate_document(self, doc: Document, strict: bool = True) -&gt; bool:
@@ -483,7 +483,7 @@ class OdinsonBaseAPI:
     ) -&gt; Union[bool, OdinsonErrors]:
         &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/validate/rule&#34;
-        res = self._post_text(endpoint=endpoint, contents=rule)
+        res = self._post_text(endpoint=endpoint, text=rule)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
@@ -599,9 +599,9 @@ class OdinsonBaseAPI:
         }
         params = {k: v for (k, v) in params.items() if v}
         # print(params)
-        res = requests.get(endpoint, params=params).json()
+        res = requests.get(endpoint, params=params)
         # print(res)
-        return Results(**res)
+        return Results.empty() if res.status_code != 200 else Results(**res.json())
 
     def search(
         self,
@@ -619,7 +619,7 @@ class OdinsonBaseAPI:
         prev_doc: Optional[int] = None,
         # The score for the last result seen in the previous page of results.
         prev_score: Optional[float] = None,
-    ) -&gt; Results:  # -&gt; Iterator[S]:
+    ) -&gt; Iterator[ScoreDoc]:
         endpoint = f&#34;{self.address}/api/execute/pattern&#34;
         params = {
             &#34;odinsonQuery&#34;: odinson_query,
@@ -638,6 +638,8 @@ class OdinsonBaseAPI:
             prev_doc=prev_doc,
         )
         total = results.total_hits
+        if total == 0:
+            return iter(())
         last = results.score_docs[-1]
         while seen &lt; total:
             for sd in results.score_docs:
@@ -751,13 +753,13 @@ def tags_vocabulary(self) -&gt; List[str]:
 <span>def <span class="ident">corpus</span></span>(<span>self) ‑> <a title="lum.odinson.rest.responses.CorpusInfo" href="responses.html#lum.odinson.rest.responses.CorpusInfo">CorpusInfo</a></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Provides a summary of the current index</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def corpus(self) -&gt; CorpusInfo:
-    &#34;&#34;&#34;&#34;&#34;&#34;
+    &#34;&#34;&#34;Provides a summary of the current index&#34;&#34;&#34;
     endpoint = f&#34;{self.address}/api/corpus&#34;
     # return requests.get(endpoint).json()
     return CorpusInfo(**requests.get(endpoint).json())</code></pre>
@@ -915,7 +917,7 @@ def tags_vocabulary(self) -&gt; List[str]:
 </details>
 </dd>
 <dt id="lum.odinson.rest.api.OdinsonBaseAPI.search"><code class="name flex">
-<span>def <span class="ident">search</span></span>(<span>self, odinson_query: str, metadata_query: Optional[str] = None, label: Optional[str] = None, commit: bool = False, prev_doc: Optional[int] = None, prev_score: Optional[float] = None) ‑> <a title="lum.odinson.rest.responses.Results" href="responses.html#lum.odinson.rest.responses.Results">Results</a></span>
+<span>def <span class="ident">search</span></span>(<span>self, odinson_query: str, metadata_query: Optional[str] = None, label: Optional[str] = None, commit: bool = False, prev_doc: Optional[int] = None, prev_score: Optional[float] = None) ‑> Iterator[<a title="lum.odinson.rest.responses.ScoreDoc" href="responses.html#lum.odinson.rest.responses.ScoreDoc">ScoreDoc</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -939,7 +941,7 @@ def tags_vocabulary(self) -&gt; List[str]:
     prev_doc: Optional[int] = None,
     # The score for the last result seen in the previous page of results.
     prev_score: Optional[float] = None,
-) -&gt; Results:  # -&gt; Iterator[S]:
+) -&gt; Iterator[ScoreDoc]:
     endpoint = f&#34;{self.address}/api/execute/pattern&#34;
     params = {
         &#34;odinsonQuery&#34;: odinson_query,
@@ -958,6 +960,8 @@ def tags_vocabulary(self) -&gt; List[str]:
         prev_doc=prev_doc,
     )
     total = results.total_hits
+    if total == 0:
+        return iter(())
     last = results.score_docs[-1]
     while seen &lt; total:
         for sd in results.score_docs:
@@ -1083,7 +1087,7 @@ def tags_vocabulary(self) -&gt; List[str]:
 ) -&gt; Union[bool, OdinsonErrors]:
     &#34;&#34;&#34;Inspects and validates an Odinson rule&#34;&#34;&#34;
     endpoint = f&#34;{self.address}/api/validate/rule&#34;
-    res = self._post_text(endpoint=endpoint, contents=rule)
+    res = self._post_text(endpoint=endpoint, text=rule)
     if res.status_code == 200:
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
     else:

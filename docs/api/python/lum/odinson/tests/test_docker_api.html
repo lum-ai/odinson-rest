@@ -71,7 +71,7 @@ class TestDockerAPI(unittest.TestCase):
         &#34;&#34;&#34;
         # NOTE: we must stop the container before destroying the mounted volume
         # close API
-        self.api._close()
+        self.api.close()
         # clean up test index
         self.indexdir.cleanup()
 
@@ -169,7 +169,7 @@ not have a method with the specified name.</p></div>
         &#34;&#34;&#34;
         # NOTE: we must stop the container before destroying the mounted volume
         # close API
-        self.api._close()
+        self.api.close()
         # clean up test index
         self.indexdir.cleanup()
 
@@ -246,7 +246,7 @@ See <a href="https://docs.python.org/3/library/unittest.html">https://docs.pytho
     &#34;&#34;&#34;
     # NOTE: we must stop the container before destroying the mounted volume
     # close API
-    self.api._close()
+    self.api.close()
     # clean up test index
     self.indexdir.cleanup()</code></pre>
 </details>
