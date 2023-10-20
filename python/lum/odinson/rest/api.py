@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
-from lum.odinson.doc import AnyField, Document, Sentence, ScoreDoc
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, Statistic, Results
+from lum.odinson.doc import AnyField, Document, Sentence
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, Results
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
