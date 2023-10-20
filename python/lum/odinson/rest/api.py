@@ -45,7 +45,7 @@ class OdinsonBaseAPI:
         return requests.get(endpoint).json()
 
     def corpus(self) -> CorpusInfo:
-        """"""
+        """Provides a summary of the current index"""
         endpoint = f"{self.address}/api/corpus"
         # return requests.get(endpoint).json()
         return CorpusInfo(**requests.get(endpoint).json())
