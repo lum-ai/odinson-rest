@@ -19,6 +19,7 @@ Navigate to [localhost:9000/api](http://localhost:9000/api) to interactively exp
 We also provide a Python library as a simple way to build applications that interact with the Odinson REST API.  You can either connect to an existing odinson-rest service or launch one using docker.
 
 ### Launching and interacting with a service using docker
+
 ```python
 from lum.odinson.doc import Document, Fields
 from lum.odinson.rest.docker import DockerBasedOdinsonAPI
@@ -38,6 +39,20 @@ engine.index(doc)
 for res in engine.search(odinson_query="[lemma=be]"):
   for span in res.spans():
     print(f"{res.document_id} ({res.sentence_index}):  {span}")
+```
+### Validating a rule
+
+
+```python
+from lum.odinson.rest.docker import DockerBasedOdinsonAPI
+
+engine = DockerBasedOdinsonAPI()
+# will return False
+engine.validate_rule("[")
+# will return True
+engine.validate_rule("[word=Gonzo]")
+
+engine.close()
 ```
 
 <!-- ## API Endpoints and Examples

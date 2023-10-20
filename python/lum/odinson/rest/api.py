@@ -112,11 +112,10 @@ class OdinsonBaseAPI:
     ) -> requests.Response:
         return requests.post(
             endpoint,
-            json=text,
             # NOTE: data takes str & .json() returns json str
-            # strange as it seems, this round trip is seems necessary for at least some files
-            # data=json.dumps(json.loads(doc.json())),
-            headers=headers,
+            #json=text,
+            data=text,
+            headers=headers
         )
 
     def validate_document(self, doc: Document, strict: bool = True) -> bool:
@@ -134,7 +133,7 @@ class OdinsonBaseAPI:
     ) -> Union[bool, OdinsonErrors]:
         """Inspects and validates an Odinson rule"""
         endpoint = f"{self.address}/api/validate/rule"
-        res = self._post_text(endpoint=endpoint, contents=rule)
+        res = self._post_text(endpoint=endpoint, text=rule)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:

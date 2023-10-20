@@ -8,7 +8,7 @@ version = "0.1.0"
 dependencies=[
     "pydantic~=2.0.0",
     #"typing_extensions", # see https://github.com/pydantic/pydantic/issues/5821#issuecomment-1559196859
-    "requests",
+    "requests[security]",
 ]
 
 #green -vvv --run-coverage /app

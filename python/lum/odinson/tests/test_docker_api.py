@@ -42,7 +42,7 @@ class TestDockerAPI(unittest.TestCase):
         """
         # NOTE: we must stop the container before destroying the mounted volume
         # close API
-        self.api._close()
+        self.api.close()
         # clean up test index
         self.indexdir.cleanup()
 
