@@ -164,8 +164,9 @@ class OdinsonBaseAPI:
 
     def update(self, doc: Document, max_tokens: Optional[int] = None) -> bool:
         """Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence."""
+        # f"{self.address}/api/update/document/{urllib.parse.quote(doc.id)}"
         endpoint = (
-            f"{self.address}/api/update/document/{urllib.parse.quote(doc.id)}"
+            f"{self.address}/api/update/document"
             if not max_tokens
             else f"{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}"
         )
@@ -175,7 +176,7 @@ class OdinsonBaseAPI:
     def delete(self, doc_or_id: Union[Document, Text]) -> bool:
         """Removes an OdinsonDocument from the index."""
         doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
-        endpoint = f"{self.address}/api/delete/document/{doc_id}"
+        endpoint = f"{self.address}/api/delete/document/{urllib.parse.quote(doc_id)}"
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
 

@@ -411,7 +411,8 @@ paths:
           description: |
             An error message.
 
-  /api/update/document/{documentId}:
+  # /api/update/document/{documentId}:
+  /api/update/document:
     post:
       tags:
         - index
