@@ -2,7 +2,7 @@ from __future__ import annotations
 import dateutil
 from lum.odinson.typing import Tokens
 from enum import Enum
-from typing import Any, List, Literal, Sequence, Text, Tuple, Type, Union
+from typing import Any, List, Literal, Optional, Sequence, Text, Tuple, Type, Union
 import abc
 from pydantic import BaseModel, ConfigDict
 import pydantic
@@ -29,7 +29,6 @@ class Field(BaseModel):
     name: Text
     type: Fields = pydantic.Field(alias="$type", default="ai.lum.odinson.Field")
     model_config = ConfigDict(use_enum_values=True, validate_default=True)
-
 
 class TokensField(Field):
     tokens: Tokens
@@ -194,6 +193,57 @@ class Sentence(BaseModel):
     def json(self, **kwargs):
         return self.model_dump_json(**kwargs)
 
+    def copy(self, fields: List[AnyField]) -> "Sentence":
+        """Convenience method for easily copying an Odinson Sentence and replacing specific attributes"""
+        return Sentence(
+          # validate and count tokens
+          numTokens=Sentence._count_tokens(fields), 
+          fields=fields
+        )
+    
+    @staticmethod
+    def validate_fields(fields: List[AnyField]) -> bool:
+        # validation
+        num_tokens = set()
+        for f in fields:
+            if isinstance(f, TokensField):
+                num_tokens.add(len(f.tokens))
+        # NOTE: this will also fail if no TokensField are present
+        if len(num_tokens) != 1:
+            raise Exception(f"All TokensField for sentence should have same length, but found {len(num_tokens)}")
+        return True
+        
+    @staticmethod
+    def _count_tokens(fields: List[AnyField]) -> bool:
+      """Get count of tokens based on TokensField after first validating with Sentence.validate_fields"""
+      _ = Sentence.validate_fields(fields)
+      for f in fields:
+          if isinstance(f, TokensField):
+              return len(f.tokens)
+        
+    @staticmethod
+    def from_fields(fields: List[AnyField]) -> "Sentence":
+        """Create an Odinson Sentence from a collection of fields"""
+        return Sentence(
+          # validate and count
+          numTokens=Sentence._count_tokens(fields), 
+          fields=fields
+        )
+    
+    @staticmethod
+    def from_tokens(tokens: List[Token]) -> "Sentence":
+        """Create an Odinson Sentence from a collection Tokens"""
+        fields_dict = dict()
+        for tok in tokens:
+            for k, v in tok.__dict__.items():
+                value = fields_dict.get(k, [])
+                value.append(v)
+                fields_dict[k] = value
+        num_tokens = list({len(values) for values in fields_dict.items()}) 
+        assert num_tokens == 1, "All token attributes must have the same length"
+        fields = [TokensField(name=k, tokens=toks) for k, toks in fields_dict.items()]
+        return Sentence(numTokens=num_tokens[0], fields=fields)
+        
 
 class Document(BaseModel):
     """ai.lum.odinson.Document"""
@@ -253,3 +303,11 @@ class Document(BaseModel):
         else:
             with open(fp, "r") as f:
                 return Document(**json.loads(f.read()))
+
+    def copy(self, id: Optional[str] = None, metadata: Optional[List[AnyField]] = None, sentences: Optional[List[Sentence]] = None) -> "Document":
+        """Convenience method for easily copying an Odinson Document and replacing specific attributes"""
+        return Document(
+          id=id or self.id,
+          metadata=metadata or self.metadata,
+          sentences=sentences or self.sentences
+        )

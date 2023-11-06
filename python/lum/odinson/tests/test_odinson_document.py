@@ -22,3 +22,14 @@ class TestOdinsonDocument(unittest.TestCase):
         self.assertTrue(
             len(od.lemma) > 0, f"doc.lemma should not be empty, but returned {od.lemma}"
         )
+    
+    def test_copy(self):
+        """odinson.Document.copy() should produce copies with only the specified changes."""
+        _od = odinson.Document.from_file(TEST_DOC_PATH)
+        od = _od.copy(id="blarg")
+        self.assertTrue(
+            _od.id != od.id, f"Doc ID of original and clone should differ, but clone's ID was {od.id}"
+        )
+        self.assertTrue(
+            all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))), f"Sentences of original and clone differing only in Doc ID should be identical"
+        )

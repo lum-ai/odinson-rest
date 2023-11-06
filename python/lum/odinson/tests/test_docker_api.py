@@ -22,7 +22,7 @@ class TestDockerAPI(unittest.TestCase):
         """
         self.test_doc = odinson.Document.from_file(TEST_DOC_PATH)
         self.indexdir = tempfile.TemporaryDirectory()
-        self.api = DockerBasedOdinsonAPI(
+        self.engine = DockerBasedOdinsonAPI(
             local_path=self.indexdir.name, keep_alive=False
         )
         MAX_WAIT = 5
@@ -30,7 +30,7 @@ class TestDockerAPI(unittest.TestCase):
         ELAPSED = 0
         while ELAPSED < MAX_WAIT:
             try:
-                len(self.api)
+                len(self.engine)
             except:
                 pass
             time.sleep(STEP)
