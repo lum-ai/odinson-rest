@@ -31,7 +31,7 @@
 import dateutil
 from lum.odinson.typing import Tokens
 from enum import Enum
-from typing import List, Literal, Sequence, Text, Tuple, Type, Union
+from typing import Any, List, Literal, Sequence, Text, Tuple, Type, Union
 import abc
 from pydantic import BaseModel, ConfigDict
 import pydantic
@@ -66,6 +66,9 @@ class TokensField(Field):
         alias=&#34;$type&#34;, default=Fields.TOKENS_FIELD.value, frozen=True
     )
 
+    def __hash__(self) -&gt; int:
+        return hash((self.name, self.type, tuple(self.tokens)))
+
 
 class GraphField(Field):
     edges: List[Tuple[int, int, Text]]
@@ -74,12 +77,22 @@ class GraphField(Field):
         alias=&#34;$type&#34;, default=Fields.GRAPH_FIELD.value, frozen=True
     )
 
+    def __hash__(self) -&gt; int:
+        roots = tuple(self.roots)
+        edges = tuple(
+            sorted(self.edges, key=lambda triple: (triple[0], triple[1], triple[2]))
+        )
+        return hash((self.name, self.type, roots, edges))
+
 
 class StringField(Field):
     string: Text
     type: Literal[Fields.STRING_FIELD] = pydantic.Field(
         alias=&#34;$type&#34;, default=Fields.STRING_FIELD.value, frozen=True
     )
+
+    def __hash__(self) -&gt; int:
+        return hash((self.name, self.type, self.string))
 
 
 class DateField(Field):
@@ -88,6 +101,9 @@ class DateField(Field):
         alias=&#34;$type&#34;, default=Fields.DATE_FIELD.value, frozen=True
     )
 
+    def __hash__(self) -&gt; int:
+        return hash((self.name, self.type, self.date))
+
 
 class NumberField(Field):
     value: float
@@ -95,12 +111,18 @@ class NumberField(Field):
         alias=&#34;$type&#34;, default=Fields.NUMBER_FIELD.value, frozen=True
     )
 
+    def __hash__(self) -&gt; int:
+        return hash((self.name, self.type, self.value))
+
 
 class NestedField(Field):
     fields: List[Type[Field]]
     type: Literal[Fields.NESTED_FIELD] = pydantic.Field(
         alias=&#34;$type&#34;, default=Fields.NESTED_FIELD.value, frozen=True
     )
+
+    def __hash__(self) -&gt; int:
+        return hash((self.name, self.type, tuple(self.fields)))
 
 
 AnyField = Union[
@@ -132,10 +154,62 @@ class Metadata:
                 pass
 
 
+class Token:
+    &#34;&#34;&#34;Convenience class to represent a single token
+    and its attributes&#34;&#34;&#34;
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            self.__dict__[k] = v
+
+    def __len__(self):
+        return len(self.raw)
+
+    def __str__(self):
+        return self.raw
+
+    def __hash__(self):
+        return hash(tuple(frozenset(sorted(self.__dict__.items()))))
+
+
 class Sentence(BaseModel):
     numTokens: int
     # FIXME: figure out how to just use List[Type[Field]]
     fields: List[AnyField]
+    model_config = ConfigDict(extra=&#34;allow&#34;)
+
+    def model_post_init(self, ctx) -&gt; None:
+        &#34;&#34;&#34;Easy access to fields&#34;&#34;&#34;
+        tokens = [dict([]) for _ in range(self.numTokens)]
+        graph = None
+        for f in self.fields:
+            key = f.name
+            # token attributes
+            if isinstance(f, TokensField):
+                # populate tokens
+                for i, label in enumerate(f.tokens):
+                    tokens[i][key] = label
+                self.__dict__[key] = f.tokens
+            # syntactic dependencies, semantic roles, etc.
+            elif isinstance(f, GraphField):
+                graph = f
+        # create tokens
+        self.__dict__[&#34;tokens&#34;] = [Token(**d) for d in tokens]
+
+        # TODO: create graph
+        # if graph is not None:
+        #   edges = []
+        #   self.__dict__[&#34;edges&#34;] =
+        #   key = &#34;edges&#34;
+
+    def __getitem__(self, index: int) -&gt; Token:
+        return self.tokens[index]
+
+    def __hash__(self):
+        num_tokens = [self.numTokens]
+        fields = [hash(f) for f in self.fields]
+        components = num_tokens + fields
+        return hash(tuple(components))
 
     def model_dump(self, by_alias=True, **kwargs):
         return super().model_dump(by_alias=by_alias, **kwargs)
@@ -156,6 +230,31 @@ class Document(BaseModel):
     id: Text
     metadata: List[AnyField]
     sentences: List[Sentence]
+
+    def __hash__(self):
+        metadata = [0] if len(self.metadata) == 0 else [hash(f) for f in self.metadata]
+        sentences = [hash(s) for s in self.sentences]
+        components = [hash(self.id)] + metadata + sentences
+        return hash(tuple(components))
+
+    def model_post_init(self, ctx) -&gt; None:
+        tokens = []
+        attributes = dict()
+        for s in self.sentences:
+            # append tokens
+            tokens.append(s.tokens)
+            for f in s.fields:
+                key = f.name
+                # token attributes
+                if isinstance(f, TokensField):
+                    values = attributes.get(key, [])
+                    # nested list
+                    values.append(s.__dict__[key])
+                    attributes[key] = values
+        for k, v in attributes.items():
+            self.__dict__[k] = v
+
+        self.__dict__[&#34;tokens&#34;] = [s.tokens for s in self.sentences]
 
     def metadata_by_name(self, name: str) -&gt; List[AnyField]:
         return [m for m in self.metadata if m.name == name]
@@ -214,6 +313,31 @@ allow <code>self</code> as a field name.</p></div>
     id: Text
     metadata: List[AnyField]
     sentences: List[Sentence]
+
+    def __hash__(self):
+        metadata = [0] if len(self.metadata) == 0 else [hash(f) for f in self.metadata]
+        sentences = [hash(s) for s in self.sentences]
+        components = [hash(self.id)] + metadata + sentences
+        return hash(tuple(components))
+
+    def model_post_init(self, ctx) -&gt; None:
+        tokens = []
+        attributes = dict()
+        for s in self.sentences:
+            # append tokens
+            tokens.append(s.tokens)
+            for f in s.fields:
+                key = f.name
+                # token attributes
+                if isinstance(f, TokensField):
+                    values = attributes.get(key, [])
+                    # nested list
+                    values.append(s.__dict__[key])
+                    attributes[key] = values
+        for k, v in attributes.items():
+            self.__dict__[k] = v
+
+        self.__dict__[&#34;tokens&#34;] = [s.tokens for s in self.sentences]
 
     def metadata_by_name(self, name: str) -&gt; List[AnyField]:
         return [m for m in self.metadata if m.name == name]
@@ -421,6 +545,36 @@ If mode is 'python', the dictionary may contain any Python objects.</dd>
     return super().model_dump_json(by_alias=by_alias, **kwargs)</code></pre>
 </details>
 </dd>
+<dt id="lum.odinson.doc.Document.model_post_init"><code class="name flex">
+<span>def <span class="ident">model_post_init</span></span>(<span>self, ctx) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Override this method to perform additional initialization after <code>__init__</code> and <code>model_construct</code>.
+This is useful if you want to do some validation that requires the entire model to be initialized.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_post_init(self, ctx) -&gt; None:
+    tokens = []
+    attributes = dict()
+    for s in self.sentences:
+        # append tokens
+        tokens.append(s.tokens)
+        for f in s.fields:
+            key = f.name
+            # token attributes
+            if isinstance(f, TokensField):
+                values = attributes.get(key, [])
+                # nested list
+                values.append(s.__dict__[key])
+                attributes[key] = values
+    for k, v in attributes.items():
+        self.__dict__[k] = v
+
+    self.__dict__[&#34;tokens&#34;] = [s.tokens for s in self.sentences]</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -453,6 +607,7 @@ If mode is 'python', the dictionary may contain any Python objects.</dd>
 <li><code><a title="lum.odinson.doc.Document.model_dump" href="#lum.odinson.doc.Document.model_dump">model_dump</a></code></li>
 <li><code><a title="lum.odinson.doc.Document.model_dump_json" href="#lum.odinson.doc.Document.model_dump_json">model_dump_json</a></code></li>
 <li><code><a title="lum.odinson.doc.Document.model_fields" href="#lum.odinson.doc.Document.model_fields">model_fields</a></code></li>
+<li><code><a title="lum.odinson.doc.Document.model_post_init" href="#lum.odinson.doc.Document.model_post_init">model_post_init</a></code></li>
 <li><code><a title="lum.odinson.doc.Document.sentences" href="#lum.odinson.doc.Document.sentences">sentences</a></code></li>
 </ul>
 </li>
