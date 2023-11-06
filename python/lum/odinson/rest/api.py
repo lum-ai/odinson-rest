@@ -15,6 +15,7 @@ __all__ = ["OdinsonBaseAPI"]
 
 
 class OdinsonBaseAPI:
+
     def __init__(self, address: Text):
         self.address = address
 
@@ -194,7 +195,6 @@ class OdinsonBaseAPI:
         """Retrieves Odinson Document Metadata from the doc store."""
         endpoint = f"{self.address}/api/metadata/sentence/{sentence_id}"
         res = requests.get(endpoint)
-        print(res.json())
         doc = Document.model_validate(
             {"id": "UNK", "metadata": res.json(), "sentences": []}
         )
@@ -204,7 +204,7 @@ class OdinsonBaseAPI:
         """Retrieves Odinson Document Metadata from the doc store."""
         endpoint = f"{self.address}/api/metadata/document/{document_id}"
         res = requests.get(endpoint)
-        print(res.json())
+        # print(res.json())
         doc = Document.model_validate(
             {"id": document_id, "metadata": res.json(), "sentences": []}
         )
