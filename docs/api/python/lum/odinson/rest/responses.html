@@ -41,6 +41,15 @@ __all__ = [&#34;CorpusInfo&#34;, &#34;OdinsonErrors&#34;, &#34;ScoreDoc&#34;, &#
 
 # OdinsonMatch = Union[&#34;NamedCapture&#34;, &#34;GraphTraversalMatch&#34;]
 
+mq_desc = pydantic.Field(
+    alias=&#34;metadataQuery&#34;,
+    description=&#34;A query to filter Documents by their metadata before applying an Odinson pattern. See https://docs.lum.ai/odinson/metadata for details.&#34;,
+    default=None,
+)
+
+duration_desc = pydantic.Field(
+    description=&#34;The query&#39;s execution time (in seconds)&#34;
+)
 
 class OdinsonErrors(BaseModel):
     errors: List[str]
@@ -96,7 +105,6 @@ class EventMatch(BaseMatch):
 class NamedCaptureMatch(BaseMatch):
     named_captures: List[NamedCapture] = pydantic.Field(alias=&#34;namedCaptures&#34;)
 
-
 class ScoreDoc(BaseModel):
     sentence_id: int = pydantic.Field(
         alias=&#34;sentenceId&#34;, description=&#34;The internal ID for this Odinson Document.&#34;
@@ -121,19 +129,55 @@ class ScoreDoc(BaseModel):
             # FIXME: should this be joined on whitespace?
             yield &#34; &#34;.join(self.words[m.start : m.end])
 
+# class OdinsonSpan(BaseModel):
+#     start: int = pydantic.Field(description=&#34;&#34;)
+#     end: int = pydantic.Field(description=&#34;&#34;)
+# class OdinsonMatch(BaseModel):
+#     span: OdinsonSpan = pydantic.Field(description=&#34;&#34;)
+#     captures: List[OdinsonSpan] = pydantic.Field(description=&#34;&#34;)
+
+class BaseMention(BaseModel):
+    label: str = pydantic.Field(description=&#34;The label for this Mention&#34;)
+    sentence_id: int = pydantic.Field(
+        alias=&#34;sentenceId&#34;, description=&#34;The internal ID for this Odinson Document.&#34;
+    )
+    documentId: str = pydantic.Field(
+        alias=&#34;documentId&#34;, description=&#34;The parent document&#39;s ID as provided at index time.&#34;
+    )
+    sentence_index: int = pydantic.Field(
+        alias=&#34;sentenceIndex&#34;, description=&#34;The positional index (0-based) of the matched sentence in some Odinson Document.&#34;
+    )
+    words: List[str] = pydantic.Field(description=&#34;The words of the sentence.&#34;
+    )
+    found_by: str = pydantic.Field( alias=&#34;foundBy&#34;, description=&#34;The name of the rule that produced this match.&#34;
+    )
+    match: List[Union[EventMatch, NamedCaptureMatch, BaseMatch]] = pydantic.Field(description=&#34;The Mention representing the match.&#34;)
+
+class GrammarResults(BaseModel):
+    metadata_query: Optional[str] = mq_desc
+    duration: float = duration_desc
+    allow_trigger_overlaps: bool = pydantic.Field(alias=&#34;allowTriggerOverlaps&#34;, description=&#34;&#34;)
+    mentions: List[BaseMention]
+
+    def model_dump(self, by_alias=True, **kwargs):
+        return super().model_dump(by_alias=by_alias, **kwargs)
+
+    def model_dump_json(self, by_alias=True, **kwargs):
+        return super().model_dump_json(by_alias=by_alias, **kwargs)
+
+    def dict(self, **kwargs):
+        return self.model_dump(**kwargs)
+
+    def json(self, **kwargs):
+        return self.model_dump_json(**kwargs)
+    # TODO: add convenience methods to get all matched spans
 
 class Results(BaseModel):
     odinson_query: str = pydantic.Field(
         alias=&#34;odinsonQuery&#34;, description=&#34;An Odinson pattern.&#34;
     )
-    metadata_query: Optional[str] = pydantic.Field(
-        alias=&#34;metadataQuery&#34;,
-        description=&#34;A query to filter Documents by their metadata before applying an Odinson pattern. See https://docs.lum.ai/odinson/metadata for details.&#34;,
-        default=None,
-    )
-    duration: float = pydantic.Field(
-        description=&#34;The query&#39;s execution time (in seconds)&#34;
-    )
+    metadata_query: Optional[str] = mq_desc
+    duration: float = duration_desc
     total_hits: int = pydantic.Field(
         alias=&#34;totalHits&#34;,
         description=&#34;The total number of hits (matches) for the query&#34;,
@@ -143,36 +187,6 @@ class Results(BaseModel):
     )
 
 
-# @dataclass
-# class OdinsonResults:
-#   _API: OdinsonBaseAPI
-
-
-# @dataclass
-# class MentionsResults:
-#     _API: OdinsonBaseAPI
-#     metadataQuery: Text
-#     duration: float
-#     allowTriggerOverlaps: bool
-#     _mentions: List[Mention]
-
-#     # TODO: define __next__
-
-
-# class GrammarResult(BaseModel):
-#     # The internal ID for this Odinson Document.
-#     sentenceId: int
-#     # The parent document&#39;s ID as provided at index time (uses org.clulab.processors.Document.id).
-#     documentId: Text
-
-#     # The index of this sentence in the parent document (0-based).
-#     sentenceIndex: int
-
-#     # Tokens for the document (sentence).
-#     words: List[Text]
-
-#     # The label for this Mention.
-#     label: Text
 
 #     # The name of the rule which matched this Mention.
 #     foundBy: Text
@@ -536,14 +550,8 @@ allow <code>self</code> as a field name.</p></div>
     odinson_query: str = pydantic.Field(
         alias=&#34;odinsonQuery&#34;, description=&#34;An Odinson pattern.&#34;
     )
-    metadata_query: Optional[str] = pydantic.Field(
-        alias=&#34;metadataQuery&#34;,
-        description=&#34;A query to filter Documents by their metadata before applying an Odinson pattern. See https://docs.lum.ai/odinson/metadata for details.&#34;,
-        default=None,
-    )
-    duration: float = pydantic.Field(
-        description=&#34;The query&#39;s execution time (in seconds)&#34;
-    )
+    metadata_query: Optional[str] = mq_desc
+    duration: float = duration_desc
     total_hits: int = pydantic.Field(
         alias=&#34;totalHits&#34;,
         description=&#34;The total number of hits (matches) for the query&#34;,

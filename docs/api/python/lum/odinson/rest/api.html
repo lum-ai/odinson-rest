@@ -30,7 +30,8 @@
 <pre><code class="python">from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
 from lum.odinson.doc import AnyField, Document, Sentence
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, Results
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, GrammarResults, Results
+from lum.odinson.rest.requests import GrammarRequest
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -247,9 +248,9 @@ class OdinsonBaseAPI:
         elif isinstance(id, int):
             return self.metadata_for_sentence(id)
 
-    # /api/parent/sentence/:sentenceId
-    # /api/metadata/document/:odinsonDocId
-    # /api/metadata/sentence/:sentenceId
+    # TODO: /api/parent/sentence/:sentenceId
+    # TODO: /api/metadata/document/:odinsonDocId
+    # TODO: /api/metadata/sentence/:sentenceId
 
     def _search(
         self,
@@ -282,6 +283,29 @@ class OdinsonBaseAPI:
         res = requests.get(endpoint, params=params)
         # print(res)
         return Results.empty() if res.status_code != 200 else Results(**res.json())
+
+    def execute_grammar(
+        self,
+        grammar: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        max_docs: Optional[int] = 20,
+        allow_trigger_overlaps: bool = False
+    ):
+        endpoint = f&#34;{self.address}/api/execute/grammar&#34;
+        gr = GrammarRequest(
+            grammar=grammar,
+            metadataQuery=metadata_query,
+            maxDocs=max_docs,
+            allowTriggerOverlaps=allow_trigger_overlaps
+        )
+        res = requests.post(
+            endpoint,
+            json=gr.dict()
+        )
+        #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+        # FIXME: check status code and return error or empty results?
+        return GrammarResults(**res.json())
 
     def search(
         self,
@@ -340,7 +364,6 @@ class OdinsonBaseAPI:
             )
             # print(f&#34;total_hits:\t{results.total_hits}&#34;)
 
-    # TODO: add method to retrieve doc for id
     # TODO: add rewrite method
     # for any token that matches the pattern, replace its entry in field &lt;field&gt; with &lt;label&gt;
     # ex [word=&#34;Table&#34; &amp; tag=/NNP.*/] -&gt; {scratch: &#34;CAPTION&#34;}</code></pre>
@@ -569,9 +592,9 @@ class OdinsonBaseAPI:
         elif isinstance(id, int):
             return self.metadata_for_sentence(id)
 
-    # /api/parent/sentence/:sentenceId
-    # /api/metadata/document/:odinsonDocId
-    # /api/metadata/sentence/:sentenceId
+    # TODO: /api/parent/sentence/:sentenceId
+    # TODO: /api/metadata/document/:odinsonDocId
+    # TODO: /api/metadata/sentence/:sentenceId
 
     def _search(
         self,
@@ -604,6 +627,29 @@ class OdinsonBaseAPI:
         res = requests.get(endpoint, params=params)
         # print(res)
         return Results.empty() if res.status_code != 200 else Results(**res.json())
+
+    def execute_grammar(
+        self,
+        grammar: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        max_docs: Optional[int] = 20,
+        allow_trigger_overlaps: bool = False
+    ):
+        endpoint = f&#34;{self.address}/api/execute/grammar&#34;
+        gr = GrammarRequest(
+            grammar=grammar,
+            metadataQuery=metadata_query,
+            maxDocs=max_docs,
+            allowTriggerOverlaps=allow_trigger_overlaps
+        )
+        res = requests.post(
+            endpoint,
+            json=gr.dict()
+        )
+        #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+        # FIXME: check status code and return error or empty results?
+        return GrammarResults(**res.json())
 
     def search(
         self,
@@ -662,7 +708,6 @@ class OdinsonBaseAPI:
             )
             # print(f&#34;total_hits:\t{results.total_hits}&#34;)
 
-    # TODO: add method to retrieve doc for id
     # TODO: add rewrite method
     # for any token that matches the pattern, replace its entry in field &lt;field&gt; with &lt;label&gt;
     # ex [word=&#34;Table&#34; &amp; tag=/NNP.*/] -&gt; {scratch: &#34;CAPTION&#34;}</code></pre>
@@ -798,6 +843,39 @@ def tags_vocabulary(self) -&gt; List[str]:
     endpoint = f&#34;{self.address}/api/document/{document_id}&#34;
     res = requests.get(endpoint)
     return Document.model_validate(res.json())</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.api.OdinsonBaseAPI.execute_grammar"><code class="name flex">
+<span>def <span class="ident">execute_grammar</span></span>(<span>self, grammar: str, metadata_query: Optional[str] = None, max_docs: Optional[int] = 20, allow_trigger_overlaps: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def execute_grammar(
+    self,
+    grammar: str,
+    # A query to filter Documents by their metadata before applying an Odinson pattern.
+    metadata_query: Optional[str] = None,
+    max_docs: Optional[int] = 20,
+    allow_trigger_overlaps: bool = False
+):
+    endpoint = f&#34;{self.address}/api/execute/grammar&#34;
+    gr = GrammarRequest(
+        grammar=grammar,
+        metadataQuery=metadata_query,
+        maxDocs=max_docs,
+        allowTriggerOverlaps=allow_trigger_overlaps
+    )
+    res = requests.post(
+        endpoint,
+        json=gr.dict()
+    )
+    #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+    # FIXME: check status code and return error or empty results?
+    return GrammarResults(**res.json())</code></pre>
 </details>
 </dd>
 <dt id="lum.odinson.rest.api.OdinsonBaseAPI.index"><code class="name flex">
@@ -1122,6 +1200,7 @@ def tags_vocabulary(self) -&gt; List[str]:
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.delete" href="#lum.odinson.rest.api.OdinsonBaseAPI.delete">delete</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.document" href="#lum.odinson.rest.api.OdinsonBaseAPI.document">document</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary" href="#lum.odinson.rest.api.OdinsonBaseAPI.edge_vocabulary">edge_vocabulary</a></code></li>
+<li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.execute_grammar" href="#lum.odinson.rest.api.OdinsonBaseAPI.execute_grammar">execute_grammar</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.index" href="#lum.odinson.rest.api.OdinsonBaseAPI.index">index</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.metadata" href="#lum.odinson.rest.api.OdinsonBaseAPI.metadata">metadata</a></code></li>
 <li><code><a title="lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_document" href="#lum.odinson.rest.api.OdinsonBaseAPI.metadata_for_document">metadata_for_document</a></code></li>

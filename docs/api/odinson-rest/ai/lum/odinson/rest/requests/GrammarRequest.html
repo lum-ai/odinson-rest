@@ -186,7 +186,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">GrammarRequest</span><span class="params">(<span name="grammar">grammar: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pageSize">pageSize: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="allowTriggerOverlaps">allowTriggerOverlaps: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="pretty">pretty: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">GrammarRequest</span><span class="params">(<span name="grammar">grammar: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxDocs">maxDocs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="allowTriggerOverlaps">allowTriggerOverlaps: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="metadataQuery">metadataQuery: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="pretty">pretty: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -242,9 +242,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="ai.lum.odinson.rest.requests.GrammarRequest#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(grammar:String,pageSize:Option[Int],allowTriggerOverlaps:Option[Boolean],pretty:Option[Boolean]):ai.lum.odinson.rest.requests.GrammarRequest"></a><a id="&lt;init&gt;:GrammarRequest"></a>
+      <a id="&lt;init&gt;(grammar:String,maxDocs:Option[Int],allowTriggerOverlaps:Option[Boolean],metadataQuery:Option[String],pretty:Option[Boolean]):ai.lum.odinson.rest.requests.GrammarRequest"></a><a id="&lt;init&gt;:GrammarRequest"></a>
       <span class="permalink">
-      <a href="../../../../../ai/lum/odinson/rest/requests/GrammarRequest.html#&lt;init&gt;(grammar:String,pageSize:Option[Int],allowTriggerOverlaps:Option[Boolean],pretty:Option[Boolean]):ai.lum.odinson.rest.requests.GrammarRequest" title="Permalink">
+      <a href="../../../../../ai/lum/odinson/rest/requests/GrammarRequest.html#&lt;init&gt;(grammar:String,maxDocs:Option[Int],allowTriggerOverlaps:Option[Boolean],metadataQuery:Option[String],pretty:Option[Boolean]):ai.lum.odinson.rest.requests.GrammarRequest" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -253,7 +253,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">GrammarRequest</span><span class="params">(<span name="grammar">grammar: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pageSize">pageSize: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="allowTriggerOverlaps">allowTriggerOverlaps: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="pretty">pretty: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">GrammarRequest</span><span class="params">(<span name="grammar">grammar: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="maxDocs">maxDocs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>] = <span class="symbol">None</span></span>, <span name="allowTriggerOverlaps">allowTriggerOverlaps: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>, <span name="metadataQuery">metadataQuery: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="pretty">pretty: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">None</span></span>)</span>
       </span>
       
       
@@ -442,6 +442,38 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="ai.lum.odinson.rest.requests.GrammarRequest#maxDocs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="maxDocs:Option[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../../ai/lum/odinson/rest/requests/GrammarRequest.html#maxDocs:Option[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxDocs</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      
+    </li><li name="ai.lum.odinson.rest.requests.GrammarRequest#metadataQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="metadataQuery:Option[String]"></a>
+      <span class="permalink">
+      <a href="../../../../../ai/lum/odinson/rest/requests/GrammarRequest.html#metadataQuery:Option[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">metadataQuery</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -500,22 +532,6 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="ai.lum.odinson.rest.requests.GrammarRequest#pageSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pageSize:Option[Int]"></a>
-      <span class="permalink">
-      <a href="../../../../../ai/lum/odinson/rest/requests/GrammarRequest.html#pageSize:Option[Int]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pageSize</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      
-      
     </li><li name="ai.lum.odinson.rest.requests.GrammarRequest#pretty" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="pretty:Option[Boolean]"></a>
       <span class="permalink">
