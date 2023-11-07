@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
 from lum.odinson.doc import AnyField, Document, Sentence
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, Results
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, GrammarResults, Results
+from lum.odinson.rest.requests import GrammarRequest
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -218,9 +219,9 @@ class OdinsonBaseAPI:
         elif isinstance(id, int):
             return self.metadata_for_sentence(id)
 
-    # /api/parent/sentence/:sentenceId
-    # /api/metadata/document/:odinsonDocId
-    # /api/metadata/sentence/:sentenceId
+    # TODO: /api/parent/sentence/:sentenceId
+    # TODO: /api/metadata/document/:odinsonDocId
+    # TODO: /api/metadata/sentence/:sentenceId
 
     def _search(
         self,
@@ -253,6 +254,29 @@ class OdinsonBaseAPI:
         res = requests.get(endpoint, params=params)
         # print(res)
         return Results.empty() if res.status_code != 200 else Results(**res.json())
+
+    def execute_grammar(
+        self,
+        grammar: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        max_docs: Optional[int] = 20,
+        allow_trigger_overlaps: bool = False
+    ):
+        endpoint = f"{self.address}/api/execute/grammar"
+        gr = GrammarRequest(
+            grammar=grammar,
+            metadataQuery=metadata_query,
+            maxDocs=max_docs,
+            allowTriggerOverlaps=allow_trigger_overlaps
+        )
+        res = requests.post(
+            endpoint,
+            json=gr.dict()
+        )
+        #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+        # FIXME: check status code and return error or empty results?
+        return GrammarResults(**res.json())
 
     def search(
         self,
@@ -311,7 +335,6 @@ class OdinsonBaseAPI:
             )
             # print(f"total_hits:\t{results.total_hits}")
 
-    # TODO: add method to retrieve doc for id
     # TODO: add rewrite method
     # for any token that matches the pattern, replace its entry in field <field> with <label>
     # ex [word="Table" & tag=/NNP.*/] -> {scratch: "CAPTION"}
