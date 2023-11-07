@@ -44,6 +44,7 @@ __all__ = [&#34;OdinsonBaseAPI&#34;]
 
 
 class OdinsonBaseAPI:
+
     def __init__(self, address: Text):
         self.address = address
 
@@ -192,8 +193,9 @@ class OdinsonBaseAPI:
 
     def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
         &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+        # f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
         endpoint = (
-            f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+            f&#34;{self.address}/api/update/document&#34;
             if not max_tokens
             else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
         )
@@ -203,7 +205,7 @@ class OdinsonBaseAPI:
     def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
         &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
         doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
-        endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+        endpoint = f&#34;{self.address}/api/delete/document/{urllib.parse.quote(doc_id)}&#34;
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
 
@@ -223,7 +225,6 @@ class OdinsonBaseAPI:
         &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
         res = requests.get(endpoint)
-        print(res.json())
         doc = Document.model_validate(
             {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
         )
@@ -233,7 +234,7 @@ class OdinsonBaseAPI:
         &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
         res = requests.get(endpoint)
-        print(res.json())
+        # print(res.json())
         doc = Document.model_validate(
             {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
         )
@@ -365,6 +366,7 @@ class OdinsonBaseAPI:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class OdinsonBaseAPI:
+
     def __init__(self, address: Text):
         self.address = address
 
@@ -513,8 +515,9 @@ class OdinsonBaseAPI:
 
     def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
         &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+        # f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
         endpoint = (
-            f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+            f&#34;{self.address}/api/update/document&#34;
             if not max_tokens
             else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
         )
@@ -524,7 +527,7 @@ class OdinsonBaseAPI:
     def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
         &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
         doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
-        endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+        endpoint = f&#34;{self.address}/api/delete/document/{urllib.parse.quote(doc_id)}&#34;
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
 
@@ -544,7 +547,6 @@ class OdinsonBaseAPI:
         &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
         res = requests.get(endpoint)
-        print(res.json())
         doc = Document.model_validate(
             {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
         )
@@ -554,7 +556,7 @@ class OdinsonBaseAPI:
         &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
         res = requests.get(endpoint)
-        print(res.json())
+        # print(res.json())
         doc = Document.model_validate(
             {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
         )
@@ -777,7 +779,7 @@ def tags_vocabulary(self) -&gt; List[str]:
 <pre><code class="python">def delete(self, doc_or_id: Union[Document, Text]) -&gt; bool:
     &#34;&#34;&#34;Removes an OdinsonDocument from the index.&#34;&#34;&#34;
     doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
-    endpoint = f&#34;{self.address}/api/delete/document/{doc_id}&#34;
+    endpoint = f&#34;{self.address}/api/delete/document/{urllib.parse.quote(doc_id)}&#34;
     res = requests.delete(endpoint)
     return OdinsonBaseAPI.status_code_to_bool(res.status_code)</code></pre>
 </details>
@@ -849,7 +851,7 @@ def tags_vocabulary(self) -&gt; List[str]:
     &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
     endpoint = f&#34;{self.address}/api/metadata/document/{document_id}&#34;
     res = requests.get(endpoint)
-    print(res.json())
+    # print(res.json())
     doc = Document.model_validate(
         {&#34;id&#34;: document_id, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
     )
@@ -869,7 +871,6 @@ def tags_vocabulary(self) -&gt; List[str]:
     &#34;&#34;&#34;Retrieves Odinson Document Metadata from the doc store.&#34;&#34;&#34;
     endpoint = f&#34;{self.address}/api/metadata/sentence/{sentence_id}&#34;
     res = requests.get(endpoint)
-    print(res.json())
     doc = Document.model_validate(
         {&#34;id&#34;: &#34;UNK&#34;, &#34;metadata&#34;: res.json(), &#34;sentences&#34;: []}
     )
@@ -1023,8 +1024,9 @@ def tags_vocabulary(self) -&gt; List[str]:
 </summary>
 <pre><code class="python">def update(self, doc: Document, max_tokens: Optional[int] = None) -&gt; bool:
     &#34;&#34;&#34;Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence.&#34;&#34;&#34;
+    # f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
     endpoint = (
-        f&#34;{self.address}/api/update/document/{urllib.parse.quote(doc.id)}&#34;
+        f&#34;{self.address}/api/update/document&#34;
         if not max_tokens
         else f&#34;{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}&#34;
     )
