@@ -205,6 +205,12 @@ class OdinsonController @Inject() (
     json.format(pretty)
   }
 
+  def healthcheck() = Action.async {
+    Future {
+      Ok(Json.toJson(200))
+    }
+  }
+  
   def numDocs = Action.async {
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
