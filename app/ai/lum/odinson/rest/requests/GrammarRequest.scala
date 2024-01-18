@@ -4,8 +4,9 @@ import play.api.libs.json._
 
 case class GrammarRequest(
   grammar: String,
-  pageSize: Option[Int] = None,
+  maxDocs: Option[Int] = None,
   allowTriggerOverlaps: Option[Boolean] = None,
+  metadataQuery: Option[String] = None,
   pretty: Option[Boolean] = None
 )
 

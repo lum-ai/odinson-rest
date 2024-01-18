@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
 from lum.odinson.doc import AnyField, Document, Sentence
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, Statistic, Results
+from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, GrammarResults, Results
+from lum.odinson.rest.requests import GrammarRequest
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -15,6 +16,7 @@ __all__ = ["OdinsonBaseAPI"]
 
 
 class OdinsonBaseAPI:
+
     def __init__(self, address: Text):
         self.address = address
 
@@ -45,7 +47,7 @@ class OdinsonBaseAPI:
         return requests.get(endpoint).json()
 
     def corpus(self) -> CorpusInfo:
-        """"""
+        """Provides a summary of the current index"""
         endpoint = f"{self.address}/api/corpus"
         # return requests.get(endpoint).json()
         return CorpusInfo(**requests.get(endpoint).json())
@@ -112,11 +114,10 @@ class OdinsonBaseAPI:
     ) -> requests.Response:
         return requests.post(
             endpoint,
-            json=text,
             # NOTE: data takes str & .json() returns json str
-            # strange as it seems, this round trip is seems necessary for at least some files
-            # data=json.dumps(json.loads(doc.json())),
-            headers=headers,
+            #json=text,
+            data=text,
+            headers=headers
         )
 
     def validate_document(self, doc: Document, strict: bool = True) -> bool:
@@ -134,7 +135,7 @@ class OdinsonBaseAPI:
     ) -> Union[bool, OdinsonErrors]:
         """Inspects and validates an Odinson rule"""
         endpoint = f"{self.address}/api/validate/rule"
-        res = self._post_text(endpoint=endpoint, contents=rule)
+        res = self._post_text(endpoint=endpoint, text=rule)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
@@ -164,8 +165,9 @@ class OdinsonBaseAPI:
 
     def update(self, doc: Document, max_tokens: Optional[int] = None) -> bool:
         """Updates an OdinsonDocument in the index, allowing for a specified maximum number of tokens per sentence."""
+        # f"{self.address}/api/update/document/{urllib.parse.quote(doc.id)}"
         endpoint = (
-            f"{self.address}/api/update/document/{urllib.parse.quote(doc.id)}"
+            f"{self.address}/api/update/document"
             if not max_tokens
             else f"{self.address}/api/update/document/maxTokensPerSentence/{max_tokens}"
         )
@@ -175,7 +177,7 @@ class OdinsonBaseAPI:
     def delete(self, doc_or_id: Union[Document, Text]) -> bool:
         """Removes an OdinsonDocument from the index."""
         doc_id: Text = doc_or_id if isinstance(doc_or_id, Text) else doc_or_id.id
-        endpoint = f"{self.address}/api/delete/document/{doc_id}"
+        endpoint = f"{self.address}/api/delete/document/{urllib.parse.quote(doc_id)}"
         res = requests.delete(endpoint)
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
 
@@ -195,7 +197,6 @@ class OdinsonBaseAPI:
         """Retrieves Odinson Document Metadata from the doc store."""
         endpoint = f"{self.address}/api/metadata/sentence/{sentence_id}"
         res = requests.get(endpoint)
-        print(res.json())
         doc = Document.model_validate(
             {"id": "UNK", "metadata": res.json(), "sentences": []}
         )
@@ -205,7 +206,7 @@ class OdinsonBaseAPI:
         """Retrieves Odinson Document Metadata from the doc store."""
         endpoint = f"{self.address}/api/metadata/document/{document_id}"
         res = requests.get(endpoint)
-        print(res.json())
+        # print(res.json())
         doc = Document.model_validate(
             {"id": document_id, "metadata": res.json(), "sentences": []}
         )
@@ -218,9 +219,9 @@ class OdinsonBaseAPI:
         elif isinstance(id, int):
             return self.metadata_for_sentence(id)
 
-    # /api/parent/sentence/:sentenceId
-    # /api/metadata/document/:odinsonDocId
-    # /api/metadata/sentence/:sentenceId
+    # TODO: /api/parent/sentence/:sentenceId
+    # TODO: /api/metadata/document/:odinsonDocId
+    # TODO: /api/metadata/sentence/:sentenceId
 
     def _search(
         self,
@@ -250,9 +251,32 @@ class OdinsonBaseAPI:
         }
         params = {k: v for (k, v) in params.items() if v}
         # print(params)
-        res = requests.get(endpoint, params=params).json()
+        res = requests.get(endpoint, params=params)
         # print(res)
-        return Results(**res)
+        return Results.empty() if res.status_code != 200 else Results(**res.json())
+
+    def execute_grammar(
+        self,
+        grammar: str,
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        max_docs: Optional[int] = 20,
+        allow_trigger_overlaps: bool = False
+    ):
+        endpoint = f"{self.address}/api/execute/grammar"
+        gr = GrammarRequest(
+            grammar=grammar,
+            metadataQuery=metadata_query,
+            maxDocs=max_docs,
+            allowTriggerOverlaps=allow_trigger_overlaps
+        )
+        res = requests.post(
+            endpoint,
+            json=gr.dict()
+        )
+        #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+        # FIXME: check status code and return error or empty results?
+        return GrammarResults(**res.json())
 
     def search(
         self,
@@ -270,7 +294,7 @@ class OdinsonBaseAPI:
         prev_doc: Optional[int] = None,
         # The score for the last result seen in the previous page of results.
         prev_score: Optional[float] = None,
-    ) -> Results:  # -> Iterator[S]:
+    ) -> Iterator[ScoreDoc]:
         endpoint = f"{self.address}/api/execute/pattern"
         params = {
             "odinsonQuery": odinson_query,
@@ -289,6 +313,8 @@ class OdinsonBaseAPI:
             prev_doc=prev_doc,
         )
         total = results.total_hits
+        if total == 0:
+            return iter(())
         last = results.score_docs[-1]
         while seen < total:
             for sd in results.score_docs:
@@ -309,7 +335,6 @@ class OdinsonBaseAPI:
             )
             # print(f"total_hits:\t{results.total_hits}")
 
-    # TODO: add method to retrieve doc for id
     # TODO: add rewrite method
     # for any token that matches the pattern, replace its entry in field <field> with <label>
     # ex [word="Table" & tag=/NNP.*/] -> {scratch: "CAPTION"}

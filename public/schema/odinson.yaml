@@ -139,6 +139,8 @@ paths:
           content:
             "application/json":
               schema:
+                # FIXME: this needs to be updated.
+                # see lum.odinson.rest.responses.GrammarResults
                 $ref: '#/components/schemas/OdinsonGrammarResults'
         '400':
           description: Syntax error in query.
@@ -411,7 +413,8 @@ paths:
           description: |
             An error message.
 
-  /api/update/document/{documentId}:
+  # /api/update/document/{documentId}:
+  /api/update/document:
     post:
       tags:
         - index
@@ -1082,7 +1085,7 @@ components:
     OdinsonGrammarRequest:
       type: object
       required:
-        - rules
+        - grammar
       properties:
         grammar:
           type: string
@@ -1097,7 +1100,9 @@ components:
                 pattern: |
                   trigger = [lemma=have]
                   subject  = >nsubj []
-        pageSize:
+          metadataQuery:
+            $ref: '#/components/schemas/MetadataQuery'
+        maxDocs:
           type: integer
           format: int32
           description: |

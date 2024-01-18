@@ -35,8 +35,8 @@ jobs:
         echo "app_version=$app_version"
         echo "commit=${{github.sha}}"
 
-  text_reading:
-    name: "docker image for text reading component"
+  rest:
+    name: "docker image for REST API"
     needs: [app_version]
     runs-on: ubuntu-latest
     steps:

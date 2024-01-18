@@ -11,6 +11,7 @@ import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
 import ai.lum.odinson.rest.BuildInfo
 import ai.lum.odinson.rest.requests._
 import ai.lum.odinson.rest.responses._
+import ai.lum.odinson.rest.utils.{ OdinsonConfigUtils }
 //import org.apache.lucene.document.{ Document => LuceneDocument }
 import org.apache.lucene.store.FSDirectory
 //import play.api.Configuration
@@ -29,7 +30,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class OdinsonController @Inject() (
-  config: Config = ConfigFactory.load(),
+  _config: Config = ConfigFactory.load(),
   // playConfig: Configuration,
   cc: ControllerComponents
 )(
@@ -41,6 +42,7 @@ class OdinsonController @Inject() (
   import ai.lum.odinson.rest.utils.OdinsonDocumentUtils._
 
   // format: off
+  val config               = OdinsonConfigUtils.injectTokenAttributes(_config)
   val docsDir              = config.apply[File]  ("odinson.docsDir")
   val pageSize             = config.apply[Int]   ("odinson.pageSize")
   val posTagTokenField     = config.apply[String]("odinson.index.posTagTokenField")
@@ -203,6 +205,12 @@ class OdinsonController @Inject() (
     json.format(pretty)
   }
 
+  def healthcheck() = Action.async {
+    Future {
+      Ok(Json.toJson(200))
+    }
+  }
+  
   def numDocs = Action.async {
     Future {
       ExtractorEngine.usingEngine(config) { engine =>
@@ -441,17 +449,23 @@ class OdinsonController @Inject() (
       // FIXME: replace .get with validation check
       val gr = request.body.asJson.get.as[GrammarRequest]
       val grammar = gr.grammar
-      val pageSize = gr.pageSize
+      val maxDocs = gr.maxDocs
+      val metadataQuery = gr.metadataQuery
       val allowTriggerOverlaps = gr.allowTriggerOverlaps.getOrElse(false)
       val pretty = gr.pretty
       try {
         // rules -> OdinsonQuery
-        val extractors = engine.ruleReader.compileRuleString(grammar)
+        val extractors = metadataQuery match {
+          case None => engine.ruleReader.compileRuleString(grammar)
+          case Some(raw) => 
+            val mq = engine.compiler.mkParentQuery(raw)
+            engine.compileRuleString(rules=grammar, metadataFilter=mq)
+        }
 
         val start = System.currentTimeMillis()
 
-        val maxSentences: Int = pageSize match {
-          case Some(ps) => ps
+        val maxSentences: Int = maxDocs match {
+          case Some(md) => md
           case None     => engine.numDocs()
         }
 

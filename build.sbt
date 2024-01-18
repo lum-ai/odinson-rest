@@ -56,6 +56,7 @@ lazy val sharedDeps = {
       caffeine,
       "org.scalatest" %% "scalatest" % "3.2.8", //3.2.17",
       "com.typesafe.scala-logging" %%  "scala-logging" % "3.9.5",
+      // "com.typesafe" % "config" % "1.4.3",
       // "ch.qos.logback" %  "logback-classic" % "1.4.11",
       "org.json4s" %% "json4s-core" % json4sVersion,
       "ai.lum"        %% "common"               % "0.1.5",
@@ -135,8 +136,10 @@ lazy val packagerSettings = {
     dockerEnvVars ++= Map(
       "APP_VERSION" -> scala.util.Properties.envOrElse("APP_VERSION", "???"),
       "APPLICATION_SECRET" -> "this-is-not-a-secure-key-please-change-me",
-      // NOTE: bind mount odison dir to /data/odinson
+      // NOTE: bind mount odinson dir to /data/odinson
       "ODINSON_DATA_DIR" -> "/app/data/odinson",
+      // token attributes that should be searchable
+      "ODINSON_TOKEN_ATTRIBUTES" -> "raw,word,norm,lemma,tag,chunk,entity,incoming,outgoing",
       // NOTE: the expected min. RAM requirements
       "_JAVA_OPTIONS" -> "-Xmx2g -Dfile.encoding=UTF-8 -Dplay.server.pidfile.path=/dev/null"
     )

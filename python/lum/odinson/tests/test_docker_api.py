@@ -22,7 +22,7 @@ class TestDockerAPI(unittest.TestCase):
         """
         self.test_doc = odinson.Document.from_file(TEST_DOC_PATH)
         self.indexdir = tempfile.TemporaryDirectory()
-        self.api = DockerBasedOdinsonAPI(
+        self.engine = DockerBasedOdinsonAPI(
             local_path=self.indexdir.name, keep_alive=False
         )
         MAX_WAIT = 5
@@ -30,7 +30,7 @@ class TestDockerAPI(unittest.TestCase):
         ELAPSED = 0
         while ELAPSED < MAX_WAIT:
             try:
-                len(self.api)
+                len(self.engine)
             except:
                 pass
             time.sleep(STEP)
@@ -42,25 +42,35 @@ class TestDockerAPI(unittest.TestCase):
         """
         # NOTE: we must stop the container before destroying the mounted volume
         # close API
-        self.api._close()
+        self.engine.close()
         # clean up test index
         self.indexdir.cleanup()
 
     def test_index_doc(self):
-        """api.index(doc) should store an odinson.Document in the index."""
-        self.api.index(self.test_doc, max_tokens=-1)
-        # print(f"Num. docs:\t{len(self.api)}")
-        actual = len(self.api)
+        """engine.index(doc) should store an odinson.Document in the index."""
+        self.engine.index(self.test_doc, max_tokens=-1)
+        # print(f"Num. docs:\t{len(self.engine)}")
+        actual = len(self.engine)
         self.assertTrue(
             actual > 0,
             f"index {self.indexdir.name} did not contain any docs after indexing.  Instead found {actual}",
         )
 
+    def test_update_doc(self):
+        """engine.update(doc) should replace an odinson.Document in the index."""
+        self.engine.index(self.test_doc, max_tokens=-1)
+        # print(f"Num. docs:\t{len(self.engine)}")
+        doc2 = self.test_doc.copy(metadata=[])
+        res = self.engine.update(doc2, max_tokens=-1)
+        self.assertTrue(
+            res == True, f"engine.update() should replace doc with the same ID"
+        )
+
     def test_delete_doc(self):
-        """api.delete(doc) should remove an odinson.Document in the index."""
-        self.api.index(self.test_doc, max_tokens=-1)
-        self.api.delete(self.test_doc)
-        actual = len(self.api)
+        """engine.delete(doc) should remove an odinson.Document in the index."""
+        self.engine.index(self.test_doc, max_tokens=-1)
+        self.engine.delete(self.test_doc)
+        actual = len(self.engine)
         self.assertTrue(
             actual == 0,
             f"index {self.indexdir.name} should not contain any docs after indexing and deleting the same doc.  Instead found {actual}",

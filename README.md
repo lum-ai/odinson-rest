@@ -101,4 +101,3 @@ Please see [CITATION.cff](./CITATION.cff)
 ## Authors
 
 - [Gus Hahn-Powell](https://parsertongue.org/about)
-- [Dane Bell](http://danebell.info)
