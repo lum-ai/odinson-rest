@@ -121,7 +121,7 @@ lazy val packagerSettings = {
     Docker / maintainer := "Gus Hahn-Powell <ghp@lum.ai>",
     Docker / dockerExposedPorts := Seq(9000),
     Universal / javaOptions ++= Seq(
-      "-J-Xmx4G",
+      //"-J-Xmx4G",
       // avoid writing a PID file
       "-Dplay.server.pidfile.path=/dev/null",
       //"-Dlogger.resource=logback.xml"
