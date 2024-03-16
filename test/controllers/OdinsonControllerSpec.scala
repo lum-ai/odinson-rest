@@ -180,25 +180,6 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     }
 
-    "process a pattern query using the runQuery method without a metadataQuery" in {
-
-      val res = controller.runQuery(
-        odinsonQuery = "[lemma=be] []",
-        metadataQuery = None,
-        label = None,
-        commit = None,
-        prevDoc = None,
-        prevScore = None,
-        enriched = false,
-        pretty = None
-      ).apply(FakeRequest(GET, "/pattern"))
-
-      status(res) mustBe OK
-      contentType(res) mustBe Some("application/json")
-      Helpers.contentAsString(res) must include("core")
-
-    }
-
     "process a pattern query by calling the /api/execute/pattern endpoint" in {
       // the pattern used in this test: "[lemma=be] []"
       val result = route(
