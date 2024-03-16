@@ -390,7 +390,7 @@ class OdinsonController @Inject() (
     */
   def commitResults(
     engine: ExtractorEngine,
-    oq: String,
+    odinsonQuery: String,
     metadataQuery: Option[String],
     label: String = "Mention"
   ): Unit = {
