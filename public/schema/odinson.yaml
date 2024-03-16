@@ -112,6 +112,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryError'
 
+  /api/execute/disjunction-of-patterns:
+    post:
+      tags:
+        - search
+      summary: |
+        Composes a disjunction of Odinson queries (ex. A OR B OR C) and executes it against the corpus.
+      description: |
+        Composes a disjunction of Odinson queries (ex. A OR B OR C) and executes it against the corpus.  Optionally include a doc-level Lucene query to identify a subset of documents to which the query should be applied.
+      operationId: execute-disjunctive-pattern
+      requestBody:
+        description: |
+          a disjunction of patterns.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/SimplePatternsRequest'
+      responses:
+        '200':
+          description: Paginated matches for the query.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BasicResults'
+        '400':
+          description: Syntax error in query.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/QueryError'
+
   /api/execute/grammar:
     post:
       tags:
@@ -1081,6 +1114,49 @@ components:
                 roots: [ 2 ]
 
   schemas:
+    SimplePatternsRequest:
+      type: object
+      required:
+        - patterns
+      properties:
+        patterns:
+          type: array
+          description: A list of queries.
+          items:
+            type: string
+            description: A single odinson query.
+        metadataQuery:
+          $ref: '#/components/schemas/MetadataQuery'
+        label:
+          description: |
+            The label to use when committing mentions to the State.
+          schema:
+            type: string
+        commit:
+          description: |
+            Whether or not the results of this query should be committed to the State.
+          schema:
+            type: boolean
+        prevDoc:
+          description: |
+            The ID (`sentenceId`) for the last document (sentence) seen in the previous page of results.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            # minimum: 1
+            # exclusiveMinimum: false
+            # maximum: 3
+            # exclusiveMaximum: false
+          #example: 1
+        prevScore:
+          description: |
+            The score for the last result seen in the previous page of results.
+          required: false
+          schema:
+            type: number
+            format: float
+          #example: 0.424
 
     OdinsonGrammarRequest:
       type: object

@@ -4,7 +4,7 @@ import ai.lum.common.ConfigFactory
 import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.digraph.Vocabulary
 import ai.lum.odinson.lucene._
-import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc }
+import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc, OdinOrQuery }
 import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
 //import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
@@ -390,7 +390,7 @@ class OdinsonController @Inject() (
     */
   def commitResults(
     engine: ExtractorEngine,
-    odinsonQuery: String,
+    oq: String,
     metadataQuery: Option[String],
     label: String = "Mention"
   ): Unit = {
@@ -489,7 +489,8 @@ class OdinsonController @Inject() (
     }
   }
 
-  /** @param odinsonQuery
+  /** Executes the provided Odinson pattern.
+    * @param odinsonQuery
     *   An Odinson pattern
     * @param metadataQuery
     *   A Lucene query to filter documents (optional).
@@ -548,6 +549,44 @@ class OdinsonController @Inject() (
             config
           ))
           json.format(pretty)
+        } catch handleNonFatal
+      }
+    }
+  }
+
+  /** Applies a disjunction of the provided patterns against the corpus.
+    * @return
+    *   JSON of matches
+    */
+  def runDisjunctiveQuery() = Action { request =>
+    // FIXME: do this in a non-blocking way
+    ExtractorEngine.usingEngine(config) { engine =>
+      // FIXME: replace .get with validation check
+      val spr = request.body.asJson.get.as[SimplePatternsRequest]
+        try {
+          val patterns: List[OdinsonQuery] = spr.patterns.map(engine.compiler.mkQuery).toList
+          val disjunctiveQuery = new OdinOrQuery(patterns, fields = patterns.head.getField)
+          val oq = spr.metadataQuery match {
+            case Some(pq) =>
+              engine.compiler.mkQuery(disjunctiveQuery, pq)
+            case None =>
+              disjunctiveQuery
+          }
+          val start = System.currentTimeMillis()
+          val results: OdinResults = retrieveResults(engine, oq, spr.prevDoc, spr.prevScore)
+          val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
+
+          // NOTE: no use of state here
+
+          val json = Json.toJson(engine.mkJson(
+            spr.patterns.map{ patt => s"(${patt})"}.mkString(" | "),
+            spr.metadataQuery,
+            duration,
+            results,
+            enriched,
+            config
+          ))
+          json.format(spr.pretty)
         } catch handleNonFatal
       }
     }

@@ -1,8 +1,15 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterator, List, Literal, Optional, Text, Union
 from lum.odinson.doc import AnyField, Document, Sentence
-from lum.odinson.rest.responses import CorpusInfo, OdinsonErrors, ScoreDoc, Statistic, GrammarResults, Results
-from lum.odinson.rest.requests import GrammarRequest
+from lum.odinson.rest.responses import (
+    CorpusInfo,
+    OdinsonErrors,
+    ScoreDoc,
+    Statistic,
+    GrammarResults,
+    Results,
+)
+from lum.odinson.rest.requests import GrammarRequest, SimplePatternsRequest
 from pydantic import BaseModel
 from dataclasses import dataclass
 import pydantic
@@ -16,7 +23,6 @@ __all__ = ["OdinsonBaseAPI"]
 
 
 class OdinsonBaseAPI:
-
     def __init__(self, address: Text):
         self.address = address
 
@@ -115,9 +121,9 @@ class OdinsonBaseAPI:
         return requests.post(
             endpoint,
             # NOTE: data takes str & .json() returns json str
-            #json=text,
+            # json=text,
             data=text,
-            headers=headers
+            headers=headers,
         )
 
     def validate_document(self, doc: Document, strict: bool = True) -> bool:
@@ -261,20 +267,17 @@ class OdinsonBaseAPI:
         # A query to filter Documents by their metadata before applying an Odinson pattern.
         metadata_query: Optional[str] = None,
         max_docs: Optional[int] = 20,
-        allow_trigger_overlaps: bool = False
+        allow_trigger_overlaps: bool = False,
     ):
         endpoint = f"{self.address}/api/execute/grammar"
         gr = GrammarRequest(
             grammar=grammar,
             metadataQuery=metadata_query,
             maxDocs=max_docs,
-            allowTriggerOverlaps=allow_trigger_overlaps
+            allowTriggerOverlaps=allow_trigger_overlaps,
         )
-        res = requests.post(
-            endpoint,
-            json=gr.dict()
-        )
-        #return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
+        res = requests.post(endpoint, json=gr.dict())
+        # return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
         # FIXME: check status code and return error or empty results?
         return GrammarResults(**res.json())
 
@@ -296,14 +299,6 @@ class OdinsonBaseAPI:
         prev_score: Optional[float] = None,
     ) -> Iterator[ScoreDoc]:
         endpoint = f"{self.address}/api/execute/pattern"
-        params = {
-            "odinsonQuery": odinson_query,
-            "metadataQuery": metadata_query,
-            "label": label,
-            "commit": commit,
-            "prevDoc": prev_doc,
-            "prevScore": prev_score,
-        }
         seen = 0
         results: Results = self._search(
             odinson_query=odinson_query,
@@ -332,6 +327,60 @@ class OdinsonBaseAPI:
                 label=label,
                 commit=commit,
                 prev_doc=last.sentence_id,
+            )
+            # print(f"total_hits:\t{results.total_hits}")
+
+    def search_disjunction_of_patterns(
+        self,
+        # An Odinson pattern.
+        # Example: ["[lemma=pie] []", "[lemma=blarg]"]
+        patterns: list[str],
+        # A query to filter Documents by their metadata before applying an Odinson pattern.
+        metadata_query: Optional[str] = None,
+        # The label to use when committing mentions to the State.
+        # Example: character contains 'Special Agent'
+        label: Optional[str] = None,
+        # The ID (sentenceId) for the last document (sentence) seen in the previous page of results.
+        prev_doc: Optional[int] = None,
+        # The score for the last result seen in the previous page of results.
+        prev_score: Optional[float] = None,
+    ) -> Iterator[ScoreDoc]:
+        endpoint = f"{self.address}/api/execute/disjunction-of-patterns"
+
+        spr = SimplePatternsRequest(
+            patterns=patterns,
+            metadataQuery=metadata_query,
+            prevDoc=prev_doc,
+            prevScore=prev_score,
+        )
+        results: Results = Results(**requests.post(endpoint, json=spr.dict()).json())
+
+        seen = 0
+        total = results.total_hits
+        if total == 0:
+            return iter(())
+        last = results.score_docs[-1]
+        while seen < total:
+            for sd in results.score_docs:
+                seen += 1
+                last = sd
+                # print(f"{seen-1}/{total}")
+                # print(f"sd.document_id:\t{sd.document_id}")
+                # print(f"sd.sentence_id:\t{sd.sentence_id}\n")
+                # FIXME: should this be a Results() with a single doc?
+                yield sd
+            # paginate
+            nspr = SimplePatternsRequest(
+                patterns=patterns,
+                metadata_query=metadata_query,
+                label=label,
+                prev_doc=last.sentence_id,
+            )
+            results: Results = Results(
+                **requests.post(
+                    endpoint,
+                    json=nspr.dict(),
+                ).json()
             )
             # print(f"total_hits:\t{results.total_hits}")
 

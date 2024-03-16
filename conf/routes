@@ -20,6 +20,9 @@ GET     /api                            controllers.OpenApiController.openAPI
 GET     /api/execute/pattern            controllers.OdinsonController.runQuery(odinsonQuery: String, metadataQuery: Option[String], label: Option[String], commit: Option[Boolean], prevDoc: Option[Int], prevScore: Option[Float], enriched: Boolean = false, pretty: Option[Boolean])
 
 + nocsrf
+POST     /api/execute/disjunction-of-patterns            controllers.OdinsonController.runDisjunctiveQuery()
+
++ nocsrf
 POST    /api/execute/grammar            controllers.OdinsonController.executeGrammar()
 
 # document json

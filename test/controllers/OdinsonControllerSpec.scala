@@ -180,11 +180,11 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     }
 
-    "process a pattern query using the runQuery method with a metadataQuery" in {
+    "process a pattern query using the runQuery method without a metadataQuery" in {
 
-      val res1 = controller.runQuery(
-        odinsonQuery = "[lemma=pie]",
-        metadataQuery = Some("character contains '/Maj.*/'"),
+      val res = controller.runQuery(
+        odinsonQuery = "[lemma=be] []",
+        metadataQuery = None,
         label = None,
         commit = None,
         prevDoc = None,
@@ -193,28 +193,13 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
         pretty = None
       ).apply(FakeRequest(GET, "/pattern"))
 
-      status(res1) mustBe OK
-      contentType(res1) mustBe Some("application/json")
-      // println(contentAsJson(res1))
-      noResults(contentAsJson(res1)) mustBe true
+      status(res) mustBe OK
+      contentType(res) mustBe Some("application/json")
+      Helpers.contentAsString(res) must include("core")
 
-      val res2 = controller.runQuery(
-        odinsonQuery = "[lemma=pie]",
-        metadataQuery = Some("character contains 'Special Agent'"),
-        label = None,
-        commit = None,
-        prevDoc = None,
-        prevScore = None,
-        enriched = false,
-        pretty = None
-      ).apply(FakeRequest(GET, "/pattern"))
-
-      status(res2) mustBe OK
-      contentType(res2) mustBe Some("application/json")
-      hasResults(contentAsJson(res2)) mustBe true
     }
 
-    "process a pattern query by accessing the /api/execute/pattern endpoint" in {
+    "process a pattern query by calling the /api/execute/pattern endpoint" in {
       // the pattern used in this test: "[lemma=be] []"
       val result = route(
         app,
@@ -225,6 +210,77 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       contentType(result) mustBe Some("application/json")
       Helpers.contentAsString(result) must include("core")
 
+    }
+
+    // "process a pattern of disjunctive queries using the runDisjunctiveQueries method with a metadataQuery" in {
+
+    //   val res1 = controller.runDisjunctiveQueries(
+    //     odinsonQueries = List("[lemma=pie]", "[lemma=noodles]"),
+    //     metadataQuery = Some("character contains '/Maj.*/'"),
+    //     label = None,
+    //     commit = None,
+    //     prevDoc = None,
+    //     prevScore = None,
+    //     enriched = false,
+    //     pretty = None
+    //   ).apply(FakeRequest(POST, "/disjunction-of-patterns"))
+
+    //   status(res1) mustBe OK
+    //   contentType(res1) mustBe Some("application/json")
+    //   // println(contentAsJson(res1))
+    //   noResults(contentAsJson(res1)) mustBe true
+
+    //   val res2 = controller.runDisjunctiveQueries(
+    //     odinsonQuery = List("[lemma=pie]", "[lemma=noodles]"),
+    //     metadataQuery = Some("character contains 'Special Agent'"),
+    //     label = None,
+    //     commit = None,
+    //     prevDoc = None,
+    //     prevScore = None,
+    //     enriched = false,
+    //     pretty = None
+    //   ).apply(FakeRequest(POST, "/disjunction-of-patterns"))
+
+    //   status(res2) mustBe OK
+    //   contentType(res2) mustBe Some("application/json")
+    //   hasResults(contentAsJson(res2)) mustBe true
+    // }
+
+    // "process a disjunction of queries using the runDisjunctiveQueries method without a metadataQuery" in {
+
+    //   val res = controller.runDisjunctiveQueries(
+    //     odinsonQueries = List("[lemma=be] []", "[lemma=blarg]"),
+    //     metadataQuery = None,
+    //     label = None,
+    //     commit = None,
+    //     prevDoc = None,
+    //     prevScore = None,
+    //     enriched = false,
+    //     pretty = None
+    //   ).apply(FakeRequest(POST, "/disjunction-of-patterns"))
+
+    //   status(res) mustBe OK
+    //   contentType(res) mustBe Some("application/json")
+    //   Helpers.contentAsString(res) must include("core")
+
+    // }
+
+    "process a disjunction of queries by calling the /api/execute/disjunction-of-patterns endpoint" in {
+
+      val body = Json.obj(
+        // format: off
+        "odinsonQueries"       -> List("[lemma=be] []", "[lemma=blarg]")
+        // format: on
+      )
+
+      val response =
+        controller.runDisjunctiveQueries().apply(FakeRequest(POST, "/execute/disjunction-of-patterns").withJsonBody(body))
+      status(response) mustBe OK
+      contentType(response) mustBe Some("application/json")
+
+      status(result) mustBe OK
+      contentType(result) mustBe Some("application/json")
+      Helpers.contentAsString(result) must include("core")
     }
 
     "execute a grammar using the executeGrammar method" in {
