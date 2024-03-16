@@ -4151,6 +4151,23 @@ etc.
   The last Document ID seen on the previous page of results (required if retrieving page 2+).</p></dd><dt class="param">prevScore</dt><dd class="cmt"><p>
   The score of the last Document see on the previous page (required if retrieving page 2+).</p></dd><dt>returns</dt><dd class="cmt"><p>
   JSON of matches</p></dd></dl></div>
+    </li><li name="controllers.OdinsonController#runDisjunctiveQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="runDisjunctiveQuery():play.api.mvc.Action[play.api.mvc.AnyContent]"></a><a id="runDisjunctiveQuery():Action[AnyContent]"></a>
+      <span class="permalink">
+      <a href="../controllers/OdinsonController.html#runDisjunctiveQuery():play.api.mvc.Action[play.api.mvc.AnyContent]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">runDisjunctiveQuery</span><span class="params">()</span><span class="result">: <span class="extype" name="play.api.mvc.Action">Action</span>[<span class="extype" name="play.api.mvc.AnyContent">AnyContent</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Applies a disjunction of the provided patterns against the corpus.</p><div class="fullcomment"><div class="comment cmt"><p>Applies a disjunction of the provided patterns against the corpus.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
+  JSON of matches</p></dd></dl></div>
     </li><li name="controllers.OdinsonController#runQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="runQuery(odinsonQuery:String,metadataQuery:Option[String],label:Option[String],commit:Option[Boolean],prevDoc:Option[Int],prevScore:Option[Float],enriched:Boolean,pretty:Option[Boolean]):play.api.mvc.Action[play.api.mvc.AnyContent]"></a><a id="runQuery(String,Option[String],Option[String],Option[Boolean],Option[Int],Option[Float],Boolean,Option[Boolean]):Action[AnyContent]"></a>
       <span class="permalink">
@@ -4166,7 +4183,7 @@ etc.
         <span class="name">runQuery</span><span class="params">(<span name="odinsonQuery">odinsonQuery: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="metadataQuery">metadataQuery: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="label">label: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="commit">commit: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="prevDoc">prevDoc: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="prevScore">prevScore: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Float">Float</span>]</span>, <span name="enriched">enriched: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="pretty">pretty: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>]</span>)</span><span class="result">: <span class="extype" name="play.api.mvc.Action">Action</span>[<span class="extype" name="play.api.mvc.AnyContent">AnyContent</span>]</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">odinsonQuery</dt><dd class="cmt"><p>
+      <p class="shortcomment cmt">Executes the provided Odinson pattern.</p><div class="fullcomment"><div class="comment cmt"><p>Executes the provided Odinson pattern.</p></div><dl class="paramcmts block"><dt class="param">odinsonQuery</dt><dd class="cmt"><p>
   An Odinson pattern</p></dd><dt class="param">metadataQuery</dt><dd class="cmt"><p>
   A Lucene query to filter documents (optional).</p></dd><dt class="param">label</dt><dd class="cmt"><p>
   The label to use when committing matches to the state.</p></dd><dt class="param">commit</dt><dd class="cmt"><p>

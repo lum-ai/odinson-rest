@@ -28,19 +28,39 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from __future__ import annotations
-from typing import Optional
+import typing
 from pydantic import BaseModel, ConfigDict
 
 
-__all__ = [&#34;GrammarRequest&#34;]
+__all__ = [&#34;GrammarRequest&#34;, &#34;SimplePatternsRequest&#34;]
 
 
 class GrammarRequest(BaseModel):
     grammar: str
-    metadataQuery: Optional[str] = None
-    maxDocs: Optional[int] = None
-    allowTriggerOverlaps: Optional[bool] = None
-    pretty: Optional[bool] = None
+    metadataQuery: typing.Optional[str] = None
+    maxDocs: typing.Optional[int] = None
+    allowTriggerOverlaps: typing.Optional[bool] = None
+    pretty: typing.Optional[bool] = None
+
+    def model_dump(self, by_alias=True, **kwargs):
+        return super().model_dump(by_alias=by_alias, **kwargs)
+
+    def model_dump_json(self, by_alias=True, **kwargs):
+        return super().model_dump_json(by_alias=by_alias, **kwargs)
+
+    def dict(self, **kwargs):
+        return self.model_dump(**kwargs)
+
+    def json(self, **kwargs):
+        return self.model_dump_json(**kwargs)
+
+
+class SimplePatternsRequest(BaseModel):
+    patterns: list[str]
+    metadataQuery: typing.Optional[str] = None
+    prevDoc: typing.Optional[int] = None
+    prevScore: typing.Optional[float] = None
+    pretty: typing.Optional[bool] = None
 
     def model_dump(self, by_alias=True, **kwargs):
         return super().model_dump(by_alias=by_alias, **kwargs)
@@ -123,10 +143,10 @@ allow <code>self</code> as a field name.</p></div>
 </summary>
 <pre><code class="python">class GrammarRequest(BaseModel):
     grammar: str
-    metadataQuery: Optional[str] = None
-    maxDocs: Optional[int] = None
-    allowTriggerOverlaps: Optional[bool] = None
-    pretty: Optional[bool] = None
+    metadataQuery: typing.Optional[str] = None
+    maxDocs: typing.Optional[int] = None
+    allowTriggerOverlaps: typing.Optional[bool] = None
+    pretty: typing.Optional[bool] = None
 
     def model_dump(self, by_alias=True, **kwargs):
         return super().model_dump(by_alias=by_alias, **kwargs)
@@ -281,6 +301,223 @@ If mode is 'python', the dictionary may contain any Python objects.</dd>
 </dd>
 </dl>
 </dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest"><code class="flex name class">
+<span>class <span class="ident">SimplePatternsRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A base model class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>model_config</code></strong></dt>
+<dd>Configuration settings for the model.</dd>
+<dt><strong><code>model_fields</code></strong></dt>
+<dd>Metadata about the fields defined on the model.
+This replaces <code>Model.__fields__</code> from Pydantic V1.</dd>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly specified during validation.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p>
+<p>Uses <code>__pydantic_self__</code> instead of the more common <code>self</code> for the first arg to
+allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SimplePatternsRequest(BaseModel):
+    patterns: list[str]
+    metadataQuery: typing.Optional[str] = None
+    prevDoc: typing.Optional[int] = None
+    prevScore: typing.Optional[float] = None
+    pretty: typing.Optional[bool] = None
+
+    def model_dump(self, by_alias=True, **kwargs):
+        return super().model_dump(by_alias=by_alias, **kwargs)
+
+    def model_dump_json(self, by_alias=True, **kwargs):
+        return super().model_dump_json(by_alias=by_alias, **kwargs)
+
+    def dict(self, **kwargs):
+        return self.model_dump(**kwargs)
+
+    def json(self, **kwargs):
+        return self.model_dump_json(**kwargs)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.metadataQuery"><code class="name">var <span class="ident">metadataQuery</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.model_config"><code class="name">var <span class="ident">model_config</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.patterns"><code class="name">var <span class="ident">patterns</span> : list[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.pretty"><code class="name">var <span class="ident">pretty</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.prevDoc"><code class="name">var <span class="ident">prevDoc</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.prevScore"><code class="name">var <span class="ident">prevScore</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.dict"><code class="name flex">
+<span>def <span class="ident">dict</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def dict(self, **kwargs):
+    return self.model_dump(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.json"><code class="name flex">
+<span>def <span class="ident">json</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def json(self, **kwargs):
+    return self.model_dump_json(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.model_dump"><code class="name flex">
+<span>def <span class="ident">model_dump</span></span>(<span>self, by_alias=True, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/dev-v2/usage/serialization/#modelmodel_dump">https://docs.pydantic.dev/dev-v2/usage/serialization/#modelmodel_dump</a></p>
+<p>Generate a dictionary representation of the model, optionally specifying which fields to include or exclude.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mode</code></strong></dt>
+<dd>The mode in which <code>to_python</code> should run.
+If mode is 'json', the dictionary will only contain JSON serializable types.
+If mode is 'python', the dictionary may contain any Python objects.</dd>
+<dt><strong><code>include</code></strong></dt>
+<dd>A list of fields to include in the output.</dd>
+<dt><strong><code>exclude</code></strong></dt>
+<dd>A list of fields to exclude from the output.</dd>
+<dt><strong><code>by_alias</code></strong></dt>
+<dd>Whether to use the field's alias in the dictionary key if defined.</dd>
+<dt><strong><code>exclude_unset</code></strong></dt>
+<dd>Whether to exclude fields that are unset or None from the output.</dd>
+<dt><strong><code>exclude_defaults</code></strong></dt>
+<dd>Whether to exclude fields that are set to their default value from the output.</dd>
+<dt><strong><code>exclude_none</code></strong></dt>
+<dd>Whether to exclude fields that have a value of <code>None</code> from the output.</dd>
+<dt><strong><code>round_trip</code></strong></dt>
+<dd>Whether to enable serialization and deserialization round-trip support.</dd>
+<dt><strong><code>warnings</code></strong></dt>
+<dd>Whether to log warnings when invalid fields are encountered.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A dictionary representation of the model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_dump(self, by_alias=True, **kwargs):
+    return super().model_dump(by_alias=by_alias, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="lum.odinson.rest.requests.SimplePatternsRequest.model_dump_json"><code class="name flex">
+<span>def <span class="ident">model_dump_json</span></span>(<span>self, by_alias=True, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/dev-v2/usage/serialization/#modelmodel_dump_json">https://docs.pydantic.dev/dev-v2/usage/serialization/#modelmodel_dump_json</a></p>
+<p>Generates a JSON representation of the model using Pydantic's <code>to_json</code> method.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>indent</code></strong></dt>
+<dd>Indentation to use in the JSON output. If None is passed, the output will be compact.</dd>
+<dt><strong><code>include</code></strong></dt>
+<dd>Field(s) to include in the JSON output. Can take either a string or set of strings.</dd>
+<dt><strong><code>exclude</code></strong></dt>
+<dd>Field(s) to exclude from the JSON output. Can take either a string or set of strings.</dd>
+<dt><strong><code>by_alias</code></strong></dt>
+<dd>Whether to serialize using field aliases.</dd>
+<dt><strong><code>exclude_unset</code></strong></dt>
+<dd>Whether to exclude fields that have not been explicitly set.</dd>
+<dt><strong><code>exclude_defaults</code></strong></dt>
+<dd>Whether to exclude fields that have the default value.</dd>
+<dt><strong><code>exclude_none</code></strong></dt>
+<dd>Whether to exclude fields that have a value of <code>None</code>.</dd>
+<dt><strong><code>round_trip</code></strong></dt>
+<dd>Whether to use serialization/deserialization between JSON and class instance.</dd>
+<dt><strong><code>warnings</code></strong></dt>
+<dd>Whether to show any warnings that occurred during serialization.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A JSON string representation of the model.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def model_dump_json(self, by_alias=True, **kwargs):
+    return super().model_dump_json(by_alias=by_alias, **kwargs)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -311,6 +548,22 @@ If mode is 'python', the dictionary may contain any Python objects.</dd>
 <li><code><a title="lum.odinson.rest.requests.GrammarRequest.model_dump_json" href="#lum.odinson.rest.requests.GrammarRequest.model_dump_json">model_dump_json</a></code></li>
 <li><code><a title="lum.odinson.rest.requests.GrammarRequest.model_fields" href="#lum.odinson.rest.requests.GrammarRequest.model_fields">model_fields</a></code></li>
 <li><code><a title="lum.odinson.rest.requests.GrammarRequest.pretty" href="#lum.odinson.rest.requests.GrammarRequest.pretty">pretty</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="lum.odinson.rest.requests.SimplePatternsRequest" href="#lum.odinson.rest.requests.SimplePatternsRequest">SimplePatternsRequest</a></code></h4>
+<ul class="two-column">
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.dict" href="#lum.odinson.rest.requests.SimplePatternsRequest.dict">dict</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.json" href="#lum.odinson.rest.requests.SimplePatternsRequest.json">json</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.metadataQuery" href="#lum.odinson.rest.requests.SimplePatternsRequest.metadataQuery">metadataQuery</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.model_config" href="#lum.odinson.rest.requests.SimplePatternsRequest.model_config">model_config</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.model_dump" href="#lum.odinson.rest.requests.SimplePatternsRequest.model_dump">model_dump</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.model_dump_json" href="#lum.odinson.rest.requests.SimplePatternsRequest.model_dump_json">model_dump_json</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.model_fields" href="#lum.odinson.rest.requests.SimplePatternsRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.patterns" href="#lum.odinson.rest.requests.SimplePatternsRequest.patterns">patterns</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.pretty" href="#lum.odinson.rest.requests.SimplePatternsRequest.pretty">pretty</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.prevDoc" href="#lum.odinson.rest.requests.SimplePatternsRequest.prevDoc">prevDoc</a></code></li>
+<li><code><a title="lum.odinson.rest.requests.SimplePatternsRequest.prevScore" href="#lum.odinson.rest.requests.SimplePatternsRequest.prevScore">prevScore</a></code></li>
 </ul>
 </li>
 </ul>

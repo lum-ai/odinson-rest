@@ -45,22 +45,23 @@ class TestOdinsonDocument(unittest.TestCase):
         )
 
     def test_property_access(self):
-        &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.&#34;&#34;&#34;
         od = odinson.Document.from_file(TEST_DOC_PATH)
         self.assertTrue(
             len(od.lemma) &gt; 0, f&#34;doc.lemma should not be empty, but returned {od.lemma}&#34;
         )
-    
+
     def test_copy(self):
         &#34;&#34;&#34;odinson.Document.copy() should produce copies with only the specified changes.&#34;&#34;&#34;
         _od = odinson.Document.from_file(TEST_DOC_PATH)
         od = _od.copy(id=&#34;blarg&#34;)
         self.assertTrue(
-            _od.id != od.id, f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;
+            _od.id != od.id,
+            f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;,
         )
         self.assertTrue(
-            all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))), f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;
+            all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))),
+            f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;,
         )</code></pre>
 </details>
 </section>
@@ -119,22 +120,23 @@ not have a method with the specified name.</p></div>
         )
 
     def test_property_access(self):
-        &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.&#34;&#34;&#34;
         od = odinson.Document.from_file(TEST_DOC_PATH)
         self.assertTrue(
             len(od.lemma) &gt; 0, f&#34;doc.lemma should not be empty, but returned {od.lemma}&#34;
         )
-    
+
     def test_copy(self):
         &#34;&#34;&#34;odinson.Document.copy() should produce copies with only the specified changes.&#34;&#34;&#34;
         _od = odinson.Document.from_file(TEST_DOC_PATH)
         od = _od.copy(id=&#34;blarg&#34;)
         self.assertTrue(
-            _od.id != od.id, f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;
+            _od.id != od.id,
+            f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;,
         )
         self.assertTrue(
-            all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))), f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;
+            all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))),
+            f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;,
         )</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -157,10 +159,12 @@ not have a method with the specified name.</p></div>
     _od = odinson.Document.from_file(TEST_DOC_PATH)
     od = _od.copy(id=&#34;blarg&#34;)
     self.assertTrue(
-        _od.id != od.id, f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;
+        _od.id != od.id,
+        f&#34;Doc ID of original and clone should differ, but clone&#39;s ID was {od.id}&#34;,
     )
     self.assertTrue(
-        all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))), f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;
+        all(_od.sentences[i] == od.sentences[i] for i in range(len(_od.sentences))),
+        f&#34;Sentences of original and clone differing only in Doc ID should be identical&#34;,
     )</code></pre>
 </details>
 </dd>
@@ -191,8 +195,7 @@ not have a method with the specified name.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def test_property_access(self):
-    &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;odinson.Document should store token attributes for easy access via doc.attribute_name.&#34;&#34;&#34;
     od = odinson.Document.from_file(TEST_DOC_PATH)
     self.assertTrue(
         len(od.lemma) &gt; 0, f&#34;doc.lemma should not be empty, but returned {od.lemma}&#34;
