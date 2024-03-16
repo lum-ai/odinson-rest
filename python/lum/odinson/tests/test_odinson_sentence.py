@@ -9,8 +9,7 @@ import pytest
 # see https://docs.python.org/3/library/unittest.html#basic-example
 class TestOdinsonSentence(unittest.TestCase):
     def test_property_access(self):
-        """odinson.Sentence should store token attributes for easy access via sent.attribute_name.
-        """
+        """odinson.Sentence should store token attributes for easy access via sent.attribute_name."""
         od = odinson.Document.from_file(TEST_DOC_PATH)
         s = od.sentences[0]
         self.assertTrue(

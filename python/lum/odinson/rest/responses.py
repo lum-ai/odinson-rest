@@ -18,9 +18,8 @@ mq_desc = pydantic.Field(
     default=None,
 )
 
-duration_desc = pydantic.Field(
-    description="The query's execution time (in seconds)"
-)
+duration_desc = pydantic.Field(description="The query's execution time (in seconds)")
+
 
 class OdinsonErrors(BaseModel):
     errors: List[str]
@@ -76,6 +75,7 @@ class EventMatch(BaseMatch):
 class NamedCaptureMatch(BaseMatch):
     named_captures: List[NamedCapture] = pydantic.Field(alias="namedCaptures")
 
+
 class ScoreDoc(BaseModel):
     sentence_id: int = pydantic.Field(
         alias="sentenceId", description="The internal ID for this Odinson Document."
@@ -100,6 +100,7 @@ class ScoreDoc(BaseModel):
             # FIXME: should this be joined on whitespace?
             yield " ".join(self.words[m.start : m.end])
 
+
 # class OdinsonSpan(BaseModel):
 #     start: int = pydantic.Field(description="")
 #     end: int = pydantic.Field(description="")
@@ -107,27 +108,35 @@ class ScoreDoc(BaseModel):
 #     span: OdinsonSpan = pydantic.Field(description="")
 #     captures: List[OdinsonSpan] = pydantic.Field(description="")
 
+
 class BaseMention(BaseModel):
     label: str = pydantic.Field(description="The label for this Mention")
     sentence_id: int = pydantic.Field(
         alias="sentenceId", description="The internal ID for this Odinson Document."
     )
     documentId: str = pydantic.Field(
-        alias="documentId", description="The parent document's ID as provided at index time."
+        alias="documentId",
+        description="The parent document's ID as provided at index time.",
     )
     sentence_index: int = pydantic.Field(
-        alias="sentenceIndex", description="The positional index (0-based) of the matched sentence in some Odinson Document."
+        alias="sentenceIndex",
+        description="The positional index (0-based) of the matched sentence in some Odinson Document.",
     )
-    words: List[str] = pydantic.Field(description="The words of the sentence."
+    words: List[str] = pydantic.Field(description="The words of the sentence.")
+    found_by: str = pydantic.Field(
+        alias="foundBy", description="The name of the rule that produced this match."
     )
-    found_by: str = pydantic.Field( alias="foundBy", description="The name of the rule that produced this match."
+    match: List[Union[EventMatch, NamedCaptureMatch, BaseMatch]] = pydantic.Field(
+        description="The Mention representing the match."
     )
-    match: List[Union[EventMatch, NamedCaptureMatch, BaseMatch]] = pydantic.Field(description="The Mention representing the match.")
+
 
 class GrammarResults(BaseModel):
     metadata_query: Optional[str] = mq_desc
     duration: float = duration_desc
-    allow_trigger_overlaps: bool = pydantic.Field(alias="allowTriggerOverlaps", description="")
+    allow_trigger_overlaps: bool = pydantic.Field(
+        alias="allowTriggerOverlaps", description=""
+    )
     mentions: List[BaseMention]
 
     def model_dump(self, by_alias=True, **kwargs):
@@ -141,7 +150,9 @@ class GrammarResults(BaseModel):
 
     def json(self, **kwargs):
         return self.model_dump_json(**kwargs)
+
     # TODO: add convenience methods to get all matched spans
+
 
 class Results(BaseModel):
     odinson_query: str = pydantic.Field(
@@ -156,7 +167,6 @@ class Results(BaseModel):
     score_docs: List[ScoreDoc] = pydantic.Field(
         alias="scoreDocs", description="The matches"
     )
-
 
 
 #     # The name of the rule which matched this Mention.
