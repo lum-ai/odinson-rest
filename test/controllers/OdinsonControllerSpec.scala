@@ -212,9 +212,9 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     }
 
-    // "process a pattern of disjunctive queries using the runDisjunctiveQueries method with a metadataQuery" in {
+    // "process a pattern of disjunctive queries using the runDisjunctiveQuery method with a metadataQuery" in {
 
-    //   val res1 = controller.runDisjunctiveQueries(
+    //   val res1 = controller.runDisjunctiveQuery(
     //     odinsonQueries = List("[lemma=pie]", "[lemma=noodles]"),
     //     metadataQuery = Some("character contains '/Maj.*/'"),
     //     label = None,
@@ -230,7 +230,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
     //   // println(contentAsJson(res1))
     //   noResults(contentAsJson(res1)) mustBe true
 
-    //   val res2 = controller.runDisjunctiveQueries(
+    //   val res2 = controller.runDisjunctiveQuery(
     //     odinsonQuery = List("[lemma=pie]", "[lemma=noodles]"),
     //     metadataQuery = Some("character contains 'Special Agent'"),
     //     label = None,
@@ -246,9 +246,9 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
     //   hasResults(contentAsJson(res2)) mustBe true
     // }
 
-    // "process a disjunction of queries using the runDisjunctiveQueries method without a metadataQuery" in {
+    // "process a disjunction of queries using the runDisjunctiveQuery method without a metadataQuery" in {
 
-    //   val res = controller.runDisjunctiveQueries(
+    //   val res = controller.runDisjunctiveQuery(
     //     odinsonQueries = List("[lemma=be] []", "[lemma=blarg]"),
     //     metadataQuery = None,
     //     label = None,
@@ -274,7 +274,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       )
 
       val response =
-        controller.runDisjunctiveQueries().apply(FakeRequest(POST, "/execute/disjunction-of-patterns").withJsonBody(body))
+        controller.runDisjunctiveQuery().apply(FakeRequest(POST, "/execute/disjunction-of-patterns").withJsonBody(body))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
 
