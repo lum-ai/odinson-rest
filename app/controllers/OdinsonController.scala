@@ -563,32 +563,31 @@ class OdinsonController @Inject() (
     ExtractorEngine.usingEngine(config) { engine =>
       // FIXME: replace .get with validation check
       val spr = request.body.asJson.get.as[SimplePatternsRequest]
-        try {
-          val patterns: List[OdinsonQuery] = spr.patterns.map(engine.compiler.mkQuery).toList
-          val disjunctiveQuery = new OdinOrQuery(patterns, fields = patterns.head.getField)
-          val oq = spr.metadataQuery match {
-            case Some(pq) =>
-              engine.compiler.mkQuery(disjunctiveQuery, pq)
-            case None =>
-              disjunctiveQuery
-          }
-          val start = System.currentTimeMillis()
-          val results: OdinResults = retrieveResults(engine, oq, spr.prevDoc, spr.prevScore)
-          val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
+      try {
+        val patterns: List[OdinsonQuery] = spr.patterns.map(engine.compiler.mkQuery).toList
+        val disjunctiveQuery = new OdinOrQuery(patterns, fields = patterns.head.getField)
+        val oq = spr.metadataQuery match {
+          case Some(pq) =>
+            engine.compiler.mkQuery(disjunctiveQuery, pq)
+          case None =>
+            disjunctiveQuery
+        }
+        val start = System.currentTimeMillis()
+        val results: OdinResults = retrieveResults(engine, oq, spr.prevDoc, spr.prevScore)
+        val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
 
-          // NOTE: no use of state here
+        // NOTE: no use of state here
 
-          val json = Json.toJson(engine.mkJson(
-            spr.patterns.map{ patt => s"(${patt})"}.mkString(" | "),
-            spr.metadataQuery,
-            duration,
-            results,
-            enriched,
-            config
-          ))
-          json.format(spr.pretty)
-        } catch handleNonFatal
-      }
+        val json = Json.toJson(engine.mkJson(
+          spr.patterns.map{ patt => s"(${patt})"}.mkString(" | "),
+          spr.metadataQuery,
+          duration,
+          results,
+          enriched,
+          config
+        ))
+        json.format(spr.pretty)
+      } catch handleNonFatal
     }
   }
 
