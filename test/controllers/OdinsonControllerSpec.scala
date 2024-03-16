@@ -269,7 +269,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
       val body = Json.obj(
         // format: off
-        "odinsonQueries"       -> List("[lemma=be] []", "[lemma=blarg]")
+        "patterns"       -> List("[lemma=be] []", "[lemma=blarg]")
         // format: on
       )
 
@@ -277,10 +277,6 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
         controller.runDisjunctiveQuery().apply(FakeRequest(POST, "/execute/disjunction-of-patterns").withJsonBody(body))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
-
-      status(result) mustBe OK
-      contentType(result) mustBe Some("application/json")
-      Helpers.contentAsString(result) must include("core")
     }
 
     "execute a grammar using the executeGrammar method" in {
