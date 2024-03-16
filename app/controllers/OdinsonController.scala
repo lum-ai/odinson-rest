@@ -565,7 +565,7 @@ class OdinsonController @Inject() (
       val spr = request.body.asJson.get.as[SimplePatternsRequest]
       try {
         val patterns: List[OdinsonQuery] = spr.patterns.map(engine.compiler.mkQuery).toList
-        val disjunctiveQuery = new OdinOrQuery(patterns, fields = patterns.head.getField)
+        val disjunctiveQuery = new OdinOrQuery(patterns, field = patterns.head.getField)
         val oq = spr.metadataQuery match {
           case Some(pq) =>
             engine.compiler.mkQuery(disjunctiveQuery, pq)
