@@ -31,6 +31,7 @@ class SimplePatternsRequest(BaseModel):
     metadataQuery: typing.Optional[str] = None
     prevDoc: typing.Optional[int] = None
     prevScore: typing.Optional[float] = None
+    enriched: typing.Optional[bool] = None
     pretty: typing.Optional[bool] = None
 
     def model_dump(self, by_alias=True, **kwargs):

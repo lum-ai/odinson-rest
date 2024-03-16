@@ -5,11 +5,11 @@ import play.api.libs.json._
 case class SimplePatternsRequest(
   patterns: List[String],
   metadataQuery: Option[String] = None,
-  label: Option[String], 
-  commit: Option[Boolean], 
-  prevDoc: Option[Int], 
-  prevScore: Option[Float], 
-  enriched: Boolean = false,
+  // label: Option[String] = None, 
+  // commit: Option[Boolean] = None, 
+  prevDoc: Option[Int] = None, 
+  prevScore: Option[Float] = None, 
+  enriched: Option[Boolean] = None,
   pretty: Option[Boolean] = None
 )
 

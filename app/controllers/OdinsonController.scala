@@ -583,7 +583,7 @@ class OdinsonController @Inject() (
           spr.metadataQuery,
           duration,
           results,
-          spr.enriched,
+          spr.enriched.getOrElse(false),
           config
         ))
         json.format(spr.pretty)
