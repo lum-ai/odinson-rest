@@ -65,7 +65,7 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
             self.image_name: str = self.container.image.tags[0]
             self.local_port: int = self.client.api.port(
                 self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT
-            )
+            )[0]["HostPort"]
         else:
             self.container = self.client.containers.run(
                 self.image_name,
