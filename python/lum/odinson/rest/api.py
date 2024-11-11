@@ -152,7 +152,7 @@ class OdinsonBaseAPI:
     ) -> Union[bool, OdinsonErrors]:
         """Inspects and validates an Odinson grammar"""
         endpoint = f"{self.address}/api/validate/grammar"
-        res = self._post_text(endpoint=endpoint, contents=grammar)
+        res = self._post_text(endpoint=endpoint, text=grammar)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
