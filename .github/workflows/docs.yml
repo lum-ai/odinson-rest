@@ -76,7 +76,7 @@ jobs:
     # docs (other)
     - name: "Create documentation (other)"
       run: |
-        docker run -i -v "$GITHUB_WORKSPACE:/app" parsertongue/mkdocs:latest mkdocs build -c
+        mkdocs build -c
     - name: Deploy docs
       # FIXME: re-enable later
       #if: github.ref == 'refs/heads/main'

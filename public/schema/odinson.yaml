@@ -112,6 +112,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryError'
 
+  /api/execute/disjunction-of-patterns:
+    post:
+      tags:
+        - search
+      summary: |
+        Composes a disjunction of Odinson queries (ex. A OR B OR C) and executes it against the corpus.
+      description: |
+        Composes a disjunction of Odinson queries (ex. A OR B OR C) and executes it against the corpus.  Optionally include a doc-level Lucene query to identify a subset of documents to which the query should be applied.
+      operationId: execute-disjunctive-pattern
+      requestBody:
+        description: |
+          a disjunction of patterns.
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: '#/components/schemas/SimplePatternsRequest'
+      responses:
+        '200':
+          description: Paginated matches for the query.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BasicResults'
+        '400':
+          description: Syntax error in query.
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/QueryError'
+
   /api/execute/grammar:
     post:
       tags:
@@ -127,12 +160,75 @@ paths:
           An Odinson grammar.
         required: true
         content:
-          "application/json":
+          "plain/text":
             schema:
-              $ref: '#/components/schemas/OdinsonGrammarRequest'
-#      consumes:
-#        - application/json
+              type: string
+              example: |
+                vars:
+                  chunk: "([tag=/J.*/]{,3} [tag=/N.*/]+ (of [tag=DT]? [tag=/J.*/]{,3} [tag=/N.*/]+)?)"
 
+                rules:
+                  - name: xp
+                    label: XP
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      [chunk=/.-NP/]+|[chunk=/.-ADVP/]+|[chunk=/.-VP/]+
+
+                  - name: xp-seq
+                    label: test
+                    type: basic
+                    priority: 2
+                    pattern: |
+                      @XP @XP
+
+                  - name: example-basic-rule
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      (?<hypernym> ${chunk}) >nmod_such_as (?<hyponym> ${chunk})
+
+                  - name: example-event-rule
+                    type: event
+                    priority: 1
+                    pattern: |
+                      trigger = cause|increase|decrease|affect
+                      cause = >nsubj ${chunk}
+                      effect = >dobj ${chunk}
+                
+      parameters:
+        - name: maxDocs
+          in: query
+          description: |
+            The maximum number of sentences to execute the rules against.
+          schema:
+            type: integer
+            format: int32
+          example: 10
+        - name: allowTriggerOverlaps
+          in: query
+          description: |
+            Whether or not event arguments are permitted to overlap with the event's trigger. Defaults to false.
+          schema:
+            type: boolean
+            default: false
+          example: false
+        - name: metadataQuery
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            A query to filter Documents by their metadata before applying an Odinson grammar.
+          example: "character contains 'Special Agent'"
+        - name: label
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Only return mentions matching the label (if provided).
+          #example: "character contains 'Special Agent'"
       responses:
         '200':
           description: Mentions matched by the grammar.
@@ -1081,6 +1177,49 @@ components:
                 roots: [ 2 ]
 
   schemas:
+    SimplePatternsRequest:
+      type: object
+      required:
+        - patterns
+      properties:
+        patterns:
+          type: array
+          description: A list of queries.
+          items:
+            type: string
+            description: A single odinson query.
+        metadataQuery:
+          $ref: '#/components/schemas/MetadataQuery'
+        label:
+          description: |
+            The label to use when committing mentions to the State.
+          schema:
+            type: string
+        commit:
+          description: |
+            Whether or not the results of this query should be committed to the State.
+          schema:
+            type: boolean
+        prevDoc:
+          description: |
+            The ID (`sentenceId`) for the last document (sentence) seen in the previous page of results.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            # minimum: 1
+            # exclusiveMinimum: false
+            # maximum: 3
+            # exclusiveMaximum: false
+          #example: 1
+        prevScore:
+          description: |
+            The score for the last result seen in the previous page of results.
+          required: false
+          schema:
+            type: number
+            format: float
+          #example: 0.424
 
     OdinsonGrammarRequest:
       type: object

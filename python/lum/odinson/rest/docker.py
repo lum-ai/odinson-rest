@@ -12,9 +12,16 @@ __all__ = ["DockerBasedOdinsonAPI"]
 
 
 class DockerBasedOdinsonAPI(OdinsonBaseAPI):
-    
     DEFAULT_TOKEN_ATTRIBUTES = [
-      "raw", "word", "norm", "lemma", "tag", "chunk", "entity", "incoming", "outgoing"
+        "raw",
+        "word",
+        "norm",
+        "lemma",
+        "tag",
+        "chunk",
+        "entity",
+        "incoming",
+        "outgoing",
     ]
 
     DEFAULT_IMAGE: str = "lumai/odinson-rest-api:latest"
@@ -30,14 +37,16 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
         keep_alive: bool = False,
         max_mem_gb: int = 2,
         file_encoding: str = "UTF-8",
-        token_attributes: Optional[List[str]] = None
+        token_attributes: Optional[List[str]] = None,
     ):
         self.client = docker.from_env()
         self.temp_dir = tempfile.mkdtemp()
         self.local_path: Optional[str] = local_path or self.temp_dir
         self.max_mem_gb: int = max_mem_gb
         self.file_encoding: str = file_encoding
-        self.token_attributes: List[str] = token_attributes or DockerBasedOdinsonAPI.DEFAULT_TOKEN_ATTRIBUTES
+        self.token_attributes: List[str] = (
+            token_attributes or DockerBasedOdinsonAPI.DEFAULT_TOKEN_ATTRIBUTES
+        )
         self.image_name: str = image_name
         self.local_port: int = local_port or DockerBasedOdinsonAPI.get_unused_port()
         self.keep_alive: bool = keep_alive
@@ -47,9 +56,16 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
         if self.is_running():
             self.container = self.client.containers.get(self.container_name)
             self.keep_alive = True
-            self.local_path: str = [entry.get("Source") for entry in self.container.attrs.get("Mounts", []) if entry.get("Destination", "???") == DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH][0]
+            self.local_path: str = [
+                entry.get("Source")
+                for entry in self.container.attrs.get("Mounts", [])
+                if entry.get("Destination", "???")
+                == DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH
+            ][0]
             self.image_name: str = self.container.image.tags[0]
-            self.local_port: int = self.client.api.port(self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT)
+            self.local_port: int = self.client.api.port(
+                self.container_name, DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT
+            )[0]["HostPort"]
         else:
             self.container = self.client.containers.run(
                 self.image_name,
@@ -58,18 +74,23 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
                 ports={DockerBasedOdinsonAPI.ODINSON_INTERNAL_PORT: self.local_port},
                 auto_remove=True,
                 detach=True,
-                volumes={self.local_path: {"bind": DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH, "mode": "rw"}},
+                volumes={
+                    self.local_path: {
+                        "bind": DockerBasedOdinsonAPI.ODINSON_INTERNAL_DATA_PATH,
+                        "mode": "rw",
+                    }
+                },
                 environment={
-                  #-Dodinson.compiler.allTokenFields=["a", "b", "c"]
-                  "_JAVA_OPTIONS": f"-Xmx{self.max_mem_gb}g -Dplay.server.pidfile.path=/dev/null -Dfile.encoding={self.file_encoding}",
-                  "ODINSON_TOKEN_ATTRIBUTES": ",".join(self.token_attributes)
-                }
+                    # -Dodinson.compiler.allTokenFields=["a", "b", "c"]
+                    "_JAVA_OPTIONS": f"-Xmx{self.max_mem_gb}g -Dplay.server.pidfile.path=/dev/null -Dfile.encoding={self.file_encoding}",
+                    "ODINSON_TOKEN_ATTRIBUTES": ",".join(self.token_attributes),
+                },
             )
         super().__init__(address=f"http://127.0.0.1:{self.local_port}")
-  
+
     # def __enter__(self):
     #     return self
-    
+
     # def __exit__(self, exception_type, exception_value, exception_traceback):
     #     # Exception handling here
     #     # close index
@@ -111,7 +132,7 @@ class DockerBasedOdinsonAPI(OdinsonBaseAPI):
                 return True
             except Exception as e:
                 print(f"Failed to kill {self.container_name}")
-                #print(e)
+                # print(e)
                 return False
 
     def __del__(self):

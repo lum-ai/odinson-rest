@@ -10,6 +10,7 @@ case class GrammarRequest(
   pretty: Option[Boolean] = None
 )
 
+// Deprecated
 object GrammarRequest {
   implicit val fmt: OFormat[GrammarRequest] = Json.format[GrammarRequest]
   implicit val read: Reads[GrammarRequest] = Json.reads[GrammarRequest]

@@ -4,7 +4,7 @@ import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.lucene.OdinResults
 import ai.lum.odinson.lucene.search.OdinsonScoreDoc
 import ai.lum.odinson.{
-  Document => OdinsonDocument,
+  //Document => OdinsonDocument,
   EventMatch,
   ExtractorEngine,
   Mention,
@@ -12,14 +12,37 @@ import ai.lum.odinson.{
   NGramMatch,
   OdinsonMatch
 }
-import ai.lum.odinson.rest.utils.ExtractorEngineUtils
+import ai.lum.odinson.rest.utils.{ExtractorEngineUtils,StartEnd}
 import com.typesafe.config.Config
 import play.api.http.ContentTypes
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.mvc.Results._
+import scala.annotation.tailrec
 
 package object json {
+  
+  @tailrec
+  def getStartEnd(
+    m: OdinsonMatch, 
+    start: Int, 
+    end: Int, 
+    remaining: List[NamedCapture]
+  ): StartEnd = m match {
+    case finished if remaining.isEmpty =>
+      StartEnd(
+        start = List(start, finished.start).min, 
+        end = List(end, finished.end).max
+      )
+    case _ =>
+      val next: OdinsonMatch = remaining.head.capturedMatch
+      getStartEnd(
+        next,
+        start = List(start, next.start).min,
+        end = List(end, next.end).max,
+        remaining = remaining.tail ::: m.namedCaptures.toList
+      )
+  }
 
   /** convenience methods for formatting Play 2 Json */
   implicit class JsonOps(json: JsValue) {
@@ -80,25 +103,50 @@ package object json {
       )
     }
 
-    def mkJsonForMention(mention: Mention): Json.JsValueWrapper = {
-
+    def getTokens(luceneDocId: Int): Seq[String] = {
       val displayField = engine.index.displayField
       // val doc: LuceneDocument = engine.indexSearcher.doc(mention.luceneDocId)
       // We want **all** tokens for the sentence
-      val tokens = engine.dataGatherer.getTokens(mention.luceneDocId, displayField)
+      engine.dataGatherer.getTokens(luceneDocId, displayField)
+    }
+    
+    def mkJsonForMention(mention: Mention): Json.JsValueWrapper = {
+      // We want **all** tokens for the sentence
+      val tokens = getTokens(mention.luceneDocId)
+      //println(s"""(${mention.start} - ${mention.end} w/ label ${mention.label.getOrElse("???")}): ${tokens.slice(mention.start, mention.end).mkString(" ")}""")
+      mention.odinsonMatch match {
+          case em: EventMatch =>
+            Json.obj(
+              // format: off
+              "sentenceId"    -> mention.luceneDocId,
+              // "score"         -> odinsonScoreDoc.score,
+              "label"         -> mention.label,
+              "documentId"    -> getOdinsonDocId(mention.luceneDocId),
+              "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
+              "words"         -> JsArray(tokens.map(JsString)),
+              "foundBy"       -> mention.foundBy,
+              "trigger"       -> Json.obj(
+                "start" -> em.trigger.start,
+                "end" -> em.trigger.end
+              ),
+              "match"         -> mkJsonForMatch(m=em, luceneDocId=mention.luceneDocId)
+              // format: on
+            )
+          case om =>
+            Json.obj(
+              // format: off
+              "sentenceId"    -> mention.luceneDocId,
+              // "score"         -> odinsonScoreDoc.score,
+              "label"         -> mention.label,
+              "documentId"    -> getOdinsonDocId(mention.luceneDocId),
+              "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
+              "words"         -> JsArray(tokens.map(JsString)),
+              "foundBy"       -> mention.foundBy,
+              "match"         -> mkJsonForMatch(m=om, luceneDocId=mention.luceneDocId)
+              // format: on
+            )
+      }
 
-      Json.obj(
-        // format: off
-        "sentenceId"    -> mention.luceneDocId,
-        // "score"         -> odinsonScoreDoc.score,
-        "label"         -> mention.label,
-        "documentId"    -> getOdinsonDocId(mention.luceneDocId),
-        "sentenceIndex" -> getSentenceIndex(mention.luceneDocId),
-        "words"         -> JsArray(tokens.map(JsString)),
-        "foundBy"       -> mention.foundBy,
-        "match"         -> Json.arr(mkJsonForMatch(mention.odinsonMatch))
-        // format: on
-      )
     }
 
     def mkJsonForScoreDoc(odinsonScoreDoc: OdinsonScoreDoc): Json.JsValueWrapper = {
@@ -114,40 +162,80 @@ package object json {
         "documentId"    -> getOdinsonDocId(odinsonScoreDoc.doc),
         "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc),
         "words"         -> JsArray(tokens.map(JsString)),
-        "matches"       -> Json.arr(odinsonScoreDoc.matches.map(mkJsonForMatch): _*)
+        "matches"       -> Json.arr(odinsonScoreDoc.matches.map{ m => mkJsonForMatch(m=m, luceneDocId=odinsonScoreDoc.doc)}:_*)
+        //"matches"       -> Json.arr(odinsonScoreDoc.matches.map(mkJsonForMatch): _*)
         // format: on
       )
     }
 
-    def mkJsonForMatch(m: OdinsonMatch): Json.JsValueWrapper = m match {
+    def mkJsonForMatch(m: OdinsonMatch, luceneDocId: Int): Json.JsValueWrapper = {
+      val se: StartEnd = getStartEnd(
+        m = m, 
+        start = m.start, 
+        end = m.end, 
+        remaining = m.namedCaptures.toList
+      )
+      val tokens = getTokens(luceneDocId)
+      val text = tokens.slice(se.start, se.end).mkString(" ")
+      m match {
       case em: EventMatch =>
         Json.obj(
-          "start" -> em.trigger.start,
-          "end" -> em.trigger.end,
-          // FIXME: should we simplify this?
-          "trigger" -> mkJsonForMatch(em),
-          "namedCaptures" -> Json.arr(em.namedCaptures.map(mkJsonForNamedCapture): _*)
+          "start" -> se.start,
+          "end" -> se.end,
+          "text" -> text,
+          "trigger" -> Json.obj(
+            "start" -> em.trigger.start,
+            "end" -> em.trigger.end,
+            "text" -> tokens.slice(em.trigger.start, em.trigger.end).mkString(" "),
+          ),
+          "namedCaptures" -> {
+              em.namedCaptures match {
+              case nothing if nothing.size == 0 => JsNull
+              case captures => 
+                Json.arr(captures.map{c => mkJsonForNamedCapture(c, luceneDocId)}:_*)
+            }
+          }
           // ignore argumentMetadata
         )
-      case ngram: NGramMatch =>
+      case _: NGramMatch =>
         Json.obj(
-          "start" -> ngram.start,
-          "end" -> ngram.end
+          "start" -> se.start,
+          "end" -> se.end,
+          "text" -> text,
           // avoid including empty namedCaptures
         )
       case other@_ =>
-        Json.obj(
-          "start" -> m.start,
-          "end" -> m.end,
-          "namedCaptures" -> Json.arr(m.namedCaptures.map(mkJsonForNamedCapture): _*)
-        )
+        m.namedCaptures match {
+          case nothing if nothing.size == 0 =>
+            Json.obj(
+              "start" -> se.start,
+              "end" -> se.end,
+              "text" -> text
+            )
+          case captures => 
+            Json.obj(
+              "start" -> se.start,
+              "end" -> se.end,
+              "text" -> text,
+              "trigger" -> Json.obj(
+                "start" -> m.start,
+                "end" -> m.end,
+                "text" -> tokens.slice(m.start, m.end).mkString(" ")
+              ),
+              "namedCaptures" -> Json.arr(captures.map{nc => mkJsonForNamedCapture(nc, luceneDocId)}:_*)
+            )
+        }
+      }
     }
 
-    def mkJsonForNamedCapture(namedCapture: NamedCapture): Json.JsValueWrapper = {
+    def mkJsonForNamedCapture(namedCapture: NamedCapture, luceneDocId: Int): Json.JsValueWrapper = {
+      //val tokens = getTokens(luceneDocId)
       Json.obj(
         "name" -> namedCapture.name,
         "label" -> namedCapture.label,
-        "capturedMatch" -> mkJsonForMatch(namedCapture.capturedMatch)
+        //"text" -> tokens.slice(namedCapture.start, namedCapture.end).mkString(" "),
+        //"capturedMatch" 
+        "match" -> mkJsonForMatch(namedCapture.capturedMatch, luceneDocId)
       )
     }
 
@@ -162,7 +250,8 @@ package object json {
         "documentId"    -> getOdinsonDocId(odinsonScoreDoc.doc),
         "sentenceIndex" -> getSentenceIndex(odinsonScoreDoc.doc),
         "sentence"      -> mkUnabridgedSentenceJson(odinsonScoreDoc.doc, config),
-        "matches"       -> Json.arr(odinsonScoreDoc.matches.map(mkJsonForMatch): _*)
+        "matches"       -> Json.arr(odinsonScoreDoc.matches.map{m => mkJsonForMatch(m=m, luceneDocId=odinsonScoreDoc.doc)}:_*)
+        //matches.map{mkJsonForMatch): _*)  
         // format: on
       )
     }

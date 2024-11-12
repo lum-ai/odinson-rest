@@ -1,10 +1,11 @@
 package controllers
 
+import ai.lum.odinson.utils.DisplayUtils
 import ai.lum.common.ConfigFactory
 import ai.lum.common.ConfigUtils._
 import ai.lum.odinson.digraph.Vocabulary
 import ai.lum.odinson.lucene._
-import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc }
+import ai.lum.odinson.lucene.search.{ OdinsonQuery, OdinsonScoreDoc, OdinOrQuery }
 import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine, Mention }
 //import ai.lum.odinson.lucene.index.OdinsonIndexWriter
 import com.typesafe.config.{ Config, ConfigRenderOptions, ConfigValueFactory }
@@ -18,7 +19,6 @@ import org.apache.lucene.store.FSDirectory
 import play.api.http.ContentTypes
 import play.api.libs.json._
 import play.api.mvc._
-
 import java.io.File
 import java.nio.file.Path
 //import java.nio.file.{ Files, Path }
@@ -322,11 +322,13 @@ class OdinsonController @Inject() (
     */
   def bodyToString(body: AnyContent): Option[String] =
     try {
-      val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
-      Some(contents)
+      //.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
+      body.asText
     } catch {
       case _: Throwable =>
-        None
+        val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
+        Some(contents)
+        ///None
     }
 
   /** Validates an Odinson rule.
@@ -443,53 +445,80 @@ class OdinsonController @Inject() (
     * @return
     *   JSON of matches
     */
-  def executeGrammar() = Action { request =>
-    // FIXME: do this in a non-blocking way
-    ExtractorEngine.usingEngine(config) { engine =>
-      // FIXME: replace .get with validation check
-      val gr = request.body.asJson.get.as[GrammarRequest]
-      val grammar = gr.grammar
-      val maxDocs = gr.maxDocs
-      val metadataQuery = gr.metadataQuery
-      val allowTriggerOverlaps = gr.allowTriggerOverlaps.getOrElse(false)
-      val pretty = gr.pretty
-      try {
-        // rules -> OdinsonQuery
-        val extractors = metadataQuery match {
-          case None => engine.ruleReader.compileRuleString(grammar)
-          case Some(raw) => 
-            val mq = engine.compiler.mkParentQuery(raw)
-            engine.compileRuleString(rules=grammar, metadataFilter=mq)
-        }
+  def executeGrammar(
+    maxDocs: Option[Int] = None,
+    allowTriggerOverlaps: Option[Boolean] = None,
+    metadataQuery: Option[String] = None,
+    label: Option[String] = None,
+    pretty: Option[Boolean] = None
+  ): Action[String] = Action(parse.text) { (request: Request[String]) =>
+    try {
+      request.body match {
+        case grammar: String =>
+          // validation here
+          // FIXME: do this in a non-blocking way
+          val engine = ExtractorEngine.fromConfig(config)
+          //ExtractorEngine.usingEngine(config) { engine =>
+            val allowOverlaps: Boolean = allowTriggerOverlaps.getOrElse(false)
+            try {
+              // rules -> OdinsonQuery
+              val extractors = metadataQuery match {
+                case None => engine.ruleReader.compileRuleString(grammar)
+                case Some(raw) => 
+                  val mq = engine.compiler.mkParentQuery(raw)
+                  engine.compileRuleString(rules=grammar, metadataFilter=mq)
+              }
 
-        val start = System.currentTimeMillis()
+              val start = System.currentTimeMillis()
 
-        val maxSentences: Int = maxDocs match {
-          case Some(md) => md
-          case None     => engine.numDocs()
-        }
+              val maxSentences: Int = maxDocs match {
+                case Some(md) => md
+                case None     => engine.numDocs()
+              }
 
-        val mentions: Seq[Mention] = {
-          // FIXME: should deal in iterators to better support pagination...?
-          val iterator = engine.extractMentions(
-            extractors,
-            numSentences = maxSentences,
-            allowTriggerOverlaps = allowTriggerOverlaps,
-            disableMatchSelector = false
-          )
-          iterator.toVector
-        }
+              val mentions: Seq[Mention] = {
+                // FIXME: should deal in iterators to better support pagination...?
+                //println(s"Using state ${engine.state}")
+                val iterator = engine.extractMentions(
+                  extractors,
+                  numSentences = maxSentences,
+                  allowTriggerOverlaps = allowOverlaps,
+                  disableMatchSelector = false
+                )
+                iterator.toVector
+              }
 
-        val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
+              val filteredMentions = label match {
+                case Some(lbl) => mentions.filter(_.label == Some(lbl))
+                case None => mentions
+              }
 
-        val json =
-          Json.toJson(engine.mkMentionsJson(None, duration, allowTriggerOverlaps, mentions))
-        json.format(pretty)
-      } catch handleNonFatal
+              val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
+              val json =
+                Json.toJson(engine.mkMentionsJson(None, duration, allowOverlaps, filteredMentions))
+              // println(s"${engine.state.getAllMentions().toSeq.size} mentions in state")
+              // engine.state.getAllMentions().foreach{ m => DisplayUtils.displayMention(m, engine)}
+              json.format(pretty)
+            } catch {
+              case e: Throwable => 
+                handleNonFatal(e)
+            } finally {
+            engine.close()
+          }
+        //  }
+        case _ =>
+          BadRequest("Malformed body.  Send grammar.")
+      }
+    } catch {
+      case error: Throwable =>
+        Status(500)(
+          Json.toJson(OdinsonErrors.fromException(error))
+        )
     }
   }
 
-  /** @param odinsonQuery
+  /** Executes the provided Odinson pattern.
+    * @param odinsonQuery
     *   An Odinson pattern
     * @param metadataQuery
     *   A Lucene query to filter documents (optional).
@@ -553,6 +582,43 @@ class OdinsonController @Inject() (
     }
   }
 
+  /** Applies a disjunction of the provided patterns against the corpus.
+    * @return
+    *   JSON of matches
+    */
+  def runDisjunctiveQuery() = Action { request =>
+    // FIXME: do this in a non-blocking way
+    ExtractorEngine.usingEngine(config) { engine =>
+      // FIXME: replace .get with validation check
+      val spr = request.body.asJson.get.as[SimplePatternsRequest]
+      try {
+        val patterns: List[OdinsonQuery] = spr.patterns.map(engine.compiler.mkQuery).toList
+        val disjunctiveQuery = new OdinOrQuery(patterns, field = patterns.head.getField)
+        val oq = spr.metadataQuery match {
+          case Some(pq) =>
+            engine.compiler.mkQuery(disjunctiveQuery, pq)
+          case None =>
+            disjunctiveQuery
+        }
+        val start = System.currentTimeMillis()
+        val results: OdinResults = retrieveResults(engine, oq, spr.prevDoc, spr.prevScore)
+        val duration = (System.currentTimeMillis() - start) / 1000f // duration in seconds
+
+        // NOTE: no use of state here
+
+        val json = Json.toJson(engine.mkJson(
+          spr.patterns.map{ patt => s"(${patt})"}.mkString(" | "),
+          spr.metadataQuery,
+          duration,
+          results,
+          spr.enriched.getOrElse(false),
+          config
+        ))
+        json.format(spr.pretty)
+      } catch handleNonFatal
+    }
+  }
+
   def getMetadataJsonByDocumentId(
     odinsonDocId: String,
     pretty: Option[Boolean]
@@ -583,7 +649,8 @@ class OdinsonController @Inject() (
   ) = Action.async {
     Future {
       // FIXME: do this in a non-blocking way
-      ExtractorEngine.usingEngine(config) { engine =>
+      //ExtractorEngine.usingEngine(config) { engine =>
+      val engine = ExtractorEngine.fromConfig(config)
         try {
           val odinsonDocId = engine.getOdinsonDocId(sentenceId)
           val doc: OdinsonDocument =
@@ -597,8 +664,10 @@ class OdinsonController @Inject() (
             )
           case _: Throwable =>
             BadRequest(s"sentenceId '${sentenceId}' not found")
+        } finally {
+          engine.close()
         }
-      }
+      //}
     }
   }
 
