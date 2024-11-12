@@ -145,13 +145,18 @@ class OdinsonBaseAPI:
         )
 
     def _post_text(
-        self, endpoint: str, text: str, headers: Optional[Dict[str, str]] = None
+        self, 
+        endpoint: str, 
+        text: str, 
+        params: Optional[Dict[str, Union[str,int]]] = None,
+        headers: Optional[Dict[str, str]] = None
     ) -&gt; requests.Response:
         return requests.post(
             endpoint,
             # NOTE: data takes str &amp; .json() returns json str
             # json=text,
             data=text,
+            params=params,
             headers=headers,
         )
 
@@ -181,7 +186,7 @@ class OdinsonBaseAPI:
     ) -&gt; Union[bool, OdinsonErrors]:
         &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/validate/grammar&#34;
-        res = self._post_text(endpoint=endpoint, contents=grammar)
+        res = self._post_text(endpoint=endpoint, text=grammar)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
@@ -299,13 +304,12 @@ class OdinsonBaseAPI:
         allow_trigger_overlaps: bool = False,
     ):
         endpoint = f&#34;{self.address}/api/execute/grammar&#34;
-        gr = GrammarRequest(
-            grammar=grammar,
-            metadataQuery=metadata_query,
-            maxDocs=max_docs,
-            allowTriggerOverlaps=allow_trigger_overlaps,
-        )
-        res = requests.post(endpoint, json=gr.dict())
+        params = {
+            &#34;metadataQuery&#34; : metadata_query,
+            &#34;maxDocs&#34; : max_docs,
+            &#34;allowTriggerOverlaps&#34; : allow_trigger_overlaps
+        }
+        res = self._post_text(endpoint=endpoint, text=grammar, params=params)
         # return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
         # FIXME: check status code and return error or empty results?
         return GrammarResults(**res.json())
@@ -531,13 +535,18 @@ class OdinsonBaseAPI:
         )
 
     def _post_text(
-        self, endpoint: str, text: str, headers: Optional[Dict[str, str]] = None
+        self, 
+        endpoint: str, 
+        text: str, 
+        params: Optional[Dict[str, Union[str,int]]] = None,
+        headers: Optional[Dict[str, str]] = None
     ) -&gt; requests.Response:
         return requests.post(
             endpoint,
             # NOTE: data takes str &amp; .json() returns json str
             # json=text,
             data=text,
+            params=params,
             headers=headers,
         )
 
@@ -567,7 +576,7 @@ class OdinsonBaseAPI:
     ) -&gt; Union[bool, OdinsonErrors]:
         &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
         endpoint = f&#34;{self.address}/api/validate/grammar&#34;
-        res = self._post_text(endpoint=endpoint, contents=grammar)
+        res = self._post_text(endpoint=endpoint, text=grammar)
         if res.status_code == 200:
             return OdinsonBaseAPI.status_code_to_bool(res.status_code)
         else:
@@ -685,13 +694,12 @@ class OdinsonBaseAPI:
         allow_trigger_overlaps: bool = False,
     ):
         endpoint = f&#34;{self.address}/api/execute/grammar&#34;
-        gr = GrammarRequest(
-            grammar=grammar,
-            metadataQuery=metadata_query,
-            maxDocs=max_docs,
-            allowTriggerOverlaps=allow_trigger_overlaps,
-        )
-        res = requests.post(endpoint, json=gr.dict())
+        params = {
+            &#34;metadataQuery&#34; : metadata_query,
+            &#34;maxDocs&#34; : max_docs,
+            &#34;allowTriggerOverlaps&#34; : allow_trigger_overlaps
+        }
+        res = self._post_text(endpoint=endpoint, text=grammar, params=params)
         # return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
         # FIXME: check status code and return error or empty results?
         return GrammarResults(**res.json())
@@ -954,13 +962,12 @@ def tags_vocabulary(self) -&gt; List[str]:
     allow_trigger_overlaps: bool = False,
 ):
     endpoint = f&#34;{self.address}/api/execute/grammar&#34;
-    gr = GrammarRequest(
-        grammar=grammar,
-        metadataQuery=metadata_query,
-        maxDocs=max_docs,
-        allowTriggerOverlaps=allow_trigger_overlaps,
-    )
-    res = requests.post(endpoint, json=gr.dict())
+    params = {
+        &#34;metadataQuery&#34; : metadata_query,
+        &#34;maxDocs&#34; : max_docs,
+        &#34;allowTriggerOverlaps&#34; : allow_trigger_overlaps
+    }
+    res = self._post_text(endpoint=endpoint, text=grammar, params=params)
     # return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
     # FIXME: check status code and return error or empty results?
     return GrammarResults(**res.json())</code></pre>
@@ -1290,7 +1297,7 @@ def tags_vocabulary(self) -&gt; List[str]:
 ) -&gt; Union[bool, OdinsonErrors]:
     &#34;&#34;&#34;Inspects and validates an Odinson grammar&#34;&#34;&#34;
     endpoint = f&#34;{self.address}/api/validate/grammar&#34;
-    res = self._post_text(endpoint=endpoint, contents=grammar)
+    res = self._post_text(endpoint=endpoint, text=grammar)
     if res.status_code == 200:
         return OdinsonBaseAPI.status_code_to_bool(res.status_code)
     else:
