@@ -23,7 +23,7 @@ GET     /api/execute/pattern            controllers.OdinsonController.runQuery(o
 POST     /api/execute/disjunction-of-patterns            controllers.OdinsonController.runDisjunctiveQuery()
 
 + nocsrf
-POST    /api/execute/grammar            controllers.OdinsonController.executeGrammar()
+POST    /api/execute/grammar            controllers.OdinsonController.executeGrammar(maxDocs: Option[Int], allowTriggerOverlaps: Option[Boolean], metadataQuery: Option[String], label: Option[String], pretty: Option[Boolean])
 
 # document json
 + nocsrf

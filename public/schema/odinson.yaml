@@ -160,12 +160,75 @@ paths:
           An Odinson grammar.
         required: true
         content:
-          "application/json":
+          "plain/text":
             schema:
-              $ref: '#/components/schemas/OdinsonGrammarRequest'
-#      consumes:
-#        - application/json
+              type: string
+              example: |
+                vars:
+                  chunk: "([tag=/J.*/]{,3} [tag=/N.*/]+ (of [tag=DT]? [tag=/J.*/]{,3} [tag=/N.*/]+)?)"
 
+                rules:
+                  - name: xp
+                    label: XP
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      [chunk=/.-NP/]+|[chunk=/.-ADVP/]+|[chunk=/.-VP/]+
+
+                  - name: xp-seq
+                    label: test
+                    type: basic
+                    priority: 2
+                    pattern: |
+                      @XP @XP
+
+                  - name: example-basic-rule
+                    type: basic
+                    priority: 1
+                    pattern: |
+                      (?<hypernym> ${chunk}) >nmod_such_as (?<hyponym> ${chunk})
+
+                  - name: example-event-rule
+                    type: event
+                    priority: 1
+                    pattern: |
+                      trigger = cause|increase|decrease|affect
+                      cause = >nsubj ${chunk}
+                      effect = >dobj ${chunk}
+                
+      parameters:
+        - name: maxDocs
+          in: query
+          description: |
+            The maximum number of sentences to execute the rules against.
+          schema:
+            type: integer
+            format: int32
+          example: 10
+        - name: allowTriggerOverlaps
+          in: query
+          description: |
+            Whether or not event arguments are permitted to overlap with the event's trigger. Defaults to false.
+          schema:
+            type: boolean
+            default: false
+          example: false
+        - name: metadataQuery
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            A query to filter Documents by their metadata before applying an Odinson grammar.
+          example: "character contains 'Special Agent'"
+        - name: label
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Only return mentions matching the label (if provided).
+          #example: "character contains 'Special Agent'"
       responses:
         '200':
           description: Mentions matched by the grammar.

@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Dict, Iterable, List, Optional, Text, Union
 from lum.odinson.doc import Document, Sentence
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 from dataclasses import dataclass
 import pydantic
 import json
 import requests
+import typing
 
 
 __all__ = ["CorpusInfo", "OdinsonErrors", "ScoreDoc", "Statistic", "Results"]
@@ -50,8 +51,9 @@ class Statistic(BaseModel):
 class NamedCapture(BaseModel):
     name: str
     label: str
-    captured_match: Union[BaseMatch, EventMatch, NamedCaptureMatch] = pydantic.Field(
-        alias="capturedMatch"
+    match: Union[BaseMatch, EventMatch, NamedCaptureMatch] = pydantic.Field(
+        description="Match for capture"
+        #alias="capturedMatch"
     )
 
 
@@ -62,6 +64,7 @@ class BaseMatch(BaseModel):
     end: int = pydantic.Field(
         description="Exclusive token index which denotes the end of this match's span."
     )
+    text: str = pydantic.Field(description="Text corresponding to the matched span")
 
 
 class EventMatch(BaseMatch):
@@ -129,6 +132,15 @@ class BaseMention(BaseModel):
     match: List[Union[EventMatch, NamedCaptureMatch, BaseMatch]] = pydantic.Field(
         description="The Mention representing the match."
     )
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate(cls, data: typing.Any) -> typing.Any:
+        if isinstance(data, dict):
+            res = data.get("label", None)
+            if (res is None) or (isinstance(res, str) and len(res) == 0):
+              data["label"] = "???"
+        return data
 
 
 class GrammarResults(BaseModel):

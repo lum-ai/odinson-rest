@@ -116,13 +116,18 @@ class OdinsonBaseAPI:
         )
 
     def _post_text(
-        self, endpoint: str, text: str, headers: Optional[Dict[str, str]] = None
+        self, 
+        endpoint: str, 
+        text: str, 
+        params: Optional[Dict[str, Union[str,int]]] = None,
+        headers: Optional[Dict[str, str]] = None
     ) -> requests.Response:
         return requests.post(
             endpoint,
             # NOTE: data takes str & .json() returns json str
             # json=text,
             data=text,
+            params=params,
             headers=headers,
         )
 
@@ -270,13 +275,12 @@ class OdinsonBaseAPI:
         allow_trigger_overlaps: bool = False,
     ):
         endpoint = f"{self.address}/api/execute/grammar"
-        gr = GrammarRequest(
-            grammar=grammar,
-            metadataQuery=metadata_query,
-            maxDocs=max_docs,
-            allowTriggerOverlaps=allow_trigger_overlaps,
-        )
-        res = requests.post(endpoint, json=gr.dict())
+        params = {
+            "metadataQuery" : metadata_query,
+            "maxDocs" : max_docs,
+            "allowTriggerOverlaps" : allow_trigger_overlaps
+        }
+        res = self._post_text(endpoint=endpoint, text=grammar, params=params)
         # return GrammarResults.empty() if res.status_code != 200 else GrammarResults(**res.json())
         # FIXME: check status code and return error or empty results?
         return GrammarResults(**res.json())

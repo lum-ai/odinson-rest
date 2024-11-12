@@ -274,16 +274,16 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
            |
         """.stripMargin
 
-      val body = Json.obj(
-        // format: off
-        "grammar"              -> ruleString,
-        "pageSize"             -> 10,
-        "allowTriggerOverlaps" -> false
-        // format: on
-      )
+      // val body = Json.obj(
+      //   // format: off
+      //   "grammar"              -> ruleString,
+      //   "pageSize"             -> 10,
+      //   "allowTriggerOverlaps" -> false
+      //   // format: on
+      // )
 
       val response =
-        controller.executeGrammar().apply(FakeRequest(POST, "/grammar").withJsonBody(body))
+        controller.executeGrammar().apply(FakeRequest(POST, "/grammar").withJsonBody(ruleString))
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
       Helpers.contentAsString(response) must include("vision")
@@ -304,15 +304,15 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
            |
         """.stripMargin
 
-      val body = Json.obj(
-        // format: off
-        "grammar"              -> ruleString,
-        "pageSize"             -> 10,
-        "allowTriggerOverlaps" -> false
-        // format: on
-      )
+      // val body = Json.obj(
+      //   // format: off
+      //   "grammar"              -> ruleString,
+      //   "pageSize"             -> 10,
+      //   "allowTriggerOverlaps" -> false
+      //   // format: on
+      // )
 
-      val response = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(body)).get
+      val response = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString)).get
 
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -333,10 +333,10 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
            |
         """.stripMargin
 
-      val body1 =
-        Json.obj("grammar" -> ruleString1, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
+      // val body1 =
+      //   Json.obj("grammar" -> ruleString1, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
 
-      val response1 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(body1)).get
+      val response1 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString1)).get
 
       status(response1) mustBe OK
       contentType(response1) mustBe Some("application/json")
@@ -354,10 +354,10 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
            |
         """.stripMargin
 
-      val body2 =
-        Json.obj("grammar" -> ruleString2, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
+      // val body2 =
+      //   Json.obj("grammar" -> ruleString2, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
 
-      val response2 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(body2)).get
+      val response2 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString2)).get
 
       status(response2) mustBe OK
       contentType(response2) mustBe Some("application/json")
