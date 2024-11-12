@@ -7,20 +7,24 @@ import ai.lum.odinson.{ Document => OdinsonDocument, ExtractorEngine }
 import ai.lum.odinson.utils.exceptions.OdinsonException
 import ai.lum.odinson.rest.utils.OdinsonDocumentUtils._
 import com.typesafe.config.{ Config, ConfigFactory, ConfigValueFactory }
-import org.scalatestplus.play.guice._
-import play.api.test.Helpers._
 import org.apache.commons.io.FileUtils
 //import org.scalatest.TestData
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
-import org.scalatestplus.play._
+import play.api.mvc._
 import play.api.test._
+import play.api.test.Helpers._
+import org.scalatestplus.play._
+import org.scalatestplus.play.guice._
 
 import scala.reflect.io.Directory
 
+
 // with GuiceOneAppPerTest
 class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting {
+
+  // implicit lazy val materializer: Materializer = app.materializer
 
   val defaultConfig: Config = ConfigFactory.load("test.conf")
 
@@ -32,7 +36,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
   try {
     FileUtils.copyDirectory(srcDir, tmpFolder)
   } catch {
-    case e: IOException =>
+    case _: IOException =>
       throw OdinsonException(s"Can't copy resources directory ${srcDir}")
   }
 
@@ -260,35 +264,27 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       contentType(response) mustBe Some("application/json")
     }
 
-    "execute a grammar using the executeGrammar method" in {
+    // "execute a grammar using the executeGrammar method" in {
 
-      val ruleString =
-        s"""
-           |rules:
-           | - name: "example"
-           |   label: GrammaticalSubject
-           |   type: event
-           |   pattern: |
-           |     trigger  = [tag=/VB.*/]
-           |     subject  = >nsubj []
-           |
-        """.stripMargin
+    //   val ruleString =
+    //     s"""
+    //        |rules:
+    //        | - name: "example"
+    //        |   label: GrammaticalSubject
+    //        |   type: event
+    //        |   pattern: |
+    //        |     trigger  = [tag=/VB.*/]
+    //        |     subject  = >nsubj []
+    //        |
+    //     """.stripMargin
 
-      // val body = Json.obj(
-      //   // format: off
-      //   "grammar"              -> ruleString,
-      //   "pageSize"             -> 10,
-      //   "allowTriggerOverlaps" -> false
-      //   // format: on
-      // )
-
-      val response =
-        controller.executeGrammar().apply(FakeRequest(POST, "/grammar").withJsonBody(ruleString))
-      status(response) mustBe OK
-      contentType(response) mustBe Some("application/json")
-      Helpers.contentAsString(response) must include("vision")
-
-    }
+    //   val response =
+    //     controller.executeGrammar().apply(FakeRequest(POST, "/api/execute/grammar?pageSize=10&allowTriggerOverlaps=false").withTextBody(ruleString))
+    //   // println(response)
+    //   status(response) mustBe OK
+    //   contentType(response) mustBe Some("application/json")
+    //   Helpers.contentAsString(response) must include("vision")
+    // }
 
     "execute a grammar using the /api/execute/grammar endpoint" in {
 
@@ -312,7 +308,10 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       //   // format: on
       // )
 
-      val response = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString)).get
+      val request = FakeRequest(POST, "/api/execute/grammar?pageSize=10&allowTriggerOverlaps=false").withTextBody(ruleString)
+      println(s"request:\t${request}")
+      println(s"app:\t${app}")
+      val Some(response) = route(app, request)
 
       status(response) mustBe OK
       contentType(response) mustBe Some("application/json")
@@ -336,7 +335,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       // val body1 =
       //   Json.obj("grammar" -> ruleString1, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
 
-      val response1 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString1)).get
+      val response1 = route(app, FakeRequest(POST, "/api/execute/grammar").withTextBody(ruleString1)).get
 
       status(response1) mustBe OK
       contentType(response1) mustBe Some("application/json")
@@ -357,7 +356,7 @@ class OdinsonControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       // val body2 =
       //   Json.obj("grammar" -> ruleString2, "pageSize" -> 10, "allowTriggerOverlaps" -> false)
 
-      val response2 = route(app, FakeRequest(POST, "/api/execute/grammar").withJsonBody(ruleString2)).get
+      val response2 = route(app, FakeRequest(POST, "/api/execute/grammar").withTextBody(ruleString2)).get
 
       status(response2) mustBe OK
       contentType(response2) mustBe Some("application/json")

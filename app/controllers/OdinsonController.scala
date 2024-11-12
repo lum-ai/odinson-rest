@@ -19,7 +19,6 @@ import org.apache.lucene.store.FSDirectory
 import play.api.http.ContentTypes
 import play.api.libs.json._
 import play.api.mvc._
-
 import java.io.File
 import java.nio.file.Path
 //import java.nio.file.{ Files, Path }
@@ -323,11 +322,13 @@ class OdinsonController @Inject() (
     */
   def bodyToString(body: AnyContent): Option[String] =
     try {
-      val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
-      Some(contents)
+      //.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
+      body.asText
     } catch {
       case _: Throwable =>
-        None
+        val contents = body.asRaw.get.asBytes().get.decodeString(StandardCharsets.UTF_8)
+        Some(contents)
+        ///None
     }
 
   /** Validates an Odinson rule.
@@ -450,10 +451,10 @@ class OdinsonController @Inject() (
     metadataQuery: Option[String] = None,
     label: Option[String] = None,
     pretty: Option[Boolean] = None
-  ): Action[AnyContent] = Action { request =>
+  ): Action[String] = Action(parse.text) { (request: Request[String]) =>
     try {
-      bodyToString(request.body) match {
-        case Some(grammar) =>
+      request.body match {
+        case grammar: String =>
           // validation here
           // FIXME: do this in a non-blocking way
           val engine = ExtractorEngine.fromConfig(config)
@@ -499,7 +500,7 @@ class OdinsonController @Inject() (
               // engine.state.getAllMentions().foreach{ m => DisplayUtils.displayMention(m, engine)}
               json.format(pretty)
             } catch {
-              case e => 
+              case e: Throwable => 
                 handleNonFatal(e)
             } finally {
             engine.close()

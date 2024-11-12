@@ -16,7 +16,7 @@ object ExceptionUtils {
     e: Throwable,
     message: Option[String] = None
   ): Result = {
-    println(s"e:\t${ApacheExceptionUtils.getStackTrace(e)}")
+    //println(s"e:\t${ApacheExceptionUtils.getStackTrace(e)}")
     val errorMsg: String = message match {
       // .getMessage , .getStackTrace , .getRootCause
       case None      => ApacheExceptionUtils.getMessage(e)
